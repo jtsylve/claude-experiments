@@ -9,8 +9,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/utils.sh"
 
-# Initialize and normalize CLAUDE_PLUGIN_ROOT
-init_plugin_root || exit 1
+# Initialize and normalize CLAUDE_PLUGIN_ROOT (capture return value)
+CLAUDE_PLUGIN_ROOT=$(init_plugin_root) || exit 1
 
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 

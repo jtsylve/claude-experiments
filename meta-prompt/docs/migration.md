@@ -197,7 +197,7 @@ export CLAUDE_PLUGIN_ROOT='/mnt/c/Users/name/meta-prompt'  # Works as-is
 cd meta-prompt
 CLAUDE_PLUGIN_ROOT=$(pwd) commands/scripts/test-integration.sh
 
-# Expected: All 31 tests pass
+# Expected: All 38 tests pass
 ```
 
 **4. Test Commands**
@@ -224,7 +224,7 @@ CLAUDE_PLUGIN_ROOT=$(pwd) commands/scripts/test-integration.sh
 - Automatic path conversion for Windows environments
 - Documentation updated across all files
 - Author information standardized
-- Test suite expanded to include utility function tests (35 total tests)
+- Test suite expanded to include utility function tests and edge cases (38 total tests)
 
 ### Rollback from 1.1 to 1.0
 
