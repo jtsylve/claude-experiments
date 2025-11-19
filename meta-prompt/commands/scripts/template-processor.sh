@@ -5,11 +5,12 @@
 
 set -euo pipefail
 
-# Validate required environment variables
-if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-    echo "ERROR: CLAUDE_PLUGIN_ROOT environment variable is not set" >&2
-    exit 1
-fi
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/utils.sh"
+
+# Initialize and normalize CLAUDE_PLUGIN_ROOT
+init_plugin_root || exit 1
 
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 

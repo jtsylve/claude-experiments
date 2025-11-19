@@ -54,6 +54,7 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 - **Performance:** <100ms deterministic overhead
 - **Templates:** 6 pre-built templates covering common patterns
 - **Security:** Input sanitization, whitelist-based permissions
+- **Cross-Platform:** Linux, macOS, WSL, Windows (Git Bash, Cygwin)
 
 ---
 
@@ -145,7 +146,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 **Quick checklist before submitting:**
 - [ ] All templates pass validation
-- [ ] Integration tests pass (31/31)
+- [ ] Integration tests pass (35/35)
 - [ ] Documentation updated
 - [ ] Permissions updated in settings.json
 
