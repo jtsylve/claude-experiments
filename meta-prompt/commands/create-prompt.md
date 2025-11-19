@@ -57,5 +57,8 @@ If the script returns `custom`:
    ```bash
    cat ${CLAUDE_PLUGIN_ROOT}/guides/engineering-guide.md
    ```
+
+   **Error Handling**: If the guide file is not available, fall back to using general prompt engineering best practices (clear instructions, specific examples, structured output format, error handling, and deterministic criteria).
+
 2. Follow the engineering guide to craft a custom prompt
 3. Return the crafted prompt

@@ -105,8 +105,24 @@ run_test "custom template exists" \
 
 echo ""
 
-# ===== PHASE 2B: Error Handling Tests =====
-echo -e "${YELLOW}Phase 2B: Error Handling${NC}"
+# ===== PHASE 2B: Engineering Guide Tests =====
+echo -e "${YELLOW}Phase 2B: Engineering Guide${NC}"
+
+run_test "engineering-guide.md exists and is readable" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/guides/engineering-guide.md ]"
+
+run_test_with_output "create-prompt.md references engineering guide" \
+    "cat \${CLAUDE_PLUGIN_ROOT}/commands/create-prompt.md" \
+    "guides/engineering-guide.md"
+
+run_test_with_output "engineering-guide.md has expected content" \
+    "cat \${CLAUDE_PLUGIN_ROOT}/guides/engineering-guide.md" \
+    "Comprehensive Prompt Engineering Guide"
+
+echo ""
+
+# ===== PHASE 2C: Error Handling Tests =====
+echo -e "${YELLOW}Phase 2C: Error Handling${NC}"
 
 run_test_with_output "Handles missing template gracefully" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh nonexistent" \
