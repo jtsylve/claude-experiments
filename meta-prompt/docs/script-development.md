@@ -35,35 +35,48 @@ See design-decisions.md:AD-002 for full rationale.
 
 ## Bash Version Requirements
 
-### Minimum Version: 4.0+
+### Minimum Version: 3.2+
 
-**Required features:**
+All scripts in this project are compatible with Bash 3.2+, including the default bash shipped with macOS.
+
+**Features used (all available in Bash 3.2):**
+- `[[` conditional expressions (Bash 2.0+)
+- Regex matching with `=~` operator (Bash 3.0+)
+- BASH_REMATCH array (Bash 3.0+)
+- String replacement `${var//pattern/replacement}` (Bash 3.1+)
+- Here-strings `<<<` (Bash 3.0+)
+- Indexed arrays (Bash 2.0+)
+
+**Features NOT used (Bash 4+ only):**
 - Associative arrays (`declare -A`)
-- Extended pattern matching
-- `[[` conditional expressions
-- `${var,,}` case conversion
+- Case conversion (`${var^^}`, `${var,,}`)
+- `readarray`/`mapfile` commands
+- `**` globstar pattern
+- `&>>` redirection operator
 
 ### Check Your Version
 
 ```bash
 bash --version
-# Should show: GNU bash, version 4.x or higher
+# Should show: GNU bash, version 3.2 or higher
 ```
 
-### Platform-Specific Notes
+### Platform Compatibility
 
 **macOS:**
-- Default bash is 3.2 (too old)
-- Install bash 5.x via Homebrew: `brew install bash`
-- Update shebang if needed: `#!/usr/local/bin/bash`
+- ✅ Default bash 3.2 works out-of-the-box (no Homebrew needed)
+- macOS 10.5+ ships with bash 3.2.57
+- No additional installation required
 
 **Linux:**
-- Most distributions ship bash 4.2+
+- ✅ All distributions ship with bash 3.2+
 - Ubuntu 18.04+: bash 4.4
 - CentOS 7+: bash 4.2
+- Debian 8+: bash 4.3
 
 **Windows/WSL:**
-- WSL ships with bash 4.4+
+- ✅ WSL ships with bash 4.4+
+- ✅ Git Bash includes bash 3.2+
 - PowerShell is NOT supported (different language)
 
 ---
@@ -507,25 +520,7 @@ else
 fi
 ```
 
-### Pitfall 4: Associative Array Syntax
-
-**Problem (Bash 3.x):**
-```bash
-declare -A keywords  # Not supported in bash 3.x
-```
-
-**Solution:**
-```bash
-# Check bash version
-if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
-    echo "ERROR: Bash 4.0+ required" >&2
-    exit 1
-fi
-
-declare -A keywords
-```
-
-### Pitfall 5: Command Substitution in Quotes
+### Pitfall 4: Command Substitution in Quotes
 
 **Problem:**
 ```bash
@@ -541,7 +536,7 @@ template_name=$(head -1 "$file")
 message="Template: ${template_name}"
 ```
 
-### Pitfall 6: Integer Comparison vs String
+### Pitfall 5: Integer Comparison vs String
 
 **Problem:**
 ```bash

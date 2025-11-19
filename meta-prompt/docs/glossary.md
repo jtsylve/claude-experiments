@@ -196,12 +196,14 @@ The percentage decrease in token consumption achieved by using deterministic pre
 
 ## Technical Terms
 
-### Bash 4.0+
-The minimum version of the Bash shell required for this project. Required features: associative arrays, extended pattern matching, case conversion.
+### Bash 3.2+
+The minimum version of the Bash shell required for this project. Works with the default bash shipped with macOS.
 
 **Check version:** `bash --version`
 
-**Why 4.0+:** Associative arrays (`declare -A`) were introduced in bash 4.0.
+**Features used:** `[[` conditionals, regex matching (`=~`), BASH_REMATCH, string replacement (`//`), here-strings, indexed arrays.
+
+**Why 3.2+:** All required features are available in Bash 3.2, avoiding the need for Homebrew installation on macOS.
 
 ---
 
@@ -231,7 +233,7 @@ A bash safety pattern that ensures scripts fail fast and catch errors early.
 ---
 
 ### Associative Array
-A bash data structure (hash map) that stores key-value pairs. Used for keyword categorization.
+A bash data structure (hash map) that stores key-value pairs.
 
 **Example:**
 ```bash
@@ -242,6 +244,8 @@ declare -A keywords=(
 ```
 
 **Requirement:** Bash 4.0+
+
+**Note:** Not currently used in this project to maintain Bash 3.2 compatibility.
 
 ---
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Purpose: Load templates and substitute variables
 # Inputs: $1=template_name, $2+=variable_values (as key=value pairs)
 # Outputs: Processed template ready for execution

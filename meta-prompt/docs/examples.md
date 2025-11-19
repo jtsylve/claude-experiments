@@ -177,14 +177,14 @@ Process:
 
 ```markdown
 <Relevant Quotes>
-<Quote> [1] "Bash 4.0 or higher" </Quote>
+<Quote> [1] "Bash 3.2 or higher" </Quote>
 <Quote> [2] "Git" </Quote>
 <Quote> [3] "Claude Code CLI (latest version)" </Quote>
 <Quote> [4] "Standard Unix utilities: grep, sed, awk, wc, tr, cut" </Quote>
 </Relevant Quotes>
 
 <Answer>
-The installation requirements are: [1] Bash version 4.0 or higher, [2] Git for version control, [3] the latest version of Claude Code CLI, and [4] standard Unix utilities including grep, sed, awk, wc, tr, and cut.
+The installation requirements are: [1] Bash version 3.2 or higher, [2] Git for version control, [3] the latest version of Claude Code CLI, and [4] standard Unix utilities including grep, sed, awk, wc, tr, and cut.
 </Answer>
 ```
 

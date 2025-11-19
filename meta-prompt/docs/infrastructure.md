@@ -360,7 +360,7 @@ git push --force origin main  # WARNING: Destructive
 - Windows with WSL (Windows Subsystem for Linux)
 
 **Required Software:**
-- Bash 4.0 or higher
+- Bash 3.2 or higher (macOS default bash works)
 - Git
 - Claude Code CLI (latest version)
 
@@ -526,7 +526,7 @@ Threshold: 70%
 
 **Dependency Update Policy:**
 
-- Pin specific versions in documentation (e.g., "Bash 4.0+")
+- Pin specific versions in documentation (e.g., "Bash 3.2+")
 - Test on oldest supported version
 - Document breaking changes between versions
 - Provide fallback implementations when possible

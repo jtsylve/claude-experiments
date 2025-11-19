@@ -23,7 +23,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 Before contributing, ensure you have:
 
-- Bash 4.0+ installed
+- Bash 3.2+ installed (default on macOS works)
 - Git 2.0+ installed
 - Claude Code CLI (latest version)
 - Text editor with markdown support
