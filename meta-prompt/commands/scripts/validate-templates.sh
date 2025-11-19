@@ -11,9 +11,6 @@ if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
     exit 1
 fi
 
-# Normalize path (convert backslashes to forward slashes for Windows/WSL)
-CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT//\\//}"
-
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 
 # ANSI color codes
