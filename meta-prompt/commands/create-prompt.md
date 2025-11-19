@@ -2,7 +2,6 @@
 name: create-prompt
 description: Create expert-level prompt templates for Claude Code with best practices, examples, and structured output
 argument-hint: <task description>
-model: claude-sonnet-4-5-20250929
 allowed-tools: [Bash, Read]
 ---
 
