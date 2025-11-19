@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "SlashCommand(/create-prompt:*)",
+      "Bash(.claude/commands/scripts/prompt-handler.sh:*)",
+      "Bash(chmod:*)",
+      "Bash(.claude/commands/scripts/template-processor.sh:*)",
+      "Bash(.claude/commands/scripts/validate-templates.sh:*)",
+      "Bash(DEBUG=1 .claude/commands/scripts/template-selector.sh:*)",
+      "Bash(./commands/scripts/test-integration.sh)",
+      "Bash(.claude/commands/scripts/template-selector.sh:*)",
+      "Bash(commands/scripts/test-integration.sh:*)",
+      "Bash(commands/scripts/template-processor.sh:*)",
+      "Bash(.claude/commands/scripts/test-integration.sh)",
+      "Bash(test:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
