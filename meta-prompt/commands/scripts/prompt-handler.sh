@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Purpose: Deterministic orchestration for /prompt command
 # Inputs: $1=task_description, $2=flags (optional)
 # Outputs: Instructions for Claude Code to execute

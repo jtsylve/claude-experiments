@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Purpose: Validate template files for syntax and completeness
 # Inputs: Optional template name (validates all if not specified)
 # Outputs: Validation results and errors

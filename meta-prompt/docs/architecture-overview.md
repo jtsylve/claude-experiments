@@ -239,7 +239,7 @@ description: <description>
 ### Dependencies
 
 **Required:**
-- Bash 4.0+ (for associative arrays, pattern matching)
+- Bash 3.2+ (compatible with macOS default bash)
 - Standard Unix utilities (grep, sed, awk, wc, tr, cut)
 
 **Optional:**

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Purpose: Classify tasks and route to appropriate templates
 # Inputs: $1=task_description
 # Outputs: template_name (or "custom")

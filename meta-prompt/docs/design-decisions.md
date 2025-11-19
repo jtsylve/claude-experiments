@@ -100,7 +100,7 @@ Implement a **Deterministic Preprocessor + Focused LLM** architecture where:
 
 ### AD-002: Bash for Deterministic Processing
 
-**TL;DR:** Chose Bash 4.0+ for zero-dependency, <100ms startup, universal availability across macOS/Linux/WSL
+**TL;DR:** Chose Bash 3.2+ for zero-dependency, <100ms startup, universal availability across macOS/Linux/WSL (works with macOS default bash)
 
 **Status:** Accepted
 **Date:** 2025-11-18
@@ -114,7 +114,7 @@ The deterministic processing layer requires a runtime that is:
 
 **Decision:**
 
-Use **Bash 4.0+** for all deterministic processing scripts (handler, selector, processor, validator).
+Use **Bash 3.2+** for all deterministic processing scripts (handler, selector, processor, validator).
 
 **Rationale:**
 
@@ -157,9 +157,9 @@ Use **Bash 4.0+** for all deterministic processing scripts (handler, selector, p
 
 - Negative:
   - String processing can be verbose (sed/awk syntax)
-  - Limited structured data handling (arrays, hashes)
+  - Limited structured data handling (no associative arrays in Bash 3.2)
   - Error handling less elegant than modern languages
-  - Requires bash-specific features (associative arrays = bash 4.0+)
+  - Must avoid Bash 4+ features to maintain compatibility with macOS default bash
 
 - Neutral:
   - Developers must understand bash scripting
@@ -552,7 +552,7 @@ The system must be deployable without installation steps beyond standard Unix en
 
 **Decision:**
 
-Rely only on **standard Unix utilities** (grep, sed, awk, wc, tr, cut) and Bash 4.0+. Mark `jq` as optional (not currently used).
+Rely only on **standard Unix utilities** (grep, sed, awk, wc, tr, cut) and Bash 3.2+. Mark `jq` as optional (not currently used).
 
 **Rationale:**
 

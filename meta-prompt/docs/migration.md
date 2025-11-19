@@ -418,7 +418,7 @@ git checkout v1.0 -- .claude-plugin/settings.json
 
 | Component | 1.0 | 1.1 (future) | 2.0 (future) |
 |-----------|-----|--------------|--------------|
-| Bash 4.0+ | ✅ Required | ✅ Required | ⚠️ May require 4.2+ |
+| Bash 3.2+ | ✅ Required | ✅ Required | ⚠️ May require 4.2+ |
 | Claude Code CLI | ✅ Latest | ✅ Latest | ✅ Latest |
 | Git 2.0+ | ✅ Required | ✅ Required | ✅ Required |
 | macOS | ✅ Supported | ✅ Supported | ✅ Supported |

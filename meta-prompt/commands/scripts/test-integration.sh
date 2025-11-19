@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # End-to-End Integration Test Suite
 # Tests all components of the optimization implementation
 
