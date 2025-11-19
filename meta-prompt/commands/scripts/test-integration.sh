@@ -204,8 +204,8 @@ run_test_with_output "create-prompt.md references template selector" \
     "cat \${CLAUDE_PLUGIN_ROOT}/commands/create-prompt.md" \
     "template-selector.sh"
 
-run_test "meta-prompt:prompt-optimizer agent is streamlined (<100 lines)" \
-    "[ \$(wc -l < \${CLAUDE_PLUGIN_ROOT}/agents/meta-prompt:prompt-optimizer.md | tr -d ' ') -lt 100 ]"
+run_test "prompt-optimizer agent is streamlined (<100 lines)" \
+    "[ \$(wc -l < \${CLAUDE_PLUGIN_ROOT}/agents/prompt-optimizer.md | tr -d ' ') -lt 100 ]"
 
 echo ""
 
