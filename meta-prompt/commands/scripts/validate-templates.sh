@@ -5,6 +5,12 @@
 
 set -euo pipefail
 
+# Validate required environment variables
+if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    echo "ERROR: CLAUDE_PLUGIN_ROOT environment variable is not set" >&2
+    exit 1
+fi
+
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 
 # ANSI color codes

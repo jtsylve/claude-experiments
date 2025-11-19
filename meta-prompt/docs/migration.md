@@ -123,6 +123,103 @@ commands/scripts/test-integration.sh
 
 ---
 
+## Version 1.1 (Upcoming)
+
+### Migrating from 1.0 to 1.1
+
+**Released:** TBD
+**Status:** In Development
+
+### Breaking Changes
+
+**1. Agent Reference Namespacing**
+- **Old:** `subagent_type="prompt-optimizer"`
+- **New:** `subagent_type="meta-prompt:prompt-optimizer"`
+- **Reason:** Required by Claude Code plugin marketplace namespacing system
+- **Migration Required:** Yes - Update all Task tool calls
+
+**2. Model Reference Update**
+- **Old:** `model: sonnet`
+- **New:** `model: claude-sonnet-4-5-20250929`
+- **Impact:** Commands and agents now use explicit model version
+- **Migration Required:** No - handled automatically in plugin files
+
+**3. Environment Variable Dependency**
+- **New Requirement:** `${CLAUDE_PLUGIN_ROOT}` must be set
+- **Impact:** Scripts will fail with clear error if not set
+- **Migration Required:** No - environment variable is automatically provided by Claude Code
+
+### Migration Steps
+
+**1. Update Agent References**
+
+If you have any custom scripts or commands that invoke the prompt-optimizer agent:
+
+```bash
+# OLD (will fail)
+Task tool with subagent_type="prompt-optimizer"
+
+# NEW (correct)
+Task tool with subagent_type="meta-prompt:prompt-optimizer"
+```
+
+**2. Verify Environment**
+
+The `${CLAUDE_PLUGIN_ROOT}` environment variable is automatically set by Claude Code when running commands. If you're testing scripts manually outside of Claude Code, set it manually:
+
+```bash
+export CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt
+./commands/scripts/template-processor.sh simple-classification ITEM1='test' ...
+```
+
+**3. Validate Migration**
+
+```bash
+# Run integration tests
+cd meta-prompt
+CLAUDE_PLUGIN_ROOT=$(pwd) commands/scripts/test-integration.sh
+
+# Expected: All 31 tests pass
+```
+
+**4. Test Commands**
+
+```bash
+# Test /prompt command
+/prompt "Refactor authentication module"
+
+# Test /create-prompt command
+/create-prompt "Compare two code implementations"
+```
+
+### Non-Breaking Changes
+
+**Added:**
+- MIT License with copyright notices
+- Environment variable validation for improved error messages
+- CHANGELOG.md for tracking version history
+
+**Improved:**
+- Scripts now provide clear error messages when `${CLAUDE_PLUGIN_ROOT}` is not set
+- Documentation updated across all files
+- Author information standardized
+
+### Rollback from 1.1 to 1.0
+
+If you encounter issues after upgrading:
+
+```bash
+# Revert to v1.0
+git checkout v1.0
+
+# Or revert specific files
+git checkout v1.0 -- meta-prompt/
+```
+
+**Note:** After rolling back, agent references with `meta-prompt:` prefix will fail. Use `prompt-optimizer` instead.
+
+---
+
 ## Future Migrations
 
 This section will be updated as new versions are released.
