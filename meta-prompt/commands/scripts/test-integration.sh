@@ -4,15 +4,6 @@
 
 set -euo pipefail
 
-# Validate CLAUDE_PLUGIN_ROOT
-if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-    echo "ERROR: CLAUDE_PLUGIN_ROOT environment variable is not set" >&2
-    exit 1
-fi
-
-# Normalize path (convert backslashes to forward slashes for Windows/WSL)
-CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT//\\//}"
-
 # ANSI colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -68,20 +59,6 @@ run_test_with_output() {
 echo -e "${YELLOW}=====================================${NC}"
 echo -e "${YELLOW}  LLM Optimization Integration Tests${NC}"
 echo -e "${YELLOW}=====================================${NC}"
-echo ""
-
-# ===== PHASE 0: Path Normalization Tests =====
-echo -e "${YELLOW}Phase 0: Path Normalization${NC}"
-
-run_test "Path normalization handles Unix paths" \
-    "[ \"\$(echo '/usr/local/bin' | sed 's|\\\\|/|g')\" = '/usr/local/bin' ]"
-
-run_test "Path normalization converts Windows paths" \
-    "[ \"\$(echo 'C:\\Users\\test' | sed 's|\\\\|/|g')\" = 'C:/Users/test' ]"
-
-run_test "CLAUDE_PLUGIN_ROOT is normalized (no backslashes)" \
-    "! echo \"\${CLAUDE_PLUGIN_ROOT}\" | grep -q '\\\\'"
-
 echo ""
 
 # ===== PHASE 1: Script Existence Tests =====
