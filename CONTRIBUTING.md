@@ -672,6 +672,14 @@ When releasing a new version of your plugin:
 
 ---
 
+## License
+
+By contributing to this project, you agree that your contributions will be licensed under the MIT License.
+
+Copyright (c) 2025 Joe T. Sylve, Ph.D.
+
+---
+
 ## Code of Conduct
 
 ### Our Standards

@@ -46,7 +46,7 @@ graph TD
     B -->|/create-prompt| D[create-prompt.md]
 
     C --> E[prompt-handler.sh]
-    E --> F[prompt-optimizer agent]
+    E --> F[meta-prompt:prompt-optimizer agent]
     F --> G[/create-prompt]
 
     D --> H[template-selector.sh]
@@ -93,7 +93,7 @@ graph TD
 - **Token Savings:** 100% orchestration overhead eliminated
 - **Dependencies:**
   - `scripts/prompt-handler.sh` (primary)
-  - `agents/prompt-optimizer.md` (fallback)
+  - `agents/meta-prompt:prompt-optimizer.md` (fallback)
 
 #### create-prompt.md
 - **Purpose:** Generate optimized prompts using templates or LLM
@@ -213,7 +213,7 @@ description: <description>
 
 **Location:** `agents/`
 
-#### prompt-optimizer.md
+#### meta-prompt:prompt-optimizer.md
 - **Purpose:** Expert prompt engineering for novel/complex cases
 - **Type:** Claude Code agent
 - **Lines:** 50 (reduced from 125)
@@ -260,14 +260,14 @@ description: <description>
 
 ### Flow 1: /prompt Command (Execution Mode)
 
-**Flow Description:** This sequence shows the `/prompt` command in execution mode (without `--return-only` flag). The user's task is passed to the prompt-handler.sh script (0 tokens), which generates instructions for the prompt-optimizer agent. The optimizer uses `/create-prompt` to generate an optimized prompt, then executes it in a new task context. This flow demonstrates how bash orchestration eliminates the 300 tokens previously consumed for command coordination.
+**Flow Description:** This sequence shows the `/prompt` command in execution mode (without `--return-only` flag). The user's task is passed to the prompt-handler.sh script (0 tokens), which generates instructions for the meta-prompt:prompt-optimizer agent. The optimizer uses `/create-prompt` to generate an optimized prompt, then executes it in a new task context. This flow demonstrates how bash orchestration eliminates the 300 tokens previously consumed for command coordination.
 
 ```mermaid
 sequenceDiagram
     participant User
     participant PromptMD as prompt.md
     participant Handler as prompt-handler.sh
-    participant Optimizer as prompt-optimizer agent
+    participant Optimizer as meta-prompt:prompt-optimizer agent
     participant CreatePrompt as /create-prompt
     participant Task as Task Execution
 
@@ -452,7 +452,7 @@ meta-prompt/                         # Plugin root
 │   ├── plugin.json                  # Plugin metadata
 │   └── settings.json                # Permissions and settings
 ├── agents/
-│   └── prompt-optimizer.md          # LLM agent (50 lines, streamlined)
+│   └── meta-prompt:prompt-optimizer.md          # LLM agent (50 lines, streamlined)
 ├── commands/
 │   ├── prompt.md                    # /prompt command (40 lines)
 │   ├── create-prompt.md             # /create-prompt command (196 lines)

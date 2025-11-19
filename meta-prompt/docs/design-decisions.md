@@ -489,7 +489,7 @@ Claude Code uses markdown files for configuration and instructions. The project 
 
 Use **Markdown** for:
 - Slash commands (`/prompt`, `/create-prompt`)
-- Agents (`prompt-optimizer`)
+- Agents (`meta-prompt:prompt-optimizer`)
 - Templates (all 6 templates)
 - Documentation (this file and others)
 

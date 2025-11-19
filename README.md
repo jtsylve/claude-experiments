@@ -210,9 +210,11 @@ Found a bug or security issue?
 
 ## License
 
-Individual plugins may have their own licenses. Check each plugin's directory for license information.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-The marketplace infrastructure itself is unlicensed - update with your chosen license.
+Copyright (c) 2025 Joe T. Sylve, Ph.D.
+
+Individual plugins may have their own licenses. Check each plugin's directory for license information.
 
 ## Version
 

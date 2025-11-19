@@ -5,7 +5,7 @@ meta-prompt/                                   # Plugin root
 │   └── settings.json                          # Permissions and configuration
 │
 ├── agents/                                    # LLM agents
-│   └── prompt-optimizer.md                    # Prompt engineering agent (50 lines)
+│   └── meta-prompt:prompt-optimizer.md                    # Prompt engineering agent (50 lines)
 │
 ├── commands/                                  # Slash commands
 │   ├── prompt.md                              # /prompt command (40 lines)
@@ -39,7 +39,7 @@ meta-prompt/                                   # Plugin root
 │   ├── settings.json                    # Permissions and configuration
 │   │
 │   ├── agents/                                # LLM agents
-│   │   └── prompt-optimizer.md                # Prompt engineering agent (50 lines)
+│   │   └── meta-prompt:prompt-optimizer.md                # Prompt engineering agent (50 lines)
 │   │
 │   ├── commands/                              # Slash commands
 │   │   ├── prompt.md                          # /prompt command (40 lines)
@@ -88,7 +88,7 @@ meta-prompt/                                   # Plugin root
 #### `agents/`
 **Purpose:** LLM agent definitions
 **File Format:** Markdown with YAML frontmatter
-**Count:** 1 agent (prompt-optimizer)
+**Count:** 1 agent (meta-prompt:prompt-optimizer)
 **Access:** Invoked via Task tool with `subagent_type` parameter
 
 #### `commands/`

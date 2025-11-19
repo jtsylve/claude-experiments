@@ -33,7 +33,7 @@ if [ "$RETURN_ONLY" = true ]; then
     cat <<EOF
 Use the Task tool with the following parameters:
 
-- subagent_type: "prompt-optimizer"
+- subagent_type: "meta-prompt:prompt-optimizer"
 - description: "Create optimized prompt"
 - prompt: "The user needs an optimized prompt for this task:
 
@@ -55,7 +55,7 @@ else
     cat <<EOF
 Use the Task tool with the following parameters:
 
-- subagent_type: "prompt-optimizer"
+- subagent_type: "meta-prompt:prompt-optimizer"
 - description: "Optimize and execute task"
 - prompt: "The user needs help with this task:
 

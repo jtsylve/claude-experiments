@@ -1,7 +1,7 @@
 ---
 name: prompt-optimizer
 description: Expert prompt engineer for novel tasks, template refinement, and complex multi-agent workflows
-model: sonnet
+model: claude-sonnet-4-5-20250929
 allowed-tools: [SlashCommand, Task, AskUserQuestion]
 ---
 

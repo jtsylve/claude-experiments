@@ -194,4 +194,6 @@ See [Migration Guide](docs/migration.md) for upgrade instructions between versio
 
 ## License
 
-Not specified - Update with your project's license information.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+
+Copyright (c) 2025 Joe T. Sylve, Ph.D.

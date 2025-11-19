@@ -589,7 +589,9 @@ We use semantic versioning (semver):
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same license as the project.
+By contributing to this project, you agree that your contributions will be licensed under the MIT License.
+
+Copyright (c) 2025 Joe T. Sylve, Ph.D.
 
 ---
 
