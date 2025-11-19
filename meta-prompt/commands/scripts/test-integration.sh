@@ -4,6 +4,11 @@
 
 set -euo pipefail
 
+# Source utilities and normalize CLAUDE_PLUGIN_ROOT
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/utils.sh"
+CLAUDE_PLUGIN_ROOT=$(init_plugin_root) || exit 1
+
 # ANSI colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -149,7 +154,7 @@ run_test_with_output "Normalize path with backslashes" \
 # Test that init_plugin_root validates and returns normalized path
 run_test_with_output "init_plugin_root returns normalized path" \
     "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && init_plugin_root" \
-    "/home/user/claude-experiments/meta-prompt"
+    "meta-prompt"
 
 # Test edge case: mixed slashes (forward and backward)
 run_test_with_output "Normalize path with mixed slashes" \

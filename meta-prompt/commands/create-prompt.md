@@ -13,11 +13,18 @@ You will create expert-level prompt templates using an intelligent template rout
 
 ## Process
 
-**Step 1: Template Selection**
+**Step 1: Normalize Plugin Path**
+
+First, normalize the plugin path for cross-platform compatibility:
+```bash
+source ${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && NORMALIZED_ROOT=$(normalize_path "${CLAUDE_PLUGIN_ROOT}")
+```
+
+**Step 2: Template Selection**
 
 Execute the template selector to determine the best template:
 ```bash
-${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh "{$ARGUMENTS}"
+${NORMALIZED_ROOT}/commands/scripts/template-selector.sh "{$ARGUMENTS}"
 ```
 
 **Error Handling**: If the script fails or is not available, fall back to `custom` template and use the full LLM-based prompt engineering process below.
@@ -30,12 +37,12 @@ This will return one of:
 - `simple-classification` - For comparison or classification tasks
 - `custom` - For novel tasks requiring LLM-based prompt engineering
 
-**Step 2: Route Based on Selection**
+**Step 3: Route Based on Selection**
 
 If the script returns anything OTHER than `custom`:
 1. Read the selected template using the Read tool:
-   - Use: Read tool with path `${CLAUDE_PLUGIN_ROOT}/templates/<template-name>.md`
-   - Or bash: `cat ${CLAUDE_PLUGIN_ROOT}/templates/<template-name>.md`
+   - Use: Read tool with path `${NORMALIZED_ROOT}/templates/<template-name>.md`
+   - Or bash: `cat ${NORMALIZED_ROOT}/templates/<template-name>.md`
 2. Examine the template's required variables (in the YAML frontmatter)
 3. Extract appropriate values from the task description using these heuristics:
    - **ITEM1, ITEM2**: Look for nouns, quoted strings, or entities to compare
@@ -47,7 +54,7 @@ If the script returns anything OTHER than `custom`:
    - **TARGET_PATTERNS**: Identify patterns to find (functions, classes, regex, file types)
 4. Use the template processor to substitute variables:
    ```bash
-   ${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh <template-name> VAR1='value1' VAR2='value2' ...
+   ${NORMALIZED_ROOT}/commands/scripts/template-processor.sh <template-name> VAR1='value1' VAR2='value2' ...
    ```
 5. Return the processed template as the final prompt
 6. DO NOT invoke any LLM processing - just return the template

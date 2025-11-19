@@ -37,8 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All script paths updated to use `${CLAUDE_PLUGIN_ROOT}` environment variable instead of relative paths
   - Improves portability and reliability when scripts are invoked from different directories
   - Scripts will now fail fast with clear error messages if `CLAUDE_PLUGIN_ROOT` is not set
+- **Command prompts updated to normalize paths before using CLAUDE_PLUGIN_ROOT**
+  - `/prompt` and `/create-prompt` commands now normalize paths using `utils.sh` before invoking scripts
+  - Ensures Windows paths are converted to Unix format before being passed to bash scripts or tools
+  - Critical for cross-platform compatibility in Claude Code environment
 - Scripts now use shared `utils.sh` library for consistent path handling and environment validation
   - `template-processor.sh` and `validate-templates.sh` updated to use `init_plugin_root()`
+  - `test-integration.sh` updated to normalize CLAUDE_PLUGIN_ROOT at startup
   - Ensures consistent behavior across all scripts
 
 ### Fixed

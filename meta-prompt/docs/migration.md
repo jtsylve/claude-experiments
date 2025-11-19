@@ -174,10 +174,14 @@ export CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt
 
 **Windows Path Handling:**
 
-All scripts now include automatic path normalization for Windows environments. The shared `utils.sh` library handles:
+All scripts and prompts now include automatic path normalization for Windows environments. The shared `utils.sh` library handles:
 - Converting backslashes to forward slashes
 - Converting Windows drive letters (C: → /c/)
 - Using `cygpath` when available (Git Bash, Cygwin)
+
+The normalization happens in two places:
+1. **Scripts**: Scripts that use `CLAUDE_PLUGIN_ROOT` call `init_plugin_root()` to normalize the path at startup
+2. **Prompts**: Command prompts (`/prompt`, `/create-prompt`) instruct Claude to normalize paths before invoking scripts
 
 This means you can set `CLAUDE_PLUGIN_ROOT` with Windows paths and they will be automatically converted:
 
