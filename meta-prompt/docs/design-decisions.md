@@ -268,7 +268,7 @@ The `validate-templates.sh` script ensures:
 - Template body non-empty
 
 **References:**
-- `.claude/commands/scripts/validate-templates.sh`
+- `commands/scripts/validate-templates.sh`
 
 ---
 
@@ -361,7 +361,7 @@ Else:
 
 **Tuning Parameters:**
 
-Located in `.claude/commands/scripts/template-selector.sh:10`:
+Located in `commands/scripts/template-selector.sh:10`:
 
 ```bash
 CONFIDENCE_THRESHOLD=70
@@ -370,7 +370,7 @@ CONFIDENCE_THRESHOLD=70
 Can be adjusted based on empirical accuracy metrics.
 
 **References:**
-- `.claude/commands/scripts/template-selector.sh:10-166`
+- `commands/scripts/template-selector.sh:10-166`
 
 ---
 
@@ -428,7 +428,7 @@ Implement **variable substitution with comprehensive escaping** in template-proc
 
 **Security Implementation:**
 
-Located in `.claude/commands/scripts/template-processor.sh:37-41`:
+Located in `commands/scripts/template-processor.sh:37-41`:
 
 ```bash
 escape_value() {
@@ -462,7 +462,7 @@ escape_value() {
 
 **Test Coverage:**
 
-Located in `.claude/commands/scripts/test-integration.sh:130-132`:
+Located in `commands/scripts/test-integration.sh:130-132`:
 
 ```bash
 run_test_with_output "Template processor handles special characters in values" \
@@ -471,7 +471,7 @@ run_test_with_output "Template processor handles special characters in values" \
 ```
 
 **References:**
-- `.claude/commands/scripts/template-processor.sh:37-66`
+- `commands/scripts/template-processor.sh:37-66`
 
 ---
 
@@ -645,8 +645,8 @@ Implement dedicated `sanitize_input()` and `escape_value()` functions as first s
 - `template-processor.sh` - Escapes variable values
 
 **References:**
-- `.claude/commands/scripts/prompt-handler.sh:10-14`
-- `.claude/commands/scripts/template-processor.sh:37-41`
+- `commands/scripts/prompt-handler.sh:10-14`
+- `commands/scripts/template-processor.sh:37-41`
 
 ---
 
@@ -679,9 +679,9 @@ Implement **graceful degradation** pattern:
 
 **Implementation:**
 
-- `.claude/commands/prompt.md:31-36`
-- `.claude/commands/create-prompt.md:24`
-- `.claude/commands/scripts/template-selector.sh:158-162`
+- `commands/prompt.md:31-36`
+- `commands/create-prompt.md:24`
+- `commands/scripts/template-selector.sh:158-162`
 
 ---
 
@@ -728,8 +728,8 @@ Test suite with 30+ tests covering:
 - Security
 
 **References:**
-- `.claude/commands/scripts/validate-templates.sh`
-- `.claude/commands/scripts/test-integration.sh`
+- `commands/scripts/validate-templates.sh`
+- `commands/scripts/test-integration.sh`
 
 ---
 
@@ -927,11 +927,11 @@ Test suite with 30+ tests covering:
 
 ### Key Implementation Files
 
-- **Prompt Handler:** `.claude/commands/scripts/prompt-handler.sh`
-- **Template Selector:** `.claude/commands/scripts/template-selector.sh`
-- **Template Processor:** `.claude/commands/scripts/template-processor.sh`
-- **Validator:** `.claude/commands/scripts/validate-templates.sh`
-- **Test Suite:** `.claude/commands/scripts/test-integration.sh`
+- **Prompt Handler:** `commands/scripts/prompt-handler.sh`
+- **Template Selector:** `commands/scripts/template-selector.sh`
+- **Template Processor:** `commands/scripts/template-processor.sh`
+- **Validator:** `commands/scripts/validate-templates.sh`
+- **Test Suite:** `commands/scripts/test-integration.sh`
 
 ---
 

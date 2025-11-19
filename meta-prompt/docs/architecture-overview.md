@@ -84,7 +84,7 @@ graph TD
 
 ### 1. Command Layer
 
-**Location:** `.claude/commands/`
+**Location:** `commands/`
 
 #### prompt.md
 - **Purpose:** Entry point for prompt optimization workflow
@@ -107,7 +107,7 @@ graph TD
 
 ### 2. Script Layer (Deterministic Processing)
 
-**Location:** `.claude/commands/scripts/`
+**Location:** `commands/scripts/`
 
 All scripts are written in Bash with strict error handling (`set -euo pipefail`).
 
@@ -125,7 +125,7 @@ Flow:    Parse args → Detect mode → Generate instructions → Output
 - Mode-based instruction generation
 - Zero LLM token consumption
 
-**Referenced by:** `.claude/commands/prompt.md:22`
+**Referenced by:** `commands/prompt.md:22`
 
 #### template-selector.sh
 ```bash
@@ -145,7 +145,7 @@ Flow:    Normalize → Extract keywords → Score categories → Select best
 
 **Performance:** <50ms average, 90%+ accuracy
 
-**Referenced by:** `.claude/commands/create-prompt.md:21`
+**Referenced by:** `commands/create-prompt.md:21`
 
 #### template-processor.sh
 ```bash
@@ -160,7 +160,7 @@ Flow:    Load → Extract vars → Substitute → Validate → Output
 - Prevents command injection in variable values
 - Validates all variables are replaced
 
-**Referenced by:** `.claude/commands/create-prompt.md:50`
+**Referenced by:** `commands/create-prompt.md:50`
 
 #### validate-templates.sh
 ```bash
@@ -181,7 +181,7 @@ Checks:  Frontmatter, required fields, variable consistency, XML tags, content
 
 ### 3. Template Library
 
-**Location:** `.claude/templates/`
+**Location:** `templates/`
 
 Six task-specific templates covering common patterns:
 
@@ -211,7 +211,7 @@ description: <description>
 
 ### 4. Agent Layer (LLM Processing)
 
-**Location:** `.claude/agents/`
+**Location:** `agents/`
 
 #### prompt-optimizer.md
 - **Purpose:** Expert prompt engineering for novel/complex cases
@@ -386,7 +386,7 @@ sequenceDiagram
 
 All user input is sanitized to prevent command injection:
 
-**Location:** `.claude/commands/scripts/prompt-handler.sh:10-14`
+**Location:** `commands/scripts/prompt-handler.sh:10-14`
 
 ```bash
 sanitize_input() {
@@ -396,7 +396,7 @@ sanitize_input() {
 }
 ```
 
-**Location:** `.claude/commands/scripts/template-processor.sh:37-41`
+**Location:** `commands/scripts/template-processor.sh:37-41`
 
 ```bash
 escape_value() {
@@ -436,7 +436,7 @@ Automated validation prevents malformed templates:
 - Required metadata validation
 - Content non-empty validation
 
-**Location:** `.claude/commands/scripts/validate-templates.sh`
+**Location:** `commands/scripts/validate-templates.sh`
 
 **Usage in CI/CD:** Can be integrated to prevent deployment of invalid templates.
 
@@ -531,7 +531,7 @@ Automated validation prevents malformed templates:
 
 - **Design Decisions:** `docs/design-decisions.md`
 - **Infrastructure Details:** `docs/infrastructure.md`
-- **Test Suite:** `.claude/commands/scripts/test-integration.sh`
+- **Test Suite:** `commands/scripts/test-integration.sh`
 
 ---
 

@@ -1,12 +1,55 @@
-# Meta-Prompt Infrastructure
+# Claude Experiments
+
+A curated marketplace for Claude Code plugins focused on meta-prompt optimization and developer productivity.
+
+## What is This?
+
+This repository is a Claude Code plugin marketplace that provides tools to reduce LLM token consumption and improve prompt engineering workflows. Plugins in this marketplace help you work more efficiently with Claude by optimizing how prompts are constructed and executed.
+
+## Installation
+
+Install this marketplace in Claude Code:
+
+```bash
+/plugin install claude-experiments@https://github.com/jtsylve/claude-experiments
+```
+
+Once installed, all plugins in this marketplace will be available for use in your Claude Code environment.
+
+## Available Plugins
+
+### meta-prompt (v1.0.0)
 
 **Reduce LLM token consumption by 40-60% through deterministic preprocessing and template-based routing.**
 
-This project implements a meta-prompt optimization infrastructure for Claude Code that replaces LLM-based orchestration with shell scripts and pre-built templates, invoking the LLM only for actual creative and analytical work.
+The meta-prompt plugin replaces LLM-based orchestration with shell scripts and pre-built templates, invoking the LLM only for actual creative and analytical work. This results in significant token savings while maintaining full functionality.
 
----
+#### Key Features
 
-## Quick Start
+- **Token Reduction:** 40-60% overall, 100% for orchestration
+- **Classification Accuracy:** 90%+ for template routing
+- **Performance:** <100ms deterministic overhead
+- **Templates:** 6 pre-built templates covering common patterns
+- **Security:** Input sanitization, whitelist-based permissions
+
+#### Commands
+
+- `/prompt <task>` - Optimize and execute a prompt with automatic template selection
+- `/prompt <task> --return-only` - Generate optimized prompt without executing
+- `/create-prompt <task>` - Generate a custom-tailored prompt template
+
+#### Templates Included
+
+| Template | Use Cases | Variables |
+|----------|-----------|-----------|
+| simple-classification | Compare items, check equivalence | 3 |
+| document-qa | Answer with citations, extract info | 2 |
+| code-refactoring | Modify code, fix bugs, add features | 2 |
+| function-calling | API usage, tool invocation | 2 |
+| interactive-dialogue | Tutors, customer support bots | 4 |
+| custom | Novel tasks (LLM fallback) | 1 |
+
+#### Quick Start
 
 ```bash
 # Optimize and execute a prompt
@@ -19,162 +62,167 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 /create-prompt "Compare two code snippets for semantic equivalence"
 ```
 
-**How it works:** Your task is classified into a template category (zero tokens), variables are substituted (zero tokens), and the LLM executes only the actual work. Result: 40-60% token savings.
-
----
-
-## Documentation
-
-### Core Documentation
-
-| Document | Purpose | Read this if... |
-|----------|---------|----------------|
-| [Getting Started](docs/getting-started.md) | 5-minute tutorial | You're new to the project |
-| [Architecture Overview](docs/architecture-overview.md) | System design and flow | You want to understand how it works |
-| [Design Decisions](docs/design-decisions.md) | Rationale for key choices | You want to know WHY decisions were made |
-| [Infrastructure Guide](docs/infrastructure.md) | Setup and operations | You're setting up or maintaining the system |
-
-### Specialized Guides
-
-| Document | Purpose |
-|----------|---------|
-| [Examples](docs/examples.md) | 6 practical use cases with token savings |
-| [Template Authoring](docs/template-authoring.md) | Creating custom templates |
-| [Script Development](docs/script-development.md) | Modifying bash scripts |
-| [Glossary](docs/glossary.md) | Key terminology reference |
-| [Migration Guide](docs/migration.md) | Upgrading between versions |
-| [Contributing](CONTRIBUTING.md) | Contribution workflow |
-
----
-
-## Key Features
-
-- **Token Reduction:** 40-60% overall, 100% for orchestration
-- **Classification Accuracy:** 90%+ for template routing
-- **Performance:** <100ms deterministic overhead
-- **Templates:** 6 pre-built templates covering common patterns
-- **Security:** Input sanitization, whitelist-based permissions
-
----
-
-## Quick Reference
-
-### Essential Commands
-
-```bash
-# Validate all templates
-.claude/commands/scripts/validate-templates.sh
-
-# Run integration tests
-.claude/commands/scripts/test-integration.sh
-
-# Debug template classification
-DEBUG=1 .claude/commands/scripts/template-selector.sh "your task"
-
-# Make scripts executable
-chmod +x .claude/commands/scripts/*.sh
-```
-
-### Project Structure
-
-```
-.claude/
-├── commands/          # /prompt and /create-prompt slash commands
-│   └── scripts/       # Deterministic processing (zero tokens)
-├── templates/         # 6 pre-built prompt templates
-└── agents/            # LLM agent for novel cases
-
-docs/                  # Documentation suite
-README.md              # This file - start here
-```
-
-### Performance Metrics
+#### Performance Metrics
 
 | Metric | Target | Status |
 |--------|--------|--------|
-| Token reduction | 40-60% | ✓ Met |
-| Orchestration tokens | 0 | ✓ Met |
-| Classification accuracy | 90%+ | ✓ Met |
-| Deterministic overhead | <100ms | ✓ Met |
+| Token reduction | 40-60% | Met |
+| Orchestration tokens | 0 | Met |
+| Classification accuracy | 90%+ | Met |
+| Deterministic overhead | <100ms | Met |
 
----
+#### Documentation
 
-## Installation
+See [meta-prompt/README.md](meta-prompt/README.md) for complete documentation including:
+- Architecture overview
+- Template authoring guide
+- Script development guide
+- Examples and use cases
+- Contribution guidelines
 
-```bash
-# Clone repository
-git clone <repository-url> claude-meta-prompt
-cd claude-meta-prompt
+## Contributing to the Marketplace
 
-# Make scripts executable
-chmod +x .claude/commands/scripts/*.sh
+We welcome contributions of new plugins and improvements to existing ones!
 
-# Validate installation
-.claude/commands/scripts/validate-templates.sh
-.claude/commands/scripts/test-integration.sh
-```
+### Adding a New Plugin
 
-See [Infrastructure Guide](docs/infrastructure.md#environment-setup) for detailed setup instructions.
+To propose a new plugin for this marketplace:
 
----
+1. **Fork this repository** and create a new branch for your plugin
+2. **Create a plugin directory** following the structure:
+   ```
+   your-plugin-name/
+   ├── .claude-plugin/
+   │   ├── plugin.json          # Plugin manifest
+   │   └── settings.json         # Optional: permissions and settings
+   ├── commands/                 # Slash commands (optional)
+   ├── agents/                   # AI agents (optional)
+   ├── templates/                # Prompt templates (optional)
+   ├── skills/                   # Skills (optional)
+   ├── README.md                 # Plugin documentation
+   └── CONTRIBUTING.md           # Plugin contribution guidelines
+   ```
 
-## Contributing
+3. **Create plugin.json** with required fields:
+   ```json
+   {
+     "name": "your-plugin-name",
+     "description": "Clear description of what your plugin does",
+     "version": "1.0.0",
+     "author": {
+       "name": "Your Name"
+     }
+   }
+   ```
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- Development setup
-- Pull request process
-- Code review checklist
-- Testing requirements
+4. **Update marketplace.json** to include your plugin:
+   ```json
+   {
+     "plugins": [
+       {
+         "name": "your-plugin-name",
+         "source": "./your-plugin-name",
+         "description": "Brief description"
+       }
+     ]
+   }
+   ```
 
-**Quick checklist before submitting:**
-- [ ] All templates pass validation
-- [ ] Integration tests pass (31/31)
-- [ ] Documentation updated
-- [ ] Permissions updated in settings.json
+5. **Add comprehensive documentation** in your plugin's README.md:
+   - What problem does it solve?
+   - How to use it
+   - Examples
+   - Configuration options
 
----
+6. **Test thoroughly** before submitting:
+   - Validate all commands work
+   - Test all templates and agents
+   - Verify permissions are correct
+   - Check documentation for clarity
 
-## Templates
+7. **Submit a pull request** with:
+   - Clear description of your plugin
+   - Use cases and examples
+   - Any dependencies or requirements
+   - Testing results
 
-Six templates cover common patterns:
+### Plugin Requirements
 
-| Template | Use Cases | Variables |
-|----------|-----------|-----------|
-| simple-classification | Compare items, check equivalence | 3 |
-| document-qa | Answer with citations, extract info | 2 |
-| code-refactoring | Modify code, fix bugs, add features | 2 |
-| function-calling | API usage, tool invocation | 2 |
-| interactive-dialogue | Tutors, customer support bots | 4 |
-| custom | Novel tasks (LLM fallback) | 1 |
+All plugins in this marketplace must:
 
-See [Template Authoring Guide](docs/template-authoring.md) to create your own.
+- Have a clear, focused purpose
+- Include comprehensive documentation
+- Follow security best practices (input sanitization, proper permissions)
+- Include examples and use cases
+- Be tested and validated before submission
+- Have a semantic version number
+- Include a CONTRIBUTING.md if accepting contributions
 
----
+### Plugin Guidelines
+
+**Good candidates for this marketplace:**
+- Tools that optimize prompt engineering workflows
+- Meta-prompting utilities and templates
+- Developer productivity enhancements
+- Token optimization tools
+- Prompt analysis and debugging tools
+
+**Not suitable for this marketplace:**
+- Plugins unrelated to prompt optimization or meta-prompting
+- Plugins with security vulnerabilities
+- Plugins without proper documentation
+- Plugins that duplicate existing functionality without improvement
+
+## Marketplace Maintenance
+
+This marketplace is maintained by the Meta Marketplace Team. We review all pull requests and ensure:
+- Code quality and security standards
+- Documentation completeness
+- Compatibility with Claude Code
+- No conflicts with existing plugins
 
 ## Support
 
-**Documentation:**
-- Start with this README for overview
-- See [Getting Started](docs/getting-started.md) for tutorial
-- Browse [docs/](docs/) for specialized guides
+### For Plugin Users
 
-**Troubleshooting:**
-- See [Infrastructure Guide - Troubleshooting](docs/infrastructure.md#troubleshooting)
-- Use `DEBUG=1` with scripts for verbose output
-- Run validation and tests to diagnose issues
+If you have questions about using a plugin:
+1. Check the plugin's README.md first
+2. Look through existing issues in this repository
+3. Open a new issue with the `question` label
 
----
+### For Plugin Developers
 
-## Version
+If you're developing a plugin for this marketplace:
+1. Read the full [CONTRIBUTING.md](CONTRIBUTING.md) guide
+2. Review existing plugins as examples
+3. Open an issue to discuss your plugin idea before implementing
+4. Join discussions in pull requests and issues
 
-**Current Version:** 1.0
-**Status:** Production Ready
-**Last Updated:** 2025-11-18
+### Reporting Issues
 
-See [Migration Guide](docs/migration.md) for upgrade instructions between versions.
-
----
+Found a bug or security issue?
+1. Check if it's already reported
+2. Create a new issue with:
+   - Which plugin is affected
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Your environment (OS, Claude Code version)
 
 ## License
 
-Not specified - Update with your project's license information.
+Individual plugins may have their own licenses. Check each plugin's directory for license information.
+
+The marketplace infrastructure itself is unlicensed - update with your chosen license.
+
+## Version
+
+**Marketplace Version:** 1.0.0
+**Last Updated:** 2025-11-18
+
+---
+
+## Quick Links
+
+- [meta-prompt Plugin Documentation](meta-prompt/README.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Marketplace Manifest](.claude-plugin/marketplace.json)

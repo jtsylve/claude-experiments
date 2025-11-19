@@ -1,0 +1,15 @@
+{
+  "name": "claude-experiments",
+  "version": "1.0.0",
+  "description": "A curated marketplace for Claude Code meta-prompt optimization plugins",
+  "owner": {
+    "name": "Joe T. Sylve, Ph.D."
+  },
+  "plugins": [
+    {
+      "name": "meta-prompt",
+      "source": "./meta-prompt",
+      "description": "Reduce LLM token consumption by 40-60% through deterministic preprocessing and template-based routing"
+    }
+  ]
+}

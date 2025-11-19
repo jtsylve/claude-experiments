@@ -82,26 +82,26 @@
 **Owner:** Claude Code CLI
 **Contents:** All project-specific Claude Code configuration, commands, agents, and templates
 
-#### `.claude/agents/`
+#### `agents/`
 **Purpose:** LLM agent definitions
 **File Format:** Markdown with YAML frontmatter
 **Count:** 1 agent (prompt-optimizer)
 **Access:** Invoked via Task tool with `subagent_type` parameter
 
-#### `.claude/commands/`
+#### `commands/`
 **Purpose:** Slash command definitions
 **File Format:** Markdown with YAML frontmatter
 **Count:** 2 commands (/prompt, /create-prompt)
 **Access:** User invokes via `/command-name` syntax in Claude Code
 
-#### `.claude/commands/scripts/`
+#### `commands/scripts/`
 **Purpose:** Deterministic processing scripts (bash)
 **File Format:** Bash shell scripts (.sh)
 **Permissions:** Executable (`chmod +x`)
 **Execution:** Called from commands via Bash tool
 **Token Cost:** Zero (deterministic execution)
 
-#### `.claude/templates/`
+#### `templates/`
 **Purpose:** Pre-built prompt templates
 **File Format:** Markdown with YAML frontmatter
 **Count:** 6 templates
@@ -120,7 +120,7 @@
 
 ### settings.json
 
-**Location:** `.claude/settings.json`
+**Location:** `.claude-plugin/settings.json`
 
 **Purpose:** Configure permissions for script execution and slash command usage
 
@@ -130,16 +130,16 @@
   "permissions": {
     "allow": [
       "SlashCommand(/create-prompt:*)",
-      "Bash(.claude/commands/scripts/prompt-handler.sh:*)",
+      "Bash(commands/scripts/prompt-handler.sh:*)",
       "Bash(chmod:*)",
-      "Bash(.claude/commands/scripts/template-processor.sh:*)",
-      "Bash(.claude/commands/scripts/validate-templates.sh:*)",
-      "Bash(DEBUG=1 .claude/commands/scripts/template-selector.sh:*)",
+      "Bash(commands/scripts/template-processor.sh:*)",
+      "Bash(commands/scripts/validate-templates.sh:*)",
+      "Bash(DEBUG=1 commands/scripts/template-selector.sh:*)",
       "Bash(./commands/scripts/test-integration.sh)",
-      "Bash(.claude/commands/scripts/template-selector.sh:*)",
+      "Bash(commands/scripts/template-selector.sh:*)",
       "Bash(commands/scripts/test-integration.sh:*)",
       "Bash(commands/scripts/template-processor.sh:*)",
-      "Bash(.claude/commands/scripts/test-integration.sh)"
+      "Bash(commands/scripts/test-integration.sh)"
     ],
     "deny": [],
     "ask": []
@@ -168,7 +168,7 @@
 
 **Modification Guidelines:**
 - Add new scripts to `allow` list before deployment
-- Use specific paths when possible (e.g., `.claude/commands/scripts/script-name.sh`)
+- Use specific paths when possible (e.g., `commands/scripts/script-name.sh`)
 - Include wildcard variants for different calling patterns
 - Test permission changes before committing
 
@@ -216,7 +216,7 @@ variable_descriptions:          # Optional: Detailed variable explanations
 Run validation before committing template changes:
 
 ```bash
-.claude/commands/scripts/validate-templates.sh [template-name]
+commands/scripts/validate-templates.sh [template-name]
 ```
 
 ---
@@ -308,7 +308,7 @@ git push --tags
 
 ```bash
 # Restore specific file from previous commit
-git checkout HEAD~1 .claude/templates/template-name.md
+git checkout HEAD~1 templates/template-name.md
 
 # Commit rollback
 git commit -m "rollback: Revert template-name.md to previous version"
@@ -385,11 +385,11 @@ git clone <repository-url> claude-meta-prompt
 cd claude-meta-prompt
 
 # Make scripts executable
-chmod +x .claude/commands/scripts/*.sh
+chmod +x commands/scripts/*.sh
 
 # Validate installation
-.claude/commands/scripts/validate-templates.sh
-.claude/commands/scripts/test-integration.sh
+commands/scripts/validate-templates.sh
+commands/scripts/test-integration.sh
 ```
 
 #### Option 2: Manual Setup
@@ -402,10 +402,10 @@ mkdir -p .claude/{agents,commands/scripts,templates,docs}
 # (Files should be copied manually or via installation script)
 
 # Make scripts executable
-chmod +x .claude/commands/scripts/*.sh
+chmod +x commands/scripts/*.sh
 
 # Validate setup
-.claude/commands/scripts/validate-templates.sh
+commands/scripts/validate-templates.sh
 ```
 
 ### Verification
@@ -415,13 +415,13 @@ chmod +x .claude/commands/scripts/*.sh
 bash --version
 
 # Verify scripts are executable
-ls -l .claude/commands/scripts/*.sh
+ls -l commands/scripts/*.sh
 
 # Run validation
-.claude/commands/scripts/validate-templates.sh
+commands/scripts/validate-templates.sh
 
 # Run integration tests
-.claude/commands/scripts/test-integration.sh
+commands/scripts/test-integration.sh
 ```
 
 **Expected Output:**
@@ -451,11 +451,11 @@ Ensure all scripts are in the `allow` list:
 {
   "permissions": {
     "allow": [
-      "Bash(.claude/commands/scripts/prompt-handler.sh:*)",
-      "Bash(.claude/commands/scripts/template-selector.sh:*)",
-      "Bash(.claude/commands/scripts/template-processor.sh:*)",
-      "Bash(.claude/commands/scripts/validate-templates.sh:*)",
-      "Bash(.claude/commands/scripts/test-integration.sh:*)"
+      "Bash(commands/scripts/prompt-handler.sh:*)",
+      "Bash(commands/scripts/template-selector.sh:*)",
+      "Bash(commands/scripts/template-processor.sh:*)",
+      "Bash(commands/scripts/validate-templates.sh:*)",
+      "Bash(commands/scripts/test-integration.sh:*)"
     ]
   }
 }
@@ -473,7 +473,7 @@ Ensure all scripts are in the `allow` list:
 
 ```bash
 # Set DEBUG environment variable for verbose output
-DEBUG=1 .claude/commands/scripts/template-selector.sh "Your task description"
+DEBUG=1 commands/scripts/template-selector.sh "Your task description"
 ```
 
 **Debug Output Example:**
@@ -534,7 +534,7 @@ Threshold: 70%
 
 ### Test Suite Organization
 
-**Location:** `.claude/commands/scripts/test-integration.sh`
+**Location:** `commands/scripts/test-integration.sh`
 
 **Test Phases:**
 
@@ -579,7 +579,7 @@ Threshold: 70%
 #### Run All Tests
 
 ```bash
-.claude/commands/scripts/test-integration.sh
+commands/scripts/test-integration.sh
 ```
 
 **Expected Output:**
@@ -612,14 +612,14 @@ The LLM optimization implementation is ready for deployment.
 
 ```bash
 # Extract specific phase from test script
-sed -n '/Phase 1:/,/Phase 2:/p' .claude/commands/scripts/test-integration.sh | bash
+sed -n '/Phase 1:/,/Phase 2:/p' commands/scripts/test-integration.sh | bash
 ```
 
 #### Debug Failed Tests
 
 ```bash
 # Run with verbose output
-bash -x .claude/commands/scripts/test-integration.sh
+bash -x commands/scripts/test-integration.sh
 ```
 
 ### Test Coverage
@@ -661,11 +661,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Make scripts executable
-        run: chmod +x .claude/commands/scripts/*.sh
+        run: chmod +x commands/scripts/*.sh
       - name: Validate templates
-        run: .claude/commands/scripts/validate-templates.sh
+        run: commands/scripts/validate-templates.sh
       - name: Run integration tests
-        run: .claude/commands/scripts/test-integration.sh
+        run: commands/scripts/test-integration.sh
 ```
 
 **Pre-Commit Hook:**
@@ -675,13 +675,13 @@ jobs:
 # .git/hooks/pre-commit
 
 # Run tests before allowing commit
-.claude/commands/scripts/validate-templates.sh
+commands/scripts/validate-templates.sh
 if [ $? -ne 0 ]; then
     echo "Template validation failed. Commit aborted."
     exit 1
 fi
 
-.claude/commands/scripts/test-integration.sh
+commands/scripts/test-integration.sh
 if [ $? -ne 0 ]; then
     echo "Integration tests failed. Commit aborted."
     exit 1
@@ -713,7 +713,7 @@ fi
 4. **Performance**
    - Target: <100ms total overhead
    - Measurement: Time script execution
-   - Command: `time .claude/commands/scripts/template-selector.sh "task"`
+   - Command: `time commands/scripts/template-selector.sh "task"`
 
 5. **Error Rate**
    - Target: <2% errors
@@ -759,7 +759,7 @@ Currently manual. Future improvements:
 
 1. **Create template file:**
    ```bash
-   cp .claude/templates/custom.md .claude/templates/new-template.md
+   cp templates/custom.md templates/new-template.md
    ```
 
 2. **Edit metadata and content:**
@@ -775,14 +775,14 @@ Currently manual. Future improvements:
 
 4. **Validate:**
    ```bash
-   .claude/commands/scripts/validate-templates.sh new-template
+   commands/scripts/validate-templates.sh new-template
    ```
 
 5. **Test:**
    ```bash
    # Add test case to test-integration.sh
    # Run full test suite
-   .claude/commands/scripts/test-integration.sh
+   commands/scripts/test-integration.sh
    ```
 
 6. **Document:**
@@ -804,12 +804,12 @@ Currently manual. Future improvements:
 
 3. **Test classification:**
    ```bash
-   DEBUG=1 .claude/commands/scripts/template-selector.sh "test task description"
+   DEBUG=1 commands/scripts/template-selector.sh "test task description"
    ```
 
 4. **Run full test suite:**
    ```bash
-   .claude/commands/scripts/test-integration.sh
+   commands/scripts/test-integration.sh
    ```
 
 5. **Commit changes:**
@@ -860,7 +860,7 @@ Currently manual. Future improvements:
 
 4. **Archive old template:**
    ```bash
-   git mv .claude/templates/old-template.md .claude/templates/archived/
+   git mv templates/old-template.md templates/archived/
    ```
 
 5. **Update tests and documentation:**
@@ -878,7 +878,7 @@ Currently manual. Future improvements:
 
 **Solution:**
 ```bash
-chmod +x .claude/commands/scripts/*.sh
+chmod +x commands/scripts/*.sh
 ```
 
 #### Issue: Template Not Found
@@ -890,7 +890,7 @@ chmod +x .claude/commands/scripts/*.sh
 **Solution:**
 ```bash
 # Verify template exists
-ls -l .claude/templates/template-name.md
+ls -l templates/template-name.md
 
 # Check script is looking in correct directory
 echo "SCRIPT_DIR=$SCRIPT_DIR"
@@ -906,10 +906,10 @@ echo "TEMPLATE_DIR=$TEMPLATE_DIR"
 **Solution:**
 ```bash
 # Check template's required variables
-grep "variables:" .claude/templates/template-name.md
+grep "variables:" templates/template-name.md
 
 # Provide all required variables
-.claude/commands/scripts/template-processor.sh template-name VAR1='value1' VAR2='value2'
+commands/scripts/template-processor.sh template-name VAR1='value1' VAR2='value2'
 ```
 
 #### Issue: Classification Always Returns "custom"
@@ -921,7 +921,7 @@ grep "variables:" .claude/templates/template-name.md
 **Solution:**
 ```bash
 # Debug classification
-DEBUG=1 .claude/commands/scripts/template-selector.sh "your task description"
+DEBUG=1 commands/scripts/template-selector.sh "your task description"
 
 # Check confidence scores
 # Adjust threshold or keywords as needed
@@ -1032,10 +1032,10 @@ git push --tags
 
 ```bash
 # Find when file was deleted
-git log --all --full-history -- .claude/templates/deleted-file.md
+git log --all --full-history -- templates/deleted-file.md
 
 # Restore from specific commit
-git checkout <commit-hash> -- .claude/templates/deleted-file.md
+git checkout <commit-hash> -- templates/deleted-file.md
 ```
 
 #### Recover from Corrupted State
@@ -1113,7 +1113,7 @@ This section documents the API for each bash script, including inputs, outputs, 
 
 **Purpose:** Orchestrate `/prompt` command workflow
 
-**Location:** `.claude/commands/scripts/prompt-handler.sh`
+**Location:** `commands/scripts/prompt-handler.sh`
 
 **Synopsis:**
 ```bash
@@ -1141,10 +1141,10 @@ Instructions for Claude Code to execute
 **Example Usage:**
 ```bash
 # Execution mode
-.claude/commands/scripts/prompt-handler.sh "Analyze security issues"
+commands/scripts/prompt-handler.sh "Analyze security issues"
 
 # Return-only mode
-.claude/commands/scripts/prompt-handler.sh "Refactor code" --return-only
+commands/scripts/prompt-handler.sh "Refactor code" --return-only
 ```
 
 **Key Functions:**
@@ -1158,7 +1158,7 @@ Instructions for Claude Code to execute
 
 **Purpose:** Classify tasks and select appropriate template
 
-**Location:** `.claude/commands/scripts/template-selector.sh`
+**Location:** `commands/scripts/template-selector.sh`
 
 **Synopsis:**
 ```bash
@@ -1194,11 +1194,11 @@ Threshold: 70%
 **Example Usage:**
 ```bash
 # Normal usage
-template=$(.claude/commands/scripts/template-selector.sh "Compare Python and JavaScript")
+template=$(commands/scripts/template-selector.sh "Compare Python and JavaScript")
 echo "$template"  # Output: simple-classification
 
 # Debug mode
-DEBUG=1 .claude/commands/scripts/template-selector.sh "Refactor authentication module"
+DEBUG=1 commands/scripts/template-selector.sh "Refactor authentication module"
 # Output:
 # code-refactoring
 # Confidence: 91%
@@ -1225,7 +1225,7 @@ DEBUG=1 .claude/commands/scripts/template-selector.sh "Refactor authentication m
 
 **Purpose:** Load template and substitute variables
 
-**Location:** `.claude/commands/scripts/template-processor.sh`
+**Location:** `commands/scripts/template-processor.sh`
 
 **Synopsis:**
 ```bash
@@ -1254,13 +1254,13 @@ Processed template with substituted variables
 **Example Usage:**
 ```bash
 # Simple classification example
-.claude/commands/scripts/template-processor.sh simple-classification \
+commands/scripts/template-processor.sh simple-classification \
     ITEM1='Python' \
     ITEM2='JavaScript' \
     CLASSIFICATION_CRITERIA='execution model'
 
 # Code refactoring example
-.claude/commands/scripts/template-processor.sh code-refactoring \
+commands/scripts/template-processor.sh code-refactoring \
     TASK_REQUIREMENTS='Add error handling' \
     TARGET_PATTERNS='api/routes/*.js'
 ```
@@ -1283,7 +1283,7 @@ Processed template with substituted variables
 
 **Purpose:** Validate template structure and metadata
 
-**Location:** `.claude/commands/scripts/validate-templates.sh`
+**Location:** `commands/scripts/validate-templates.sh`
 
 **Synopsis:**
 ```bash
@@ -1319,10 +1319,10 @@ Failed: 0
 **Example Usage:**
 ```bash
 # Validate all templates
-.claude/commands/scripts/validate-templates.sh
+commands/scripts/validate-templates.sh
 
 # Validate specific template
-.claude/commands/scripts/validate-templates.sh simple-classification
+commands/scripts/validate-templates.sh simple-classification
 ```
 
 **Validation Checks:**
@@ -1338,7 +1338,7 @@ Failed: 0
 
 **Purpose:** Run comprehensive integration test suite
 
-**Location:** `.claude/commands/scripts/test-integration.sh`
+**Location:** `commands/scripts/test-integration.sh`
 
 **Synopsis:**
 ```bash
@@ -1379,10 +1379,10 @@ Failed:       0
 **Example Usage:**
 ```bash
 # Run full test suite
-.claude/commands/scripts/test-integration.sh
+commands/scripts/test-integration.sh
 
 # Run with verbose bash debugging
-bash -x .claude/commands/scripts/test-integration.sh
+bash -x commands/scripts/test-integration.sh
 ```
 
 **Test Phases:**

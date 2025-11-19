@@ -71,10 +71,10 @@ grep "Current Version" README.md
 
 ```bash
 # Check specific template
-grep "version:" .claude/templates/simple-classification.md
+grep "version:" templates/simple-classification.md
 
 # Check all templates
-for template in .claude/templates/*.md; do
+for template in templates/*.md; do
     echo "$(basename $template): $(grep 'version:' $template)"
 done
 ```
@@ -83,10 +83,10 @@ done
 
 ```bash
 # View git history for scripts
-git log --oneline -- .claude/commands/scripts/
+git log --oneline -- commands/scripts/
 
 # View specific script changes
-git log -p .claude/commands/scripts/template-selector.sh
+git log -p commands/scripts/template-selector.sh
 ```
 
 ---
@@ -112,11 +112,11 @@ git clone <repository-url> meta-prompt
 cd meta-prompt
 
 # Make scripts executable
-chmod +x .claude/commands/scripts/*.sh
+chmod +x commands/scripts/*.sh
 
 # Validate
-.claude/commands/scripts/validate-templates.sh
-.claude/commands/scripts/test-integration.sh
+commands/scripts/validate-templates.sh
+commands/scripts/test-integration.sh
 ```
 
 **No migration needed** - this is the initial release
@@ -175,8 +175,8 @@ EOF
 
 **5. Validate Migration**
 ```bash
-.claude/commands/scripts/validate-templates.sh
-.claude/commands/scripts/test-integration.sh
+commands/scripts/validate-templates.sh
+commands/scripts/test-integration.sh
 ```
 
 **6. Test Manually**
@@ -261,13 +261,13 @@ git checkout -b rollback-to-v1.0 v1.0
 **3. Restore Scripts**
 ```bash
 # Make scripts executable again
-chmod +x .claude/commands/scripts/*.sh
+chmod +x commands/scripts/*.sh
 ```
 
 **4. Validate Rollback**
 ```bash
-.claude/commands/scripts/validate-templates.sh
-.claude/commands/scripts/test-integration.sh
+commands/scripts/validate-templates.sh
+commands/scripts/test-integration.sh
 ```
 
 **5. Test Functionality**
@@ -280,17 +280,17 @@ chmod +x .claude/commands/scripts/*.sh
 
 **Rollback single template:**
 ```bash
-git checkout v1.0 -- .claude/templates/simple-classification.md
+git checkout v1.0 -- templates/simple-classification.md
 ```
 
 **Rollback single script:**
 ```bash
-git checkout v1.0 -- .claude/commands/scripts/template-selector.sh
+git checkout v1.0 -- commands/scripts/template-selector.sh
 ```
 
 **Rollback configuration:**
 ```bash
-git checkout v1.0 -- .claude/settings.json
+git checkout v1.0 -- .claude-plugin/settings.json
 ```
 
 ### When to Rollback
@@ -365,7 +365,7 @@ git checkout v1.0 -- .claude/settings.json
 - [ ] Update custom templates (if needed)
 - [ ] Update configuration files (if needed)
 - [ ] Update permissions in settings.json (if needed)
-- [ ] Make scripts executable: `chmod +x .claude/commands/scripts/*.sh`
+- [ ] Make scripts executable: `chmod +x commands/scripts/*.sh`
 
 ### Post-Migration
 
