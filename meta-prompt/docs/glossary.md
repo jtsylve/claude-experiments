@@ -169,11 +169,11 @@ A user-facing command in Claude Code that starts with `/`. This project implemen
 ---
 
 ### Agent
-An LLM-powered subprocess that handles complex tasks autonomously. This project uses `prompt-optimizer` for novel cases.
+An LLM-powered subprocess that handles complex tasks autonomously. This project uses `meta-prompt:prompt-optimizer` for novel cases.
 
 **vs. Deterministic Scripts:** Agents consume tokens, scripts don't. Use scripts when possible, agents when necessary.
 
-**Location:** `agents/prompt-optimizer.md`
+**Location:** `agents/meta-prompt:prompt-optimizer.md`
 
 ---
 

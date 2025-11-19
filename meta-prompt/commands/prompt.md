@@ -2,7 +2,7 @@
 name: prompt
 description: Optimize a prompt and optionally execute it in a fresh context
 argument-hint: <task or prompt to optimize> [--return-only]
-model: sonnet
+model: claude-sonnet-4-5-20250929
 allowed-tools: [Task, Bash]
 ---
 
@@ -19,10 +19,10 @@ This command has been optimized to eliminate LLM orchestration overhead through 
 ## Process
 
 1. Execute the orchestration script to generate instructions:
-   - Run: `commands/scripts/prompt-handler.sh "{$TASK_DESCRIPTION}"`
+   - Run: `${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh "{$TASK_DESCRIPTION}"`
    - The script will parse arguments and determine execution mode
    - It will output precise instructions for you to follow
-   - **Error Handling**: If the script fails or doesn't exist, fall back to using the Task tool with `subagent_type="prompt-optimizer"` directly
+   - **Error Handling**: If the script fails or doesn't exist, fall back to using the Task tool with `subagent_type="meta-prompt:prompt-optimizer"` directly
 
 2. Follow the instructions from the script output exactly
 
@@ -31,8 +31,8 @@ This command has been optimized to eliminate LLM orchestration overhead through 
 ## Fallback Strategy
 
 If the bash orchestration script fails for any reason:
-- Use the Task tool with `subagent_type="prompt-optimizer"`
+- Use the Task tool with `subagent_type="meta-prompt:prompt-optimizer"`
 - Pass the task description and any flags (--return-only) in the prompt
-- The prompt-optimizer agent will handle the request using the full LLM-based approach
+- The meta-prompt:prompt-optimizer agent will handle the request using the full LLM-based approach
 
 This deterministic approach eliminates orchestration overhead while maintaining all functionality.

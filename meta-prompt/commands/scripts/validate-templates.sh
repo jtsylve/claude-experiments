@@ -5,8 +5,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEMPLATE_DIR="$SCRIPT_DIR/../../templates"
+TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 
 # ANSI color codes
 RED='\033[0;31m'

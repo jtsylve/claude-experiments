@@ -4,9 +4,6 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR/../.."
-
 # ANSI colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -68,16 +65,16 @@ echo ""
 echo -e "${YELLOW}Phase 1: Script Existence${NC}"
 
 run_test "prompt-handler.sh exists and is executable" \
-    "[ -x commands/scripts/prompt-handler.sh ]"
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh ]"
 
 run_test "template-selector.sh exists and is executable" \
-    "[ -x commands/scripts/template-selector.sh ]"
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh ]"
 
 run_test "template-processor.sh exists and is executable" \
-    "[ -x commands/scripts/template-processor.sh ]"
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh ]"
 
 run_test "validate-templates.sh exists and is executable" \
-    "[ -x commands/scripts/validate-templates.sh ]"
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/validate-templates.sh ]"
 
 echo ""
 
@@ -85,26 +82,26 @@ echo ""
 echo -e "${YELLOW}Phase 2: Template Validation${NC}"
 
 run_test_with_output "All templates pass validation" \
-    "commands/scripts/validate-templates.sh" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/validate-templates.sh" \
     "Passed: 6"
 
 run_test "code-refactoring template exists" \
-    "[ -f templates/code-refactoring.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-refactoring.md ]"
 
 run_test "document-qa template exists" \
-    "[ -f templates/document-qa.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/document-qa.md ]"
 
 run_test "function-calling template exists" \
-    "[ -f templates/function-calling.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/function-calling.md ]"
 
 run_test "interactive-dialogue template exists" \
-    "[ -f templates/interactive-dialogue.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/interactive-dialogue.md ]"
 
 run_test "simple-classification template exists" \
-    "[ -f templates/simple-classification.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/simple-classification.md ]"
 
 run_test "custom template exists" \
-    "[ -f templates/custom.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/custom.md ]"
 
 echo ""
 
@@ -112,23 +109,23 @@ echo ""
 echo -e "${YELLOW}Phase 2B: Error Handling${NC}"
 
 run_test_with_output "Handles missing template gracefully" \
-    "commands/scripts/template-processor.sh nonexistent" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh nonexistent" \
     "Template not found"
 
 run_test_with_output "Template processor requires template name" \
-    "commands/scripts/template-processor.sh" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh" \
     "Usage"
 
 run_test_with_output "Template selector handles empty input" \
-    "commands/scripts/template-selector.sh ''" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh ''" \
     "custom"
 
 run_test_with_output "Prompt handler handles special characters safely" \
-    "commands/scripts/prompt-handler.sh 'Task with \$SPECIAL and \`backticks\`'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Task with \$SPECIAL and \`backticks\`'" \
     "user_task"
 
 run_test_with_output "Template processor handles special characters in values" \
-    "commands/scripts/template-processor.sh simple-classification ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
     "test"
 
 echo ""
@@ -137,27 +134,27 @@ echo ""
 echo -e "${YELLOW}Phase 3: Template Selection Accuracy${NC}"
 
 run_test_with_output "Classifies code refactoring correctly" \
-    "commands/scripts/template-selector.sh 'Refactor the authentication module'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Refactor the authentication module'" \
     "code-refactoring"
 
 run_test_with_output "Classifies document Q&A correctly" \
-    "commands/scripts/template-selector.sh 'Answer questions about this document'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Answer questions about this document'" \
     "document-qa"
 
 run_test_with_output "Classifies function calling correctly" \
-    "commands/scripts/template-selector.sh 'Use these API functions to fetch data'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Use these API functions to fetch data'" \
     "function-calling"
 
 run_test_with_output "Classifies dialogue correctly" \
-    "commands/scripts/template-selector.sh 'Act as a tutor for students'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Act as a tutor for students'" \
     "interactive-dialogue"
 
 run_test_with_output "Classifies comparison correctly" \
-    "commands/scripts/template-selector.sh 'Compare these two sentences'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Compare these two sentences'" \
     "simple-classification"
 
 run_test_with_output "Falls back to custom for novel tasks" \
-    "commands/scripts/template-selector.sh 'Write a creative poem'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Write a creative poem'" \
     "custom"
 
 echo ""
@@ -166,15 +163,15 @@ echo ""
 echo -e "${YELLOW}Phase 4: Template Processing${NC}"
 
 run_test_with_output "Template processor substitutes variables" \
-    "commands/scripts/template-processor.sh simple-classification ITEM1='apple' ITEM2='orange' CLASSIFICATION_CRITERIA='fruit'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='apple' ITEM2='orange' CLASSIFICATION_CRITERIA='fruit'" \
     "apple"
 
 run_test_with_output "Template processor includes template content" \
-    "commands/scripts/template-processor.sh simple-classification ITEM1='apple' ITEM2='orange' CLASSIFICATION_CRITERIA='fruit'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='apple' ITEM2='orange' CLASSIFICATION_CRITERIA='fruit'" \
     "Begin your answer"
 
 run_test_with_output "Template processor detects unreplaced variables" \
-    "commands/scripts/template-processor.sh simple-classification ITEM1='apple'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='apple'" \
     "unreplaced"
 
 echo ""
@@ -183,15 +180,15 @@ echo ""
 echo -e "${YELLOW}Phase 5: Prompt Handler${NC}"
 
 run_test_with_output "Prompt handler detects execution mode" \
-    "commands/scripts/prompt-handler.sh 'Analyze security issues'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Analyze security issues'" \
     "Optimize and execute"
 
 run_test_with_output "Prompt handler detects return-only mode" \
-    "commands/scripts/prompt-handler.sh 'Analyze security issues --return-only'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Analyze security issues --return-only'" \
     "Create optimized prompt"
 
 run_test_with_output "Prompt handler removes --return-only flag from task" \
-    "commands/scripts/prompt-handler.sh 'Task description --return-only'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Task description --return-only'" \
     "Task description"
 
 echo ""
@@ -200,15 +197,15 @@ echo ""
 echo -e "${YELLOW}Phase 6: Modified Command Files${NC}"
 
 run_test_with_output "prompt.md references bash handler" \
-    "cat commands/prompt.md" \
+    "cat \${CLAUDE_PLUGIN_ROOT}/commands/prompt.md" \
     "prompt-handler.sh"
 
 run_test_with_output "create-prompt.md references template selector" \
-    "cat commands/create-prompt.md" \
+    "cat \${CLAUDE_PLUGIN_ROOT}/commands/create-prompt.md" \
     "template-selector.sh"
 
-run_test "prompt-optimizer agent is streamlined (<100 lines)" \
-    "[ \$(wc -l < agents/prompt-optimizer.md | tr -d ' ') -lt 100 ]"
+run_test "meta-prompt:prompt-optimizer agent is streamlined (<100 lines)" \
+    "[ \$(wc -l < \${CLAUDE_PLUGIN_ROOT}/agents/meta-prompt:prompt-optimizer.md | tr -d ' ') -lt 100 ]"
 
 echo ""
 

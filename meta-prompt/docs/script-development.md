@@ -574,7 +574,7 @@ fi
 **Key Functions:**
 - `sanitize_input()`: Escapes dangerous characters
 - Detects execution mode vs return-only mode
-- Generates instructions for prompt-optimizer agent
+- Generates instructions for meta-prompt:prompt-optimizer agent
 
 **Location:** `commands/scripts/prompt-handler.sh`
 
