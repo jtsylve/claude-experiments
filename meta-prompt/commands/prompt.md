@@ -19,7 +19,7 @@ This command has been optimized to eliminate LLM orchestration overhead through 
 ## Process
 
 1. Execute the orchestration script to generate instructions:
-   - Run: `.claude/commands/scripts/prompt-handler.sh "{$TASK_DESCRIPTION}"`
+   - Run: `commands/scripts/prompt-handler.sh "{$TASK_DESCRIPTION}"`
    - The script will parse arguments and determine execution mode
    - It will output precise instructions for you to follow
    - **Error Handling**: If the script fails or doesn't exist, fall back to using the Task tool with `subagent_type="prompt-optimizer"` directly

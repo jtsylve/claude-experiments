@@ -1,38 +1,41 @@
-# Infrastructure Documentation
-
-**Project:** Meta-Prompt Infrastructure for Claude Code
-**Version:** 1.0
-**Last Updated:** 2025-11-18
-
----
-
-## Table of Contents
-
-### 🟢 Essential (Must Read)
-1. [Environment Setup](#environment-setup) - Get started with installation
-2. [Build and Deployment](#build-and-deployment) - Deploy and rollback procedures
-
-### 🟡 Important (Read When Needed)
-3. [Testing Infrastructure](#testing-infrastructure) - Running tests and validation
-4. [Troubleshooting](#troubleshooting) - Common issues and solutions
-5. [Configuration Management](#configuration-management) - Settings and permissions
-
-### ⚪ Reference (Look Up As Needed)
-6. [Directory Structure](#directory-structure) - Complete file tree
-7. [Dependencies](#dependencies) - Required software
-8. [Script API Reference](#script-api-reference) - Script interfaces and usage
-9. [Monitoring and Maintenance](#monitoring-and-maintenance) - Ongoing operations
-10. [Performance Optimization](#performance-optimization) - Tuning and scaling
-
----
-
-## Directory Structure
-
-### Complete File Tree
-
 ```
+meta-prompt/                                   # Plugin root
+├── .claude-plugin/                            # Plugin manifest
+│   ├── plugin.json                            # Plugin metadata
+│   └── settings.json                          # Permissions and configuration
+│
+├── agents/                                    # LLM agents
+│   └── prompt-optimizer.md                    # Prompt engineering agent (50 lines)
+│
+├── commands/                                  # Slash commands
+│   ├── prompt.md                              # /prompt command (40 lines)
+│   ├── create-prompt.md                       # /create-prompt command (196 lines)
+│   │
+│   └── scripts/                               # Deterministic processing scripts
+│       ├── prompt-handler.sh                  # /prompt orchestration (77 lines)
+│       ├── template-selector.sh               # Task classification (194 lines)
+│       ├── template-processor.sh              # Variable substitution (116 lines)
+│       ├── validate-templates.sh              # Template validation (180 lines)
+│       └── test-integration.sh                # Integration tests (240 lines)
+│
+├── templates/                                 # Template library
+│   ├── simple-classification.md               # Comparison template (37 lines)
+│   ├── document-qa.md                         # Document Q&A template (39 lines)
+│   ├── code-refactoring.md                    # Code modification template (64 lines)
+│   ├── function-calling.md                    # Function/API usage template (52 lines)
+│   ├── interactive-dialogue.md                # Conversational agent template (38 lines)
+│   └── custom.md                              # LLM fallback template (20 lines)
+│
+├── docs/                                      # Documentation
+│   ├── architecture-overview.md               # System architecture
+│   ├── design-decisions.md                    # Design rationale
+│   ├── infrastructure.md                      # This file
+│   └── ...
+│
+├── CONTRIBUTING.md                            # Contribution guidelines
+└── README.md                                  # Documentation index
 
-├── .claude/                                    # Claude Code configuration root
+├── meta-prompt/                                    # Claude Code configuration root
 │   ├── settings.json                    # Permissions and configuration
 │   │
 │   ├── agents/                                # LLM agents
@@ -77,10 +80,10 @@
 
 ### Directory Purposes
 
-#### `.claude/`
-**Purpose:** Root configuration directory for Claude Code integration
-**Owner:** Claude Code CLI
-**Contents:** All project-specific Claude Code configuration, commands, agents, and templates
+#### `.claude-plugin/`
+**Purpose:** Plugin manifest and configuration
+**Owner:** Claude Code plugin system
+**Contents:** Plugin metadata (plugin.json) and permissions/settings (settings.json)
 
 #### `agents/`
 **Purpose:** LLM agent definitions
@@ -268,7 +271,7 @@ git status
 
 ```bash
 # Stage changes
-git add .claude/
+git add .
 
 # Commit with descriptive message
 git commit -m "feat: Add new template for X pattern
@@ -396,7 +399,7 @@ commands/scripts/test-integration.sh
 
 ```bash
 # Create directory structure
-mkdir -p .claude/{agents,commands/scripts,templates,docs}
+mkdir -p {agents,commands/scripts,templates,docs}
 
 # Copy files from this documentation
 # (Files should be copied manually or via installation script)
@@ -708,7 +711,7 @@ fi
 3. **Classification Accuracy**
    - Target: 90%+ correct classifications
    - Measurement: Manual review of 100+ tasks
-   - Test dataset: `.claude/tests/template-selection-dataset.txt` (to be created)
+   - Test dataset: `tests/template-selection-dataset.txt` (to be created)
 
 4. **Performance**
    - Target: <100ms total overhead
@@ -1409,7 +1412,7 @@ bash -x commands/scripts/test-integration.sh
 - **Architecture Overview:** `docs/architecture-overview.md`
 - **Design Decisions:** `docs/design-decisions.md`
 - **Documentation Index:** `README.md`
-- **Implementation Plan:** `.claude/OPTIMIZATION_IMPLEMENTATION_PLAN.md`
+- **Implementation Plan:** `OPTIMIZATION_IMPLEMENTATION_PLAN.md`
 
 ### External Resources
 
