@@ -116,6 +116,8 @@ Install via the claude-experiments marketplace:
 
 The meta-prompt plugin will be available immediately with `/prompt` and `/create-prompt` commands.
 
+**Windows Users:** Native Windows (cmd.exe/PowerShell) is not currently supported due to a Claude Code path normalization bug. Use WSL (Windows Subsystem for Linux) instead. See [Infrastructure Guide - Troubleshooting](docs/infrastructure.md#issue-windows-compatibility---claude_plugin_root-path-normalization-claude-code-bug) for details.
+
 ### For Development
 
 ```bash

@@ -358,6 +358,7 @@ git push --force origin main  # WARNING: Destructive
 - macOS (primary target)
 - Linux (Ubuntu, Debian, CentOS, etc.)
 - Windows with WSL (Windows Subsystem for Linux)
+  - **Note:** Native Windows (cmd.exe/PowerShell) is not currently supported due to a path normalization bug in Claude Code. See [Troubleshooting - Windows Compatibility](#issue-windows-compatibility---claude_plugin_root-path-normalization-claude-code-bug) for details.
 
 **Required Software:**
 - Bash 3.2 or higher (macOS default bash works)
@@ -872,6 +873,51 @@ Currently manual. Future improvements:
    - Update this file
 
 ### Troubleshooting
+
+#### Issue: Windows Compatibility - CLAUDE_PLUGIN_ROOT Path Normalization (Claude Code Bug)
+
+**Symptom:** Plugin commands fail on Windows (non-WSL) with path-related errors when executing bundled scripts
+
+**Affected Platforms:**
+- Windows (cmd.exe and PowerShell)
+- WSL is NOT affected
+
+**Cause:** This is a bug in Claude Code itself (not the meta-prompt plugin). Claude Code does not properly normalize the `CLAUDE_PLUGIN_ROOT` environment variable on Windows platforms. The variable provides different path formats depending on the shell context:
+- **cmd.exe**: Sets `C:\path\to\plugin` (backslashes)
+- **PowerShell**: Sets `C:/path/to/plugin` (forward slashes with drive prefix)
+
+Neither format is compatible with bash path interpretation, which breaks bundled shell scripts that use `${CLAUDE_PLUGIN_ROOT}/path/to/script.sh` syntax.
+
+**Technical Details:**
+- The plugin system recommends using `${CLAUDE_PLUGIN_ROOT}` for cross-platform compatibility
+- This approach works correctly on macOS and Linux
+- On Windows, bash interpreters cannot properly resolve paths containing Windows drive letters or backslash separators
+- This breaks the meta-prompt plugin and any other Claude Code plugins that use bundled bash scripts
+- The issue is in Claude Code's plugin infrastructure, not in plugin implementations
+
+**Impact:**
+- Breaks cross-platform plugin portability
+- Windows users cannot use meta-prompt or other plugins with bundled bash scripts
+- Conflicts with documented plugin development best practices
+
+**Reproduction Steps:**
+1. Install meta-prompt plugin on Windows (non-WSL)
+2. Attempt to execute `/prompt` or `/create-prompt` commands
+3. Command execution fails due to malformed path resolution in bundled scripts
+
+**Status:**
+- Tracked in Claude Code issue tracker: https://github.com/anthropics/claude-code/issues/11984
+- Affects Claude Code version 2.0.47+
+- Fix must be implemented in Claude Code itself
+- Status: Open, unassigned
+
+**Workaround:**
+Windows users should use WSL (Windows Subsystem for Linux) to run meta-prompt commands that rely on bundled scripts. WSL provides a proper Unix-like environment where path normalization works correctly.
+
+**Solution:**
+No workaround available for native Windows environments. The fix requires Claude Code to normalize `CLAUDE_PLUGIN_ROOT` to provide bash-compatible paths regardless of the host shell or operating system.
+
+---
 
 #### Issue: Script Permission Denied
 
