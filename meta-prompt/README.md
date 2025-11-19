@@ -61,6 +61,8 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 
 ### Essential Commands
 
+> **Note:** These commands are for development and testing. Run from the `meta-prompt/` directory when working with a cloned repository.
+
 ```bash
 # Validate all templates
 commands/scripts/validate-templates.sh
@@ -78,14 +80,17 @@ chmod +x commands/scripts/*.sh
 ### Project Structure
 
 ```
-.claude/
+meta-prompt/
+├── .claude-plugin/    # Plugin manifest and configuration
+│   ├── plugin.json    # Plugin metadata
+│   └── settings.json  # Permissions and settings
 ├── commands/          # /prompt and /create-prompt slash commands
 │   └── scripts/       # Deterministic processing (zero tokens)
 ├── templates/         # 6 pre-built prompt templates
-└── agents/            # LLM agent for novel cases
-
-docs/                  # Documentation suite
-README.md              # This file - start here
+├── agents/            # LLM agent for novel cases
+├── docs/              # Documentation suite
+├── CONTRIBUTING.md    # Contribution guidelines
+└── README.md          # This file - start here
 ```
 
 ### Performance Metrics
@@ -101,10 +106,22 @@ README.md              # This file - start here
 
 ## Installation
 
+### As a Claude Code Plugin (Recommended)
+
+Install via the claude-experiments marketplace:
+
 ```bash
-# Clone repository
-git clone <repository-url> claude-meta-prompt
-cd claude-meta-prompt
+/plugin install jtsylve/claude-experiments
+```
+
+The meta-prompt plugin will be available immediately with `/prompt` and `/create-prompt` commands.
+
+### For Development
+
+```bash
+# Clone the marketplace repository
+git clone https://github.com/jtsylve/claude-experiments
+cd claude-experiments/meta-prompt
 
 # Make scripts executable
 chmod +x commands/scripts/*.sh

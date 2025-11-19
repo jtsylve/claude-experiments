@@ -167,7 +167,7 @@ git checkout v2.0  # Or latest release tag
 **4. Update Configuration**
 ```bash
 # Create config file (example)
-cat > .claude/config.yml <<EOF
+cat > config.yml <<EOF
 confidence_threshold: 70
 classification_version: 2.0
 EOF

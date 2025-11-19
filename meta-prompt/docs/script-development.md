@@ -115,7 +115,7 @@ templatename="simple-classification"   # No separator
 
 ```bash
 readonly CONFIDENCE_THRESHOLD=70
-readonly TEMPLATE_DIR=".claude/templates"
+readonly TEMPLATE_DIR="templates"
 ```
 
 ### 3. Function Definitions

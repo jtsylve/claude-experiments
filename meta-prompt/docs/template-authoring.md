@@ -129,7 +129,7 @@ Keywords should match how users naturally describe the task:
 ### Step 5: Create Template File
 
 ```bash
-cd .claude/templates
+cd templates
 cp custom.md sentiment-analysis.md
 ```
 

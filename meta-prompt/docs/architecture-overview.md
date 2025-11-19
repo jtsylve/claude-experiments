@@ -447,32 +447,34 @@ Automated validation prevents malformed templates:
 ### File System Layout
 
 ```
-
-├── .claude/
-│   ├── agents/
-│   │   └── prompt-optimizer.md      # LLM agent (50 lines, streamlined)
-│   ├── commands/
-│   │   ├── prompt.md                # /prompt command (40 lines)
-│   │   ├── create-prompt.md         # /create-prompt command (196 lines)
-│   │   └── scripts/                 # Deterministic processing
-│   │       ├── prompt-handler.sh
-│   │       ├── template-selector.sh
-│   │       ├── template-processor.sh
-│   │       ├── validate-templates.sh
-│   │       └── test-integration.sh
-│   ├── templates/                   # Template library
-│   │   ├── simple-classification.md
-│   │   ├── document-qa.md
-│   │   ├── code-refactoring.md
-│   │   ├── function-calling.md
-│   │   ├── interactive-dialogue.md
-│   │   └── custom.md
+meta-prompt/                         # Plugin root
+├── .claude-plugin/                  # Plugin manifest
+│   ├── plugin.json                  # Plugin metadata
+│   └── settings.json                # Permissions and settings
+├── agents/
+│   └── prompt-optimizer.md          # LLM agent (50 lines, streamlined)
+├── commands/
+│   ├── prompt.md                    # /prompt command (40 lines)
+│   ├── create-prompt.md             # /create-prompt command (196 lines)
+│   └── scripts/                     # Deterministic processing
+│       ├── prompt-handler.sh
+│       ├── template-selector.sh
+│       ├── template-processor.sh
+│       ├── validate-templates.sh
+│       └── test-integration.sh
+├── templates/                       # Template library
+│   ├── simple-classification.md
+│   ├── document-qa.md
+│   ├── code-refactoring.md
+│   ├── function-calling.md
+│   ├── interactive-dialogue.md
+│   └── custom.md
 ├── docs/                            # Documentation (this directory)
 │   ├── architecture-overview.md
 │   ├── design-decisions.md
 │   └── infrastructure.md
-├── README.md                        # Documentation index
-└── .git/                            # Version control
+├── CONTRIBUTING.md                  # Contribution guidelines
+└── README.md                        # Documentation index
 ```
 
 ### Runtime Environment

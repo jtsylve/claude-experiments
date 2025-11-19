@@ -11,7 +11,7 @@ This repository is a Claude Code plugin marketplace that provides tools to reduc
 Install this marketplace in Claude Code:
 
 ```bash
-/plugin install claude-experiments@https://github.com/jtsylve/claude-experiments
+/plugin install jtsylve/claude-experiments
 ```
 
 Once installed, all plugins in this marketplace will be available for use in your Claude Code environment.
