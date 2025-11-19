@@ -22,13 +22,18 @@ normalize_path() {
         return 0
     fi
 
-    # If cygpath is available (Git Bash, Cygwin), use it for proper conversion
+    # If cygpath is available (Git Bash, Cygwin), try to use it for proper conversion
+    # If cygpath succeeds, use its result. If it fails, fall through to manual conversion.
     if command -v cygpath >/dev/null 2>&1; then
-        cygpath -u "$path" 2>/dev/null || echo "$path"
-        return 0
+        local cygpath_result
+        if cygpath_result=$(cygpath -u "$path" 2>/dev/null); then
+            echo "$cygpath_result"
+            return 0
+        fi
+        # cygpath failed, fall through to manual conversion
     fi
 
-    # Fallback: manual conversion for environments without cygpath
+    # Manual conversion for environments without cygpath or when cygpath fails
     # 1. Convert backslashes to forward slashes
     # 2. Handle Windows drive letters (C: -> /c/ for Git Bash compatibility)
     # 3. Collapse multiple consecutive slashes into single slash
@@ -49,12 +54,29 @@ normalize_path() {
 }
 
 # Validate and normalize CLAUDE_PLUGIN_ROOT environment variable
-# This function must be called at the start of scripts using CLAUDE_PLUGIN_ROOT
+#
+# This function validates that CLAUDE_PLUGIN_ROOT is set, normalizes the path
+# for cross-platform compatibility, and verifies the directory exists.
+# It does NOT modify global state - callers must set CLAUDE_PLUGIN_ROOT themselves.
+#
+# This function must be called at the start of scripts using CLAUDE_PLUGIN_ROOT.
+#
+# Behavior:
+#   1. Validates that CLAUDE_PLUGIN_ROOT is set
+#   2. Normalizes the path (converts Windows paths to Unix format)
+#   3. Verifies the normalized directory exists
+#   4. Outputs the normalized path to stdout
+#
+# Usage:
+#   CLAUDE_PLUGIN_ROOT=$(init_plugin_root) || exit 1
+#
 # Side effects:
-#   - Exports normalized CLAUDE_PLUGIN_ROOT
-#   - Exits with error if CLAUDE_PLUGIN_ROOT is not set
+#   - Writes error messages to stderr on failure
+#   - Does NOT modify CLAUDE_PLUGIN_ROOT (caller must assign the result)
+#
 # Returns:
-#   0 on success, 1 on failure
+#   Outputs normalized path to stdout on success
+#   Returns exit code 1 on failure (with error to stderr)
 init_plugin_root() {
     # Check if CLAUDE_PLUGIN_ROOT is set
     if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
@@ -74,20 +96,30 @@ init_plugin_root() {
         return 1
     fi
 
-    # Export the normalized version
-    export CLAUDE_PLUGIN_ROOT="$normalized_root"
-
     # Verify the directory exists
-    if [ ! -d "$CLAUDE_PLUGIN_ROOT" ]; then
-        echo "ERROR: CLAUDE_PLUGIN_ROOT directory does not exist: $CLAUDE_PLUGIN_ROOT" >&2
+    if [ ! -d "$normalized_root" ]; then
+        echo "ERROR: CLAUDE_PLUGIN_ROOT directory does not exist: $normalized_root" >&2
         return 1
     fi
 
+    # Output the normalized path (caller should assign this to CLAUDE_PLUGIN_ROOT)
+    echo "$normalized_root"
     return 0
 }
 
 # Get the absolute path to the script directory
-# This is useful for scripts that need to reference other scripts in the same directory
+#
+# NOTE: This function is currently unused in the codebase but is provided as a utility
+# for future script development. It can be used by scripts that need to reference
+# other scripts or resources in the same directory without hardcoding paths.
+#
+# This is useful for scripts that need to reference other scripts in the same directory.
+# It properly handles symlinks to ensure the real script directory is returned.
+#
+# Usage example:
+#   SCRIPT_DIR=$(get_script_dir)
+#   source "${SCRIPT_DIR}/other-script.sh"
+#
 # Returns:
 #   Absolute path to the directory containing the calling script
 get_script_dir() {

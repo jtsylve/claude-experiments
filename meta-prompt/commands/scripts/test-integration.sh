@@ -146,9 +146,25 @@ run_test_with_output "Normalize path with backslashes" \
     "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && normalize_path 'C:\\\\Users\\\\test'" \
     "/c/Users/test"
 
-# Test that init_plugin_root validates properly
-run_test "init_plugin_root validates CLAUDE_PLUGIN_ROOT" \
-    "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && init_plugin_root"
+# Test that init_plugin_root validates and returns normalized path
+run_test_with_output "init_plugin_root returns normalized path" \
+    "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && init_plugin_root" \
+    "/home/user/claude-experiments/meta-prompt"
+
+# Test edge case: mixed slashes (forward and backward)
+run_test_with_output "Normalize path with mixed slashes" \
+    "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && normalize_path 'C:/Users\\\\test/folder'" \
+    "/c/Users/test/folder"
+
+# Test edge case: path with spaces
+run_test_with_output "Normalize path with spaces" \
+    "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && normalize_path 'C:\\\\Program Files\\\\My App'" \
+    "/c/Program Files/My App"
+
+# Test edge case: path with trailing slash
+run_test_with_output "Normalize path with trailing slash" \
+    "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && normalize_path 'C:\\\\Users\\\\test\\\\'" \
+    "/c/Users/test/"
 
 echo ""
 

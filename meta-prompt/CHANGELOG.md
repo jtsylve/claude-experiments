@@ -18,9 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enables seamless operation on Windows Git Bash and Cygwin environments
 - New utility functions in `utils.sh`:
   - `normalize_path()`: Convert Windows paths to Unix format
-  - `init_plugin_root()`: Validate and normalize CLAUDE_PLUGIN_ROOT
-  - `get_script_dir()`: Get absolute path to script directory
-- Expanded test suite to 35 tests (from 31), including utility function tests
+  - `init_plugin_root()`: Validate and normalize CLAUDE_PLUGIN_ROOT (returns normalized path, does not modify global state)
+  - `get_script_dir()`: Get absolute path to script directory (utility function for future use)
+- Expanded test suite to 38 tests (from 31), including:
+  - Utility function tests (path normalization, init_plugin_root)
+  - Edge case tests (mixed slashes, paths with spaces, trailing slashes)
+  - cygpath fallback behavior validation
 
 ### Changed
 - **BREAKING:** Agent references now use fully-qualified names (`meta-prompt:prompt-optimizer` instead of `prompt-optimizer`)
