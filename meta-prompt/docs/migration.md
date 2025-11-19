@@ -172,6 +172,24 @@ export CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt
 ./commands/scripts/template-processor.sh simple-classification ITEM1='test' ...
 ```
 
+**Windows Path Handling:**
+
+All scripts now include automatic path normalization for Windows environments. The shared `utils.sh` library handles:
+- Converting backslashes to forward slashes
+- Converting Windows drive letters (C: → /c/)
+- Using `cygpath` when available (Git Bash, Cygwin)
+
+This means you can set `CLAUDE_PLUGIN_ROOT` with Windows paths and they will be automatically converted:
+
+```bash
+# Windows Git Bash - both formats work
+export CLAUDE_PLUGIN_ROOT='C:\Users\name\meta-prompt'  # Auto-converted to /c/Users/name/meta-prompt
+export CLAUDE_PLUGIN_ROOT='/c/Users/name/meta-prompt'  # Already in correct format
+
+# Windows WSL
+export CLAUDE_PLUGIN_ROOT='/mnt/c/Users/name/meta-prompt'  # Works as-is
+```
+
 **3. Validate Migration**
 
 ```bash
@@ -198,11 +216,15 @@ CLAUDE_PLUGIN_ROOT=$(pwd) commands/scripts/test-integration.sh
 - MIT License with copyright notices
 - Environment variable validation for improved error messages
 - CHANGELOG.md for tracking version history
+- Shared `utils.sh` library for cross-platform compatibility
+- Windows path normalization (Git Bash, Cygwin support)
 
 **Improved:**
 - Scripts now provide clear error messages when `${CLAUDE_PLUGIN_ROOT}` is not set
+- Automatic path conversion for Windows environments
 - Documentation updated across all files
 - Author information standardized
+- Test suite expanded to include utility function tests (35 total tests)
 
 ### Rollback from 1.1 to 1.0
 
@@ -424,6 +446,8 @@ git checkout v1.0 -- .claude-plugin/settings.json
 | macOS | ✅ Supported | ✅ Supported | ✅ Supported |
 | Linux | ✅ Supported | ✅ Supported | ✅ Supported |
 | WSL | ✅ Supported | ✅ Supported | ✅ Supported |
+| Windows Git Bash | ✅ Supported (v1.1+) | ✅ Supported | ✅ Supported |
+| Windows Cygwin | ✅ Supported (v1.1+) | ✅ Supported | ✅ Supported |
 
 ### Template Version Compatibility
 

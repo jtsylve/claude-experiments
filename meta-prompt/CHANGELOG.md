@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License with copyright notice
 - Environment variable validation in bash scripts to prevent silent failures
 - `CLAUDE_PLUGIN_ROOT` validation in `template-processor.sh` and `validate-templates.sh`
+- **Windows path normalization:** Shared `utils.sh` library for cross-platform path handling
+  - Automatic conversion of Windows paths (backslashes) to Unix-style (forward slashes)
+  - Support for Windows drive letters (C: → /c/)
+  - Uses `cygpath` when available (Git Bash, Cygwin)
+  - Enables seamless operation on Windows Git Bash and Cygwin environments
+- New utility functions in `utils.sh`:
+  - `normalize_path()`: Convert Windows paths to Unix format
+  - `init_plugin_root()`: Validate and normalize CLAUDE_PLUGIN_ROOT
+  - `get_script_dir()`: Get absolute path to script directory
+- Expanded test suite to 35 tests (from 31), including utility function tests
 
 ### Changed
 - **BREAKING:** Agent references now use fully-qualified names (`meta-prompt:prompt-optimizer` instead of `prompt-optimizer`)
@@ -24,10 +34,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All script paths updated to use `${CLAUDE_PLUGIN_ROOT}` environment variable instead of relative paths
   - Improves portability and reliability when scripts are invoked from different directories
   - Scripts will now fail fast with clear error messages if `CLAUDE_PLUGIN_ROOT` is not set
+- Scripts now use shared `utils.sh` library for consistent path handling and environment validation
+  - `template-processor.sh` and `validate-templates.sh` updated to use `init_plugin_root()`
+  - Ensures consistent behavior across all scripts
 
 ### Fixed
 - Integration test suite updated to reference correct agent file path (`agents/prompt-optimizer.md`)
 - Bash scripts no longer use fragile `cd` and `dirname` logic for path resolution
+- **Windows path compatibility:** Scripts now handle Windows-style paths (backslashes) correctly
+  - Fixes issues with `CLAUDE_PLUGIN_ROOT` on Windows Git Bash and Cygwin
+  - Automatic path conversion prevents bash path resolution errors
 
 ## [1.0.0] - Previous Release
 

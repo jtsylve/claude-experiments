@@ -76,6 +76,9 @@ run_test "template-processor.sh exists and is executable" \
 run_test "validate-templates.sh exists and is executable" \
     "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/validate-templates.sh ]"
 
+run_test "utils.sh exists and is executable" \
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh ]"
+
 echo ""
 
 # ===== PHASE 2: Template Validation =====
@@ -127,6 +130,25 @@ run_test_with_output "Prompt handler handles special characters safely" \
 run_test_with_output "Template processor handles special characters in values" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
     "test"
+
+echo ""
+
+# ===== PHASE 2C: Utility Function Tests =====
+echo -e "${YELLOW}Phase 2C: Utility Functions${NC}"
+
+# Test path normalization with Unix paths (should pass through unchanged)
+run_test_with_output "Normalize Unix path (no change)" \
+    "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && normalize_path '/home/user/test'" \
+    "/home/user/test"
+
+# Test path normalization with backslashes
+run_test_with_output "Normalize path with backslashes" \
+    "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && normalize_path 'C:\\\\Users\\\\test'" \
+    "/c/Users/test"
+
+# Test that init_plugin_root validates properly
+run_test "init_plugin_root validates CLAUDE_PLUGIN_ROOT" \
+    "source \${CLAUDE_PLUGIN_ROOT}/commands/scripts/utils.sh && init_plugin_root"
 
 echo ""
 
