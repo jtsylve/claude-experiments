@@ -328,7 +328,7 @@ test_classification() {
 }
 ```
 
-See `.claude/commands/scripts/test-integration.sh` for complete test suite.
+See `commands/scripts/test-integration.sh` for complete test suite.
 
 ### 3. Edge Case Testing
 
@@ -576,7 +576,7 @@ fi
 - Detects execution mode vs return-only mode
 - Generates instructions for prompt-optimizer agent
 
-**Location:** `.claude/commands/scripts/prompt-handler.sh`
+**Location:** `commands/scripts/prompt-handler.sh`
 
 ### template-selector.sh
 
@@ -599,7 +599,7 @@ fi
 4. Select highest confidence ≥ 70%
 5. Return template name or "custom"
 
-**Location:** `.claude/commands/scripts/template-selector.sh`
+**Location:** `commands/scripts/template-selector.sh`
 
 ### template-processor.sh
 
@@ -617,7 +617,7 @@ fi
 - Substitution with `sed`
 - Validation of unreplaced variables
 
-**Location:** `.claude/commands/scripts/template-processor.sh`
+**Location:** `commands/scripts/template-processor.sh`
 
 ### validate-templates.sh
 
@@ -635,7 +635,7 @@ fi
 - XML tags balanced
 - Template has content
 
-**Location:** `.claude/commands/scripts/validate-templates.sh`
+**Location:** `commands/scripts/validate-templates.sh`
 
 ### test-integration.sh
 
@@ -654,7 +654,7 @@ fi
 6. Prompt handler (3 tests)
 7. File modifications (3 tests)
 
-**Location:** `.claude/commands/scripts/test-integration.sh`
+**Location:** `commands/scripts/test-integration.sh`
 
 ---
 
@@ -740,7 +740,7 @@ echo "The template is $template_name with confidence $confidence%"
 2. Run shellcheck for linting
 3. Test with DEBUG=1 for verbose output
 4. Run validation and integration tests
-5. See [CONTRIBUTING.md](../CONTRIBUTING.md) for support
+5. See [CONTRIBUTING.md](CONTRIBUTING.md) for support
 
 ---
 

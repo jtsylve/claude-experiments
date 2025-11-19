@@ -1,19 +1,20 @@
-# Contributing to Meta-Prompt Infrastructure
+# Contributing to Claude Experiments
 
-Thank you for your interest in contributing! This guide will help you get started.
+Thank you for your interest in contributing to Claude Experiments! This guide will help you get started whether you're contributing a new plugin, improving an existing plugin, or enhancing the marketplace infrastructure.
 
 ---
 
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
-2. [Development Workflow](#development-workflow)
-3. [Branching Strategy](#branching-strategy)
-4. [Commit Message Conventions](#commit-message-conventions)
-5. [Pull Request Process](#pull-request-process)
-6. [Code Review Checklist](#code-review-checklist)
-7. [Testing Requirements](#testing-requirements)
-8. [Documentation Standards](#documentation-standards)
+2. [Contributing a New Plugin](#contributing-a-new-plugin)
+3. [Contributing to Existing Plugins](#contributing-to-existing-plugins)
+4. [Contributing to Marketplace Infrastructure](#contributing-to-marketplace-infrastructure)
+5. [Development Workflow](#development-workflow)
+6. [Pull Request Process](#pull-request-process)
+7. [Plugin Standards](#plugin-standards)
+8. [Testing Requirements](#testing-requirements)
+9. [Documentation Standards](#documentation-standards)
 
 ---
 
@@ -23,175 +24,330 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 Before contributing, ensure you have:
 
-- Bash 4.0+ installed
 - Git 2.0+ installed
 - Claude Code CLI (latest version)
 - Text editor with markdown support
+- Understanding of Claude Code plugin structure
 
 ### Initial Setup
 
 ```bash
 # Clone the repository
-git clone <repository-url> meta-prompt
-cd meta-prompt
+git clone https://github.com/jtsylve/claude-experiments
+cd claude-experiments
 
-# Make scripts executable
-chmod +x .claude/commands/scripts/*.sh
-
-# Validate installation
-.claude/commands/scripts/validate-templates.sh
-.claude/commands/scripts/test-integration.sh
-
-# Expected: All templates pass, all tests pass
+# Explore the structure
+ls -la
+# Should see: .claude-plugin/, meta-prompt/, README.md, CONTRIBUTING.md
 ```
 
-### Understand the System
+### Understand the Marketplace
 
-Before making changes, read:
+Before contributing, familiarize yourself with:
 
-1. **[README.md](README.md)** - Project overview
-2. **[docs/architecture-overview.md](docs/architecture-overview.md)** - How it works
-3. **[docs/design-decisions.md](docs/design-decisions.md)** - Why decisions were made
-4. **[docs/infrastructure.md](docs/infrastructure.md)** - Operational details
+1. **Marketplace structure** - See README.md
+2. **Existing plugins** - Browse meta-prompt/ as an example
+3. **Plugin requirements** - Read Plugin Standards section below
 
-**Time investment:** 1-2 hours for basic understanding
+**Time investment:** 30-60 minutes for basic understanding
+
+---
+
+## Contributing a New Plugin
+
+### Step 1: Propose Your Plugin
+
+Before writing code, open an issue to discuss your plugin idea:
+
+**Issue template:**
+```markdown
+## Plugin Proposal: [Plugin Name]
+
+**Purpose:** What problem does this plugin solve?
+
+**Target Users:** Who will use this plugin?
+
+**Features:**
+- Feature 1
+- Feature 2
+- Feature 3
+
+**Similar Plugins:** Are there existing plugins with similar functionality?
+
+**Differentiation:** If similar plugins exist, how is yours different/better?
+
+**Implementation Plan:** Brief overview of your approach
+```
+
+**Why propose first?**
+- Avoid duplicate work
+- Get early feedback on approach
+- Ensure plugin fits marketplace goals
+- Discuss potential integration issues
+
+### Step 2: Create Plugin Structure
+
+```bash
+# Create a new branch
+git checkout -b plugin/your-plugin-name
+
+# Create plugin directory structure
+mkdir -p your-plugin-name/.claude-plugin
+mkdir -p your-plugin-name/commands/scripts
+mkdir -p your-plugin-name/agents
+mkdir -p your-plugin-name/templates
+mkdir -p your-plugin-name/docs
+
+# Create required files
+touch your-plugin-name/.claude-plugin/plugin.json
+touch your-plugin-name/README.md
+touch your-plugin-name/CONTRIBUTING.md
+```
+
+### Step 3: Create Plugin Manifest
+
+Create `your-plugin-name/.claude-plugin/plugin.json`:
+
+```json
+{
+  "name": "your-plugin-name",
+  "description": "Clear, concise description of what your plugin does (1-2 sentences)",
+  "version": "1.0.0",
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "url": "https://your-website.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/repo"
+  },
+  "keywords": ["meta-prompting", "optimization", "relevant-keywords"],
+  "license": "MIT"
+}
+```
+
+**Required fields:**
+- `name` - Kebab-case, alphanumeric + hyphens only
+- `description` - Clear, concise (max 200 chars)
+- `version` - Semantic versioning (major.minor.patch)
+- `author.name` - Plugin author name
+
+**Optional but recommended:**
+- `author.email` - Contact email
+- `author.url` - Website or GitHub profile
+- `repository` - Source code location
+- `keywords` - Search terms (3-5 recommended)
+- `license` - License identifier
+
+### Step 4: Implement Plugin Components
+
+**Commands** (optional):
+- Create `.md` files in `commands/`
+- Add bash scripts in `commands/scripts/` if needed
+- Follow command naming conventions (imperative verbs)
+
+**Agents** (optional):
+- Create agent definitions in `agents/`
+- Use clear, descriptive names
+- Include comprehensive system prompts
+
+**Templates** (optional):
+- Create template files in `templates/`
+- Use frontmatter for metadata
+- Include example usage
+
+**Settings** (if needed):
+- Create `.claude-plugin/settings.json`
+- Define permissions explicitly
+- Document all settings
+
+### Step 5: Write Documentation
+
+Create `your-plugin-name/README.md` with:
+
+```markdown
+# [Plugin Name]
+
+Brief description (1-2 sentences)
+
+## Installation
+
+How to install your plugin (usually automatic via marketplace)
+
+## Quick Start
+
+Simple example showing core functionality
+
+## Features
+
+- Feature 1: Description
+- Feature 2: Description
+- Feature 3: Description
+
+## Usage
+
+### Command 1
+
+Detailed usage instructions with examples
+
+### Command 2
+
+More examples
+
+## Configuration
+
+How to configure the plugin (if applicable)
+
+## Examples
+
+Real-world use cases
+
+## Troubleshooting
+
+Common issues and solutions
+
+## Contributing
+
+Link to your plugin's CONTRIBUTING.md
+
+## License
+
+License information
+```
+
+### Step 6: Update Marketplace Manifest
+
+Edit `.claude-plugin/marketplace.json` to add your plugin:
+
+```json
+{
+  "name": "claude-experiments",
+  "description": "A curated marketplace for Claude Code meta-prompt optimization plugins",
+  "owner": {
+    "name": "Joe T. Sylve, Ph.D."
+  },
+  "plugins": [
+    {
+      "name": "meta-prompt",
+      "source": "./meta-prompt",
+      "description": "Reduce LLM token consumption by 40-60% through deterministic preprocessing"
+    },
+    {
+      "name": "your-plugin-name",
+      "source": "./your-plugin-name",
+      "description": "Brief description of your plugin"
+    }
+  ]
+}
+```
+
+### Step 7: Test Your Plugin
+
+Before submitting:
+
+```bash
+# Validate plugin.json is valid JSON
+cat your-plugin-name/.claude-plugin/plugin.json | python3 -m json.tool
+
+# Test all commands work
+# [specific testing based on your plugin]
+
+# Verify documentation
+# - All links work
+# - Examples are accurate
+# - Screenshots are included (if applicable)
+```
+
+### Step 8: Submit Pull Request
+
+See [Pull Request Process](#pull-request-process) below.
+
+---
+
+## Contributing to Existing Plugins
+
+To improve an existing plugin (like meta-prompt):
+
+1. **Check the plugin's CONTRIBUTING.md** first
+   - Example: `meta-prompt/CONTRIBUTING.md`
+   - Each plugin may have specific guidelines
+
+2. **Create a feature branch**
+   ```bash
+   git checkout -b improve/meta-prompt-feature-name
+   ```
+
+3. **Make your changes**
+   - Follow the plugin's existing patterns
+   - Maintain consistency with plugin style
+   - Update relevant documentation
+
+4. **Test thoroughly**
+   - Run plugin's test suite
+   - Validate all affected features
+   - Test edge cases
+
+5. **Submit PR to this repository**
+   - Reference the plugin name in PR title
+   - Follow plugin's testing checklist
+
+---
+
+## Contributing to Marketplace Infrastructure
+
+Improving the marketplace itself (not individual plugins):
+
+### Examples of Infrastructure Contributions
+
+- Improving marketplace.json schema validation
+- Adding CI/CD for plugin validation
+- Creating plugin discovery tools
+- Enhancing marketplace documentation
+- Building plugin management utilities
+
+### Process
+
+1. **Open an issue first** to discuss the improvement
+2. **Create a branch**: `git checkout -b infrastructure/improvement-name`
+3. **Make changes** to marketplace-level files only:
+   - `.claude-plugin/marketplace.json`
+   - `README.md`
+   - `CONTRIBUTING.md`
+   - Any CI/CD scripts
+4. **Test impact** on all existing plugins
+5. **Submit PR** with clear explanation of benefits
 
 ---
 
 ## Development Workflow
 
-### Step 1: Create a Feature Branch
+### Branching Strategy
 
-```bash
-# Fetch latest changes
-git fetch origin
-git checkout main
-git pull origin main
-
-# Create feature branch
-git checkout -b feature/your-feature-name
-
-# Or for bug fixes
-git checkout -b fix/bug-description
+**Plugin contributions:**
+```
+plugin/new-plugin-name          # New plugins
+improve/plugin-name-feature     # Improvements to existing plugins
+fix/plugin-name-bug             # Bug fixes
 ```
 
-### Step 2: Make Your Changes
-
-**For adding a template:**
-1. Create template file in `.claude/templates/`
-2. Update classification keywords in `template-selector.sh`
-3. Add test case to `test-integration.sh`
-4. Update documentation (README.md, architecture-overview.md)
-
-**For modifying scripts:**
-1. Follow [Script Development Guide](docs/script-development.md)
-2. Maintain strict error handling (`set -euo pipefail`)
-3. Add input sanitization for user data
-4. Update tests as needed
-
-**For documentation:**
-1. Use clear, concise language
-2. Include examples
-3. Update related documents
-4. Check for broken links
-
-### Step 3: Test Your Changes
-
-```bash
-# Validate templates
-.claude/commands/scripts/validate-templates.sh
-
-# Run integration tests
-.claude/commands/scripts/test-integration.sh
-
-# Test manually with debug mode
-DEBUG=1 .claude/commands/scripts/template-selector.sh "test task"
+**Infrastructure contributions:**
+```
+infrastructure/feature-name     # Marketplace improvements
+docs/improvement                # Documentation updates
 ```
 
-**Success criteria:**
-- All templates pass validation (6/6 or more)
-- All integration tests pass (31/31 or more)
-- Manual testing confirms expected behavior
-
-### Step 4: Update Documentation
-
-**Required documentation updates:**
-
-**If you added a template:**
-- [ ] README.md (template list)
-- [ ] docs/architecture-overview.md (template table)
-- [ ] docs/examples.md (add example usage)
-
-**If you modified scripts:**
-- [ ] docs/script-development.md (if new patterns added)
-- [ ] docs/architecture-overview.md (if architecture changed)
-
-**If you changed classification:**
-- [ ] docs/design-decisions.md (if threshold or algorithm changed)
-
-### Step 5: Update Permissions (if needed)
-
-If you added new scripts, update `.claude/settings.json`:
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(.claude/commands/scripts/your-new-script.sh:*)"
-    ]
-  }
-}
-```
-
----
-
-## Branching Strategy
-
-### Branch Naming
-
-**Feature branches:**
-```
-feature/add-sentiment-template
-feature/improve-classification
-feature/add-debugging-guide
-```
-
-**Bug fix branches:**
-```
-fix/template-validation-error
-fix/confidence-calculation
-fix/broken-link-in-docs
-```
-
-**Documentation branches:**
-```
-docs/update-contributing-guide
-docs/add-examples
-docs/fix-typos
-```
-
-### Branch Lifecycle
-
+**Branch lifecycle:**
 ```
 main (protected)
-  ├── feature/your-feature ← You work here
+  ├── plugin/your-plugin ← You work here
   │   ├── Commit 1
   │   ├── Commit 2
   │   └── Commit 3
   └── Merge PR → main
 ```
 
-**Rules:**
-- Never commit directly to `main`
-- Keep branches focused (one feature/fix per branch)
-- Delete branches after merge
-- Rebase on main before creating PR
-
----
-
-## Commit Message Conventions
-
-### Format
+### Commit Message Conventions
 
 ```
 <type>(<scope>): <subject>
@@ -201,35 +357,35 @@ main (protected)
 <footer>
 ```
 
-### Types
+**Types:**
+- `plugin:` New plugin or plugin feature
+- `fix:` Bug fix
+- `docs:` Documentation only
+- `infra:` Marketplace infrastructure
+- `test:` Adding or updating tests
 
-- **feat:** New feature
-- **fix:** Bug fix
-- **docs:** Documentation only
-- **refactor:** Code change that neither fixes a bug nor adds a feature
-- **test:** Adding or updating tests
-- **chore:** Changes to build process or auxiliary tools
+**Scopes:**
+- Plugin name (e.g., `meta-prompt`)
+- `marketplace` for infrastructure changes
+- `docs` for documentation
 
-### Examples
-
-**Good commit messages:**
-
-```
-feat(templates): Add sentiment-analysis template
-
-- Template: sentiment-analysis.md
-- Classification keywords: sentiment, emotion, feeling
-- Variables: TEXT_TO_ANALYZE
-- Tested: validate-templates.sh passes
-- Integration test added (test-integration.sh:245)
-
-This template covers a common pattern that previously
-fell back to custom LLM generation. Expected usage:
-15-20 times per week based on recent task logs.
-```
+**Examples:**
 
 ```
-fix(template-selector): Correct confidence calculation for code category
+plugin(sentiment-analyzer): Add new sentiment analysis plugin
+
+- Plugin: sentiment-analyzer v1.0.0
+- Commands: /analyze-sentiment
+- Templates: sentiment-positive, sentiment-negative, sentiment-neutral
+- Tested: All validation passes
+- Documentation: Complete README and examples
+
+This plugin fills a gap in the marketplace for text sentiment
+analysis workflows commonly used in customer feedback analysis.
+```
+
+```
+fix(meta-prompt): Correct confidence calculation for code category
 
 The code-refactoring category was not counting "modify"
 as a supporting keyword, causing misclassification.
@@ -240,37 +396,13 @@ Fixes #42
 ```
 
 ```
-docs(examples): Add code-refactoring example
+docs(marketplace): Update plugin contribution guidelines
 
-Added detailed example showing:
-- Input variables
-- Classification process
-- Token savings
-- Expected workflow
+- Clarified plugin.json required fields
+- Added examples for each plugin component
+- Improved testing checklist
 
-Addresses feedback in issue #38
-```
-
-**Bad commit messages:**
-
-```
-updated stuff
-```
-
-```
-fix bug
-```
-
-```
-WIP
-```
-
-### Co-Authorship
-
-If collaborating with Claude Code, add:
-
-```
-Co-Authored-By: Claude <noreply@anthropic.com>
+Makes it easier for new contributors to add plugins.
 ```
 
 ---
@@ -281,167 +413,168 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 1. **Push your branch:**
    ```bash
-   git push origin feature/your-feature-name
+   git push origin plugin/your-plugin-name
    ```
 
-2. **Create PR on GitHub:**
-   - Go to repository
-   - Click "New Pull Request"
-   - Select your branch
-   - Fill out PR template
+2. **Create PR on GitHub**
 
-3. **PR Description Template:**
+3. **Use the PR template:**
 
-   ```markdown
-   ## Summary
-   Brief description of what this PR does
+```markdown
+## Summary
+Brief description of what this PR does
 
-   ## Changes
-   - Added sentiment-analysis template
-   - Updated classification keywords
-   - Added integration test
-   - Updated documentation
+## Type of Change
+- [ ] New plugin
+- [ ] Plugin improvement
+- [ ] Plugin bug fix
+- [ ] Marketplace infrastructure
+- [ ] Documentation
 
-   ## Testing
-   - [ ] All templates pass validation
-   - [ ] All integration tests pass (31/31)
-   - [ ] Manual testing completed
-   - [ ] Documentation updated
+## Plugin Information (if applicable)
+- **Plugin name:** your-plugin-name
+- **Version:** 1.0.0
+- **Author:** Your Name
 
-   ## Related Issues
-   Fixes #42
-   Related to #38
+## Changes
+- Added sentiment-analysis plugin
+- Includes /analyze-sentiment command
+- Added 3 templates for different sentiment types
+- Complete documentation and examples
 
-   ## Screenshots (if applicable)
-   [Add screenshots of output, test results, etc.]
-   ```
+## Testing
+- [ ] Plugin.json is valid JSON
+- [ ] All commands tested and working
+- [ ] All templates validated
+- [ ] Documentation complete and accurate
+- [ ] Examples tested
+- [ ] No conflicts with existing plugins
 
-### PR Checklist
+## Related Issues
+Fixes #123
+Related to #456
 
-Before submitting, ensure:
+## Additional Notes
+[Any additional context, screenshots, or notes]
+```
 
-- [ ] Code follows project style guidelines
-- [ ] All tests pass locally
-- [ ] Documentation updated
-- [ ] Commit messages follow conventions
-- [ ] No merge conflicts with main
-- [ ] Branch is up to date with main
-- [ ] Permissions updated in settings.json (if needed)
+### Review Process
+
+**For new plugins:**
+1. Initial review within 3 business days
+2. Reviewers check:
+   - Plugin quality and functionality
+   - Documentation completeness
+   - Security considerations
+   - Marketplace fit
+3. Address feedback
+4. Final approval requires 1+ maintainer approval
+
+**For plugin improvements:**
+1. Initial review within 2 business days
+2. May need plugin author approval too
+3. Faster for bug fixes
+
+**For infrastructure:**
+1. Discussion in issue first
+2. Review within 2 business days
+3. Requires 2+ maintainer approvals
 
 ---
 
-## Code Review Checklist
+## Plugin Standards
 
-### For Reviewers
+### Required for All Plugins
 
-When reviewing PRs, check:
+1. **Valid plugin.json** with all required fields
+2. **README.md** with:
+   - Clear description
+   - Installation/usage instructions
+   - Examples
+   - Troubleshooting
+3. **Security considerations:**
+   - Input sanitization for user data
+   - Proper permissions in settings.json
+   - No hardcoded secrets
+4. **Working functionality:**
+   - All advertised features work
+   - No breaking errors
+   - Graceful error handling
 
-#### Functionality
-- [ ] Changes work as described
-- [ ] No breaking changes (or clearly documented if necessary)
-- [ ] Edge cases handled
+### Recommended for Quality Plugins
 
-#### Code Quality
-- [ ] Follows bash coding standards (script-development.md)
-- [ ] Error handling present (`set -euo pipefail`)
-- [ ] Variables quoted properly
-- [ ] Functions have clear responsibilities
+1. **CONTRIBUTING.md** for plugin-specific contributions
+2. **Comprehensive documentation:**
+   - Architecture overview
+   - API reference
+   - Multiple examples
+3. **Tests** (if applicable):
+   - Validation scripts
+   - Integration tests
+   - Example test outputs
+4. **Version control:**
+   - Semantic versioning
+   - Changelog
+   - Migration guides for breaking changes
 
-#### Security
-- [ ] Input sanitization present
-- [ ] No command injection vulnerabilities
-- [ ] No use of `eval` with user input
-- [ ] File paths validated
+### Security Requirements
 
-#### Testing
-- [ ] All tests pass (validate-templates.sh, test-integration.sh)
-- [ ] New tests added for new functionality
-- [ ] Test coverage adequate
-- [ ] Manual testing documented in PR
+**All plugins MUST:**
+- Sanitize user input before processing
+- Use whitelisted permissions in settings.json
+- Not execute arbitrary user code without sandboxing
+- Not access filesystem outside plugin directory without permission
+- Not make network requests without disclosure
+- Not store sensitive data insecurely
 
-#### Documentation
-- [ ] Code commented where necessary
-- [ ] Documentation files updated
-- [ ] Examples provided (if applicable)
-- [ ] No broken links
-
-#### Performance
-- [ ] No performance regressions
-- [ ] Script execution < 100ms (for deterministic scripts)
-- [ ] Token consumption not increased unnecessarily
-
-### Approval Process
-
-**Requirements for merge:**
-- At least 1 approval from maintainer
-- All tests passing
-- No unresolved comments
-- Documentation complete
-
-**Timeline:**
-- Initial review: Within 2 business days
-- Follow-up reviews: Within 1 business day
-- Merge: After approval + 24 hours (for final checks)
+**Security review required for:**
+- Bash script execution
+- File system access
+- Network requests
+- External tool integration
 
 ---
 
 ## Testing Requirements
 
-### Automated Tests
+### For New Plugins
 
-**Run before every commit:**
+**Minimum testing:**
+1. Plugin.json validation
+   ```bash
+   cat your-plugin-name/.claude-plugin/plugin.json | python3 -m json.tool
+   ```
 
-```bash
-# Validate all templates
-.claude/commands/scripts/validate-templates.sh
+2. Functional testing of all features
+   - Test each command
+   - Verify all templates work
+   - Test all agents respond correctly
 
-# Run integration tests
-.claude/commands/scripts/test-integration.sh
-```
+3. Documentation accuracy
+   - All examples work as shown
+   - All links are valid
+   - Screenshots are current
 
-**Expected results:**
-```
-=== Template Validation ===
-Total templates: 6+
-Passed: 6+
-Failed: 0
+**Recommended testing:**
+1. Edge case testing
+2. Error handling verification
+3. Performance testing (if performance-critical)
+4. Cross-platform testing (macOS, Linux)
 
-=== Integration Tests ===
-Total Tests: 31+
-Passed: 31+
-Failed: 0
-✓ ALL TESTS PASSED!
-```
+### For Plugin Improvements
 
-### Manual Testing
+**Required:**
+1. All existing tests still pass
+2. New tests for new functionality
+3. Regression testing for bug fixes
 
-**For template changes:**
+### Test Documentation
 
-```bash
-# Test classification
-DEBUG=1 .claude/commands/scripts/template-selector.sh "example task"
-
-# Test processing
-.claude/commands/scripts/template-processor.sh template-name \
-    VAR1='value1' VAR2='value2'
-
-# Test end-to-end
-/create-prompt "example task description"
-```
-
-### Test Coverage
-
-New features must include tests:
-
-**For new templates:**
-- Validation test (automatic)
-- Classification test (add to test-integration.sh Phase 3)
-- Processing test (add to test-integration.sh Phase 4)
-
-**For script modifications:**
-- Unit tests for new functions
-- Integration tests for workflows
-- Edge case tests
+Include in your PR:
+- What you tested
+- How you tested it
+- Test results/output
+- Any limitations or known issues
 
 ---
 
@@ -449,65 +582,38 @@ New features must include tests:
 
 ### Writing Style
 
-- **Clarity:** Write for someone new to the project
-- **Completeness:** Cover all major aspects
+- **Clarity:** Write for beginners
+- **Completeness:** Cover all features
 - **Accuracy:** Only document what exists
-- **Examples:** Provide concrete examples
+- **Examples:** Show, don't just tell
 - **Conciseness:** Be thorough but brief
 
-### File References
+### File Conventions
 
-**Use relative paths from project root:**
-
+**Use relative paths from repository root:**
 ```markdown
-✓ Good: `.claude/commands/scripts/template-selector.sh`
-✓ Good: `docs/architecture-overview.md`
-✗ Bad: `../scripts/template-selector.sh`
-✗ Bad: `/Users/joe/project/file.sh`
+✓ Good: meta-prompt/commands/prompt.md
+✓ Good: your-plugin-name/README.md
+✗ Bad: ../commands/prompt.md
+✗ Bad: /Users/joe/project/file.sh
 ```
 
-### Code References
-
-**Include line numbers for specific locations:**
-
+**Link to plugin-specific docs:**
 ```markdown
-✓ Good: `.claude/commands/scripts/template-selector.sh:83-166`
-✓ Good: See template-processor.sh:37 for escaping logic
-✗ Bad: See the template processor script
+✓ Good: See [meta-prompt documentation](meta-prompt/README.md)
+✓ Good: Check [template guide](meta-prompt/docs/template-authoring.md)
+✗ Bad: See the meta-prompt docs
 ```
 
 ### Markdown Formatting
 
-```markdown
-# H1 for document title (only one per file)
-## H2 for major sections
-### H3 for subsections
-
-**Bold** for emphasis
-*Italic* for terms
-`code` for inline code
-```
-
-Code blocks with language:
-````markdown
-```bash
-chmod +x script.sh
-```
-
-```yaml
----
-key: value
----
-```
-````
-
-### Documentation Updates
-
-**When to update:**
-- Architecture changes → architecture-overview.md
-- New patterns → examples.md, template-authoring.md
-- Process changes → CONTRIBUTING.md
-- Breaking changes → migration.md
+Follow standard markdown conventions:
+- One H1 (`#`) per file (document title)
+- Use H2 (`##`) for major sections
+- Use H3 (`###`) for subsections
+- Code blocks with language specification
+- Tables for structured data
+- Lists for sequential items
 
 ---
 
@@ -515,56 +621,54 @@ key: value
 
 ### Resources
 
-- **Documentation:** Start with [README.md](README.md)
-- **Examples:** See [docs/examples.md](docs/examples.md)
-- **Guides:** Browse [docs/](docs/) directory
-- **Code:** Read existing scripts for patterns
+- **Marketplace README:** [README.md](README.md)
+- **Example Plugin:** Browse [meta-prompt/](meta-prompt/)
+- **Issues:** Search existing issues for similar questions
 
 ### Questions?
 
-1. Check existing documentation first
-2. Search closed issues for similar questions
-3. Open a new issue with "Question:" prefix
-4. Tag as `question` label
+1. Check this CONTRIBUTING.md first
+2. Review the plugin you're interested in
+3. Search closed issues
+4. Open a new issue with "Question:" prefix
 
 ### Reporting Bugs
 
-**Create an issue with:**
+**For plugin bugs:**
+Create an issue with:
+- Plugin name and version
 - Clear description of the bug
 - Steps to reproduce
 - Expected vs actual behavior
-- Environment details (OS, bash version)
-- Relevant logs or error messages
+- Environment details (OS, Claude Code version)
 
-### Suggesting Features
-
-**Create an issue with:**
-- Description of the feature
-- Use case (why is this needed?)
-- Proposed implementation (optional)
-- Impact on existing functionality
+**For marketplace bugs:**
+Create an issue with:
+- Description of the issue
+- Impact on plugins
+- Proposed solution (if any)
 
 ---
 
 ## Release Process
 
-### Versioning
+### For Plugin Authors
 
-We use semantic versioning (semver):
-- **Major (X.0.0):** Breaking changes
-- **Minor (1.X.0):** New features, backwards compatible
-- **Patch (1.0.X):** Bug fixes
+When releasing a new version of your plugin:
 
-### Release Checklist
+1. **Update version** in plugin.json (semantic versioning)
+2. **Update CHANGELOG** (if you maintain one)
+3. **Test thoroughly**
+4. **Create PR** with version bump
+5. **Tag release** after merge (maintainers will do this)
 
-**For maintainers:**
+### For Marketplace Maintainers
 
-1. Update version numbers
-2. Update CHANGELOG.md
-3. Run full test suite
-4. Create git tag: `git tag -a v1.1.0 -m "Release 1.1.0"`
-5. Push tag: `git push --tags`
-6. Create GitHub release with notes
+1. Review and approve plugin PRs
+2. Merge to main
+3. Create git tags for new plugins: `plugin-name-v1.0.0`
+4. Update marketplace version if infrastructure changed
+5. Announce new plugins/versions
 
 ---
 
@@ -575,7 +679,7 @@ We use semantic versioning (semver):
 - Be respectful and inclusive
 - Welcome newcomers
 - Provide constructive feedback
-- Focus on what's best for the project
+- Focus on what's best for the community
 - Show empathy towards others
 
 ### Unacceptable Behavior
@@ -585,18 +689,51 @@ We use semantic versioning (semver):
 - Publishing private information
 - Other unprofessional conduct
 
+### Reporting
+
+Report issues to the maintainers via:
+- Private email (if available)
+- GitHub issue with `conduct` label
+- Direct message on relevant platforms
+
 ---
 
-## License
+## Plugin Approval Criteria
 
-By contributing, you agree that your contributions will be licensed under the same license as the project.
+Before a plugin is accepted, it must meet:
+
+### Functional Criteria
+- [ ] Solves a real problem
+- [ ] Works as advertised
+- [ ] Doesn't duplicate existing functionality (or improves upon it)
+- [ ] Fits marketplace theme (meta-prompting, optimization, productivity)
+
+### Quality Criteria
+- [ ] Code is well-structured
+- [ ] Documentation is complete
+- [ ] Examples are helpful
+- [ ] Error messages are clear
+- [ ] Performance is acceptable
+
+### Security Criteria
+- [ ] No security vulnerabilities
+- [ ] Proper input validation
+- [ ] Appropriate permissions
+- [ ] No hardcoded secrets
+- [ ] Safe file/network operations
+
+### Community Criteria
+- [ ] Responsive to feedback
+- [ ] Willing to maintain plugin
+- [ ] Follows contribution guidelines
+- [ ] Professional communication
 
 ---
 
 ## Thank You!
 
-Your contributions make this project better for everyone. We appreciate your time and effort!
+Your contributions make this marketplace better for everyone. Whether you're adding a new plugin, improving existing ones, or enhancing documentation, we appreciate your time and effort!
 
 Questions? Open an issue or reach out to the maintainers.
 
-Happy contributing! 🎉
+Happy contributing!

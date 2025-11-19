@@ -28,7 +28,7 @@ This document provides 6 detailed examples showing how the meta-prompt optimizat
 **Step 1: Template Selection**
 ```bash
 # Behind the scenes (0 tokens consumed)
-DEBUG=1 .claude/commands/scripts/template-selector.sh \
+DEBUG=1 commands/scripts/template-selector.sh \
   "Are these two functions semantically equivalent?"
 ```
 
@@ -54,7 +54,7 @@ The system extracts:
 
 **Step 3: Template Processing**
 
-Template loaded: `.claude/templates/simple-classification.md`
+Template loaded: `templates/simple-classification.md`
 
 Variables substituted:
 ```markdown
@@ -611,7 +611,7 @@ Try classifying your common tasks:
 
 ```bash
 # Test any task description
-DEBUG=1 .claude/commands/scripts/template-selector.sh "your task here"
+DEBUG=1 commands/scripts/template-selector.sh "your task here"
 ```
 
 Questions to ask:
@@ -628,10 +628,10 @@ If tasks consistently mis-classify:
 
 ## Additional Resources
 
-- **Template Library:** `.claude/templates/` directory
-- **Classification Logic:** `.claude/commands/scripts/template-selector.sh:83-166`
-- **Processing Logic:** `.claude/commands/scripts/template-processor.sh`
-- **Validation:** `.claude/commands/scripts/validate-templates.sh`
+- **Template Library:** `templates/` directory
+- **Classification Logic:** `commands/scripts/template-selector.sh:83-166`
+- **Processing Logic:** `commands/scripts/template-processor.sh`
+- **Validation:** `commands/scripts/validate-templates.sh`
 
 **Next Steps:**
 - Try `/prompt` with your own tasks

@@ -186,7 +186,7 @@ Begin your analysis immediately without preamble.
 
 ### Step 6: Update Classification Logic
 
-Edit `.claude/commands/scripts/template-selector.sh`:
+Edit `commands/scripts/template-selector.sh`:
 
 Find the keyword arrays (around line 83) and add:
 
@@ -208,7 +208,7 @@ fi
 ### Step 7: Validate
 
 ```bash
-.claude/commands/scripts/validate-templates.sh sentiment-analysis
+commands/scripts/validate-templates.sh sentiment-analysis
 ```
 
 **Expected output:**
@@ -233,7 +233,7 @@ PASSED: sentiment-analysis
 ### Step 8: Test Classification
 
 ```bash
-DEBUG=1 .claude/commands/scripts/template-selector.sh \
+DEBUG=1 commands/scripts/template-selector.sh \
   "Analyze the sentiment of this product review"
 ```
 
@@ -246,13 +246,13 @@ Threshold: 70%
 
 ### Step 9: Add Integration Tests
 
-Edit `.claude/commands/scripts/test-integration.sh`:
+Edit `commands/scripts/test-integration.sh`:
 
 Add test case in Phase 3 (Template Selection Accuracy):
 
 ```bash
 run_test "Sentiment analysis task routes to sentiment-analysis template" \
-    ".claude/commands/scripts/template-selector.sh 'Analyze sentiment of this tweet'" \
+    "commands/scripts/template-selector.sh 'Analyze sentiment of this tweet'" \
     "sentiment-analysis"
 ```
 
@@ -260,7 +260,7 @@ run_test "Sentiment analysis task routes to sentiment-analysis template" \
 
 ```bash
 # Run complete test suite
-.claude/commands/scripts/test-integration.sh
+commands/scripts/test-integration.sh
 
 # Test actual usage
 /create-prompt "Analyze the sentiment of this movie review: [review text]"
@@ -429,9 +429,9 @@ Begin your response immediately without preamble.
 
 ```bash
 # Test multiple variations
-DEBUG=1 .claude/commands/scripts/template-selector.sh "refactor the code"
-DEBUG=1 .claude/commands/scripts/template-selector.sh "modify the function"
-DEBUG=1 .claude/commands/scripts/template-selector.sh "update the class"
+DEBUG=1 commands/scripts/template-selector.sh "refactor the code"
+DEBUG=1 commands/scripts/template-selector.sh "modify the function"
+DEBUG=1 commands/scripts/template-selector.sh "update the class"
 
 # All should route to code-refactoring with >70% confidence
 ```
@@ -444,7 +444,7 @@ DEBUG=1 .claude/commands/scripts/template-selector.sh "update the class"
 
 ```bash
 # Validates structure, variables, XML tags
-.claude/commands/scripts/validate-templates.sh your-template-name
+commands/scripts/validate-templates.sh your-template-name
 ```
 
 **What it checks:**
@@ -458,7 +458,7 @@ DEBUG=1 .claude/commands/scripts/template-selector.sh "update the class"
 
 ```bash
 # Test that tasks route correctly
-DEBUG=1 .claude/commands/scripts/template-selector.sh "task description"
+DEBUG=1 commands/scripts/template-selector.sh "task description"
 ```
 
 **Success criteria:**
@@ -467,11 +467,11 @@ DEBUG=1 .claude/commands/scripts/template-selector.sh "task description"
 
 ### Integration Tests
 
-Add to `.claude/commands/scripts/test-integration.sh`:
+Add to `commands/scripts/test-integration.sh`:
 
 ```bash
 run_test "Your template routes correctly" \
-    ".claude/commands/scripts/template-selector.sh 'example task'" \
+    "commands/scripts/template-selector.sh 'example task'" \
     "your-template-name"
 ```
 
@@ -508,7 +508,7 @@ Users frequently ask:
 
 ### Step 3: Create Template
 
-**File:** `.claude/templates/code-comparison.md`
+**File:** `templates/code-comparison.md`
 
 ```yaml
 ---
@@ -569,7 +569,7 @@ Begin your comparison immediately.
 
 ### Step 4: Update Classification
 
-Edit `.claude/commands/scripts/template-selector.sh`:
+Edit `commands/scripts/template-selector.sh`:
 
 ```bash
 # Add to keyword arrays (around line 90)
@@ -589,14 +589,14 @@ fi
 ### Step 5: Validate
 
 ```bash
-.claude/commands/scripts/validate-templates.sh code-comparison
+commands/scripts/validate-templates.sh code-comparison
 # Should pass all checks
 ```
 
 ### Step 6: Test
 
 ```bash
-DEBUG=1 .claude/commands/scripts/template-selector.sh \
+DEBUG=1 commands/scripts/template-selector.sh \
   "Compare these two implementations for readability"
 
 # Expected: code-comparison, Confidence: 83%+
@@ -607,7 +607,7 @@ DEBUG=1 .claude/commands/scripts/template-selector.sh \
 ```bash
 # In test-integration.sh, Phase 3
 run_test "Code comparison task routes correctly" \
-    ".claude/commands/scripts/template-selector.sh 'Compare implementation A vs B'" \
+    "commands/scripts/template-selector.sh 'Compare implementation A vs B'" \
     "code-comparison"
 ```
 
@@ -696,15 +696,15 @@ Update:
 ## Resources
 
 ### Template Examples
-- Simple: `.claude/templates/simple-classification.md`
-- Intermediate: `.claude/templates/document-qa.md`
-- Complex: `.claude/templates/code-refactoring.md`
+- Simple: `templates/simple-classification.md`
+- Intermediate: `templates/document-qa.md`
+- Complex: `templates/code-refactoring.md`
 
 ### Scripts
-- Validation: `.claude/commands/scripts/validate-templates.sh`
-- Classification: `.claude/commands/scripts/template-selector.sh`
-- Processing: `.claude/commands/scripts/template-processor.sh`
-- Testing: `.claude/commands/scripts/test-integration.sh`
+- Validation: `commands/scripts/validate-templates.sh`
+- Classification: `commands/scripts/template-selector.sh`
+- Processing: `commands/scripts/template-processor.sh`
+- Testing: `commands/scripts/test-integration.sh`
 
 ### Documentation
 - [Architecture Overview](architecture-overview.md) - Template system design
@@ -720,6 +720,6 @@ Update:
 1. Review existing templates for inspiration
 2. Test with `DEBUG=1` to see classification behavior
 3. Run validation early and often
-4. See [CONTRIBUTING.md](../CONTRIBUTING.md) for support channels
+4. See [CONTRIBUTING.md](CONTRIBUTING.md) for support channels
 
 Happy template authoring! 🎨

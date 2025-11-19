@@ -23,13 +23,13 @@ bash --version
 # Should show: GNU bash, version 4.x or higher
 
 # Verify you're in the project directory
-ls .claude/commands/
+ls commands/
 # Should show: prompt.md, create-prompt.md, scripts/
 ```
 
 If scripts aren't executable:
 ```bash
-chmod +x .claude/commands/scripts/*.sh
+chmod +x commands/scripts/*.sh
 ```
 
 ---
@@ -60,7 +60,7 @@ Let's start with a simple task using `/prompt`:
 Let's see what happened behind the scenes. Run the classification manually:
 
 ```bash
-DEBUG=1 .claude/commands/scripts/template-selector.sh "Compare Python and JavaScript for web development"
+DEBUG=1 commands/scripts/template-selector.sh "Compare Python and JavaScript for web development"
 ```
 
 **Expected output:**
@@ -170,7 +170,7 @@ Check that everything is working:
 
 ```bash
 # Validate all templates
-.claude/commands/scripts/validate-templates.sh
+commands/scripts/validate-templates.sh
 ```
 
 **Expected output:**
@@ -192,7 +192,7 @@ Failed: 0
 Run integration tests:
 
 ```bash
-.claude/commands/scripts/test-integration.sh
+commands/scripts/test-integration.sh
 ```
 
 **Expected output:**
@@ -273,14 +273,14 @@ SAVINGS: 1800 tokens (64% reduction)
 
 **Solution:**
 ```bash
-chmod +x .claude/commands/scripts/*.sh
+chmod +x commands/scripts/*.sh
 ```
 
 ### Issue: Template always returns "custom"
 
 **Solution:** Check debug output to see confidence scores
 ```bash
-DEBUG=1 .claude/commands/scripts/template-selector.sh "your task here"
+DEBUG=1 commands/scripts/template-selector.sh "your task here"
 ```
 
 If confidence is consistently low, the keywords might need adjustment. See [Template Authoring Guide](template-authoring.md).
@@ -289,7 +289,7 @@ If confidence is consistently low, the keywords might need adjustment. See [Temp
 
 **Solution:** Verify templates exist
 ```bash
-ls .claude/templates/
+ls templates/
 # Should show: simple-classification.md, document-qa.md, etc.
 ```
 
@@ -297,7 +297,7 @@ ls .claude/templates/
 
 **Solution:** Run validation first
 ```bash
-.claude/commands/scripts/validate-templates.sh
+commands/scripts/validate-templates.sh
 # Fix any reported issues before running tests
 ```
 
@@ -321,7 +321,7 @@ ls .claude/templates/
 
 ### Contributing
 
-Want to improve the system? See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
+Want to improve the system? See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Development setup
 - Pull request process
 - Code review guidelines
@@ -346,21 +346,21 @@ Want to improve the system? See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
 ### Validation
 ```bash
 # Validate templates
-.claude/commands/scripts/validate-templates.sh
+commands/scripts/validate-templates.sh
 
 # Run tests
-.claude/commands/scripts/test-integration.sh
+commands/scripts/test-integration.sh
 
 # Debug classification
-DEBUG=1 .claude/commands/scripts/template-selector.sh "task"
+DEBUG=1 commands/scripts/template-selector.sh "task"
 ```
 
 ### File Locations
 ```
-.claude/commands/prompt.md              # /prompt command
-.claude/commands/create-prompt.md       # /create-prompt command
-.claude/commands/scripts/               # Processing scripts
-.claude/templates/                      # Template library
+commands/prompt.md              # /prompt command
+commands/create-prompt.md       # /create-prompt command
+commands/scripts/               # Processing scripts
+templates/                      # Template library
 docs/                                   # Documentation
 ```
 

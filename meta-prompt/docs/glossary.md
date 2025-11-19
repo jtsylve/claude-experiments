@@ -20,7 +20,7 @@ A pre-built prompt pattern with variable placeholders that can be reused for sim
 
 **Example:** The `simple-classification` template handles comparison tasks like "Compare Python and JavaScript".
 
-**File location:** `.claude/templates/*.md`
+**File location:** `templates/*.md`
 
 ---
 
@@ -51,7 +51,7 @@ The process of analyzing a task description and routing it to the appropriate te
 3. Calculate confidence score
 4. Select template if confidence ≥ 70%
 
-**Script:** `.claude/commands/scripts/template-selector.sh`
+**Script:** `commands/scripts/template-selector.sh`
 
 ---
 
@@ -74,7 +74,7 @@ Template: "Compare {$ITEM1} and {$ITEM2}"
 After substitution: "Compare Python and JavaScript"
 ```
 
-**Script:** `.claude/commands/scripts/template-processor.sh`
+**Script:** `commands/scripts/template-processor.sh`
 
 ---
 
@@ -164,7 +164,7 @@ A user-facing command in Claude Code that starts with `/`. This project implemen
 /create-prompt "task description"
 ```
 
-**Implementation:** Markdown files in `.claude/commands/`
+**Implementation:** Markdown files in `commands/`
 
 ---
 
@@ -173,7 +173,7 @@ An LLM-powered subprocess that handles complex tasks autonomously. This project 
 
 **vs. Deterministic Scripts:** Agents consume tokens, scripts don't. Use scripts when possible, agents when necessary.
 
-**Location:** `.claude/agents/prompt-optimizer.md`
+**Location:** `agents/prompt-optimizer.md`
 
 ---
 
@@ -328,7 +328,7 @@ set -euo pipefail
 ### JSON
 Data format used for configuration files.
 
-**Usage:** `.claude/settings.json` for permissions
+**Usage:** `.claude-plugin/settings.json` for permissions
 
 **Note:** Not used in templates (YAML frontmatter instead)
 
@@ -353,7 +353,7 @@ Documentation strategy of presenting simple information first, with details avai
 ### Whitelist-Based Security
 Security model where only explicitly allowed operations can execute. Opposite of blacklist (blocking specific bad things).
 
-**Implementation:** `.claude/settings.json` permissions
+**Implementation:** `.claude-plugin/settings.json` permissions
 
 ---
 
