@@ -34,7 +34,7 @@ This will return one of:
 
 If the script returns anything OTHER than `custom`:
 1. Read the selected template using the Read tool:
-   - Use: Read tool with path `${CLAUDE_PLUGIN_ROOT//\\//}/templates/<template-name>.md`
+   - Use: Read tool with path `"${CLAUDE_PLUGIN_ROOT//\\//}/templates/<template-name>.md"`
    - Or bash: `cat "${CLAUDE_PLUGIN_ROOT//\\//}/templates/<template-name>.md"`
 2. Examine the template's required variables (in the YAML frontmatter)
 3. Extract appropriate values from the task description using these heuristics:

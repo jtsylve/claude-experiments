@@ -13,7 +13,8 @@ Guide for developers modifying or creating bash scripts in the meta-prompt infra
 5. [Testing Strategies](#testing-strategies)
 6. [Debugging Techniques](#debugging-techniques)
 7. [Common Pitfalls](#common-pitfalls)
-8. [Script Reference](#script-reference)
+8. [Platform Compatibility](#platform-compatibility)
+9. [Script Reference](#script-reference)
 
 ---
 
@@ -556,6 +557,136 @@ if [[ "$confidence" -gt "$threshold" ]]; then  # Integer comparison
     echo "High confidence"
 fi
 ```
+
+---
+
+## Platform Compatibility
+
+### Cross-Platform Path Handling
+
+All scripts must handle path separators correctly across Windows, macOS, and Linux platforms.
+
+#### The Problem
+
+Windows uses backslashes (`\`) as path separators, while Unix-based systems (macOS, Linux, WSL) use forward slashes (`/`). When `CLAUDE_PLUGIN_ROOT` is set on Windows, it may contain backslashes:
+
+```bash
+# Windows
+C:\Users\username\.claude\plugins\meta-prompt
+
+# Unix
+/Users/username/.claude/plugins/meta-prompt
+```
+
+Concatenating Windows paths with forward slashes creates mixed separators that break script execution:
+
+```bash
+# Broken on Windows
+${CLAUDE_PLUGIN_ROOT}/commands/scripts/script.sh
+# Results in: C:\path\to\plugin/commands/scripts/script.sh
+```
+
+#### The Solution: Path Normalization
+
+**Pattern:** Normalize `CLAUDE_PLUGIN_ROOT` at the beginning of every script using bash parameter expansion:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Validate CLAUDE_PLUGIN_ROOT
+if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    echo "ERROR: CLAUDE_PLUGIN_ROOT environment variable is not set" >&2
+    exit 1
+fi
+
+# Normalize path (convert backslashes to forward slashes for Windows/WSL)
+CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT//\\//}"
+
+# Now safe to use in path concatenation
+TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
+```
+
+**How it works:**
+- `${CLAUDE_PLUGIN_ROOT//\\//}` uses bash parameter expansion
+- `//` means "replace all occurrences"
+- `\\` is the search pattern (escaped backslash)
+- `/` is the replacement (forward slash)
+
+**Result:**
+- Windows: `C:\path\to\plugin` → `C:/path/to/plugin`
+- Unix: `/path/to/plugin` → `/path/to/plugin` (no change)
+- WSL: Handles both formats → normalizes to `/`
+
+#### Implementation in Command Files
+
+For command markdown files that invoke scripts, normalize inline:
+
+```bash
+# In .md command files
+"${CLAUDE_PLUGIN_ROOT//\\//}/commands/scripts/script.sh"
+```
+
+**Always quote the entire expression** to handle paths with spaces:
+
+```bash
+# Good
+"${CLAUDE_PLUGIN_ROOT//\\//}/commands/scripts/script.sh"
+
+# Bad (breaks with spaces)
+${CLAUDE_PLUGIN_ROOT//\\//}/commands/scripts/script.sh
+```
+
+#### Testing Path Normalization
+
+Verify path normalization in your scripts:
+
+```bash
+# Test Unix paths (should remain unchanged)
+test_unix_path() {
+    local path="/usr/local/bin"
+    local normalized="${path//\\//}"
+    [[ "$normalized" == "/usr/local/bin" ]] || exit 1
+}
+
+# Test Windows paths (should convert backslashes)
+test_windows_path() {
+    local path='C:\Users\test'
+    local normalized="${path//\\//}"
+    [[ "$normalized" == "C:/Users/test" ]] || exit 1
+}
+
+# Test that CLAUDE_PLUGIN_ROOT has no backslashes
+test_normalized_plugin_root() {
+    ! echo "${CLAUDE_PLUGIN_ROOT}" | grep -q '\\'
+}
+```
+
+#### Why Forward Slashes Work on Windows
+
+Windows APIs and most Windows tools (including bash in Git Bash, WSL, and MSYS2) accept forward slashes as path separators. This is why normalizing to forward slashes works universally:
+
+- ✅ Works on Windows: `C:/path/to/file`
+- ✅ Works on Unix: `/path/to/file`
+- ✅ Works in WSL: Both formats accepted
+
+**Note:** Some Windows-specific commands (like `cmd.exe` built-ins) may require backslashes, but bash scripts run in bash environments where forward slashes work correctly.
+
+#### Checklist for New Scripts
+
+When creating a new script, ensure:
+
+- [ ] Script validates `CLAUDE_PLUGIN_ROOT` is set
+- [ ] Script normalizes `CLAUDE_PLUGIN_ROOT` after validation
+- [ ] All path operations use the normalized variable
+- [ ] All path concatenations use forward slashes
+- [ ] All paths are quoted to handle spaces
+- [ ] Tests verify path normalization works
+
+#### Related Issues
+
+- **Issue #5:** Windows path separator compatibility (resolved)
+- **PR #8:** Implementation of path normalization pattern
 
 ---
 
