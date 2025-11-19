@@ -2,7 +2,6 @@
 name: prompt
 description: Optimize a prompt and optionally execute it in a fresh context
 argument-hint: <task or prompt to optimize> [--return-only]
-model: claude-sonnet-4-5-20250929
 allowed-tools: [Task, Bash]
 ---
 
