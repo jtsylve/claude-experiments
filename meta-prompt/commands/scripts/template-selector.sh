@@ -41,7 +41,7 @@ has_strong_indicator() {
             fi
             ;;
         "doc")
-            if echo "$text" | grep -qiE "(^|[^a-z])(documents?|cite|quotes?|extract)([^a-z]|$)"; then
+            if echo "$text" | grep -qiE "(^|[^a-z])(cite|quotes?)([^a-z]|$)"; then
                 return 0
             else
                 return 1
@@ -68,6 +68,34 @@ has_strong_indicator() {
                 return 1
             fi
             ;;
+        "test")
+            if echo "$text" | grep -qiE "(^|[^a-z])(tests?|spec|testing|unittest)([^a-z]|$)"; then
+                return 0
+            else
+                return 1
+            fi
+            ;;
+        "review")
+            if echo "$text" | grep -qiE "(^|[^a-z])(review|feedback|critique)([^a-z]|$)"; then
+                return 0
+            else
+                return 1
+            fi
+            ;;
+        "documentation")
+            if echo "$text" | grep -qiE "(^|[^a-z])(documentation|readme|docstring|docs|document)([^a-z]|$)"; then
+                return 0
+            else
+                return 1
+            fi
+            ;;
+        "extraction")
+            if echo "$text" | grep -qiE "(^|[^a-z])(extract|parse|pull|grab)([^a-z]|$)"; then
+                return 0
+            else
+                return 1
+            fi
+            ;;
         *)
             return 1
             ;;
@@ -85,6 +113,10 @@ classify_task() {
     local function_keywords=("call" "invoke" "execute" "use" "available" "functions")
     local dialogue_keywords=("chat" "interactive" "teach" "socratic" "customer" "math")
     local classification_keywords=("sentence" "match" "equal" "whether" "mean")
+    local test_keywords=("coverage" "jest" "pytest" "junit" "mocha" "case" "suite" "edge" "unit" "generate")
+    local review_keywords=("quality" "readability" "maintainability" "practices" "smell" "analyze")
+    local documentation_keywords=("docs" "comment" "guide" "reference" "explain" "api" "write" "function")
+    local extraction_keywords=("data" "scrape" "find" "retrieve" "get")
 
     # Count supporting keyword matches for each category
     local code_count=$(count_matches "$task_lower" "${code_keywords[@]}")
@@ -92,6 +124,10 @@ classify_task() {
     local function_count=$(count_matches "$task_lower" "${function_keywords[@]}")
     local dialogue_count=$(count_matches "$task_lower" "${dialogue_keywords[@]}")
     local classification_count=$(count_matches "$task_lower" "${classification_keywords[@]}")
+    local test_count=$(count_matches "$task_lower" "${test_keywords[@]}")
+    local review_count=$(count_matches "$task_lower" "${review_keywords[@]}")
+    local documentation_count=$(count_matches "$task_lower" "${documentation_keywords[@]}")
+    local extraction_count=$(count_matches "$task_lower" "${extraction_keywords[@]}")
 
     # Calculate confidence scores
     # Strong indicator alone = 75%, + supporting keywords increases confidence
@@ -125,6 +161,10 @@ classify_task() {
     local function_confidence=$(calculate_confidence "function" $function_count)
     local dialogue_confidence=$(calculate_confidence "dialogue" $dialogue_count)
     local classification_confidence=$(calculate_confidence "classification" $classification_count)
+    local test_confidence=$(calculate_confidence "test" $test_count)
+    local review_confidence=$(calculate_confidence "review" $review_count)
+    local documentation_confidence=$(calculate_confidence "documentation" $documentation_count)
+    local extraction_confidence=$(calculate_confidence "extraction" $extraction_count)
 
     # Find highest confidence
     local max_confidence=0
@@ -153,6 +193,26 @@ classify_task() {
     if [ $classification_confidence -gt $max_confidence ]; then
         max_confidence=$classification_confidence
         selected_template="simple-classification"
+    fi
+
+    if [ $test_confidence -gt $max_confidence ]; then
+        max_confidence=$test_confidence
+        selected_template="test-generation"
+    fi
+
+    if [ $review_confidence -gt $max_confidence ]; then
+        max_confidence=$review_confidence
+        selected_template="code-review"
+    fi
+
+    if [ $documentation_confidence -gt $max_confidence ]; then
+        max_confidence=$documentation_confidence
+        selected_template="documentation-generator"
+    fi
+
+    if [ $extraction_confidence -gt $max_confidence ]; then
+        max_confidence=$extraction_confidence
+        selected_template="data-extraction"
     fi
 
     # If confidence below threshold, use custom template

@@ -83,7 +83,7 @@ echo -e "${YELLOW}Phase 2: Template Validation${NC}"
 
 run_test_with_output "All templates pass validation" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/validate-templates.sh" \
-    "Passed: 6"
+    "Passed: 10"
 
 run_test "code-refactoring template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-refactoring.md ]"
@@ -102,6 +102,18 @@ run_test "simple-classification template exists" \
 
 run_test "custom template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/custom.md ]"
+
+run_test "test-generation template exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/test-generation.md ]"
+
+run_test "code-review template exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-review.md ]"
+
+run_test "documentation-generator template exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/documentation-generator.md ]"
+
+run_test "data-extraction template exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/data-extraction.md ]"
 
 echo ""
 
@@ -154,7 +166,7 @@ run_test_with_output "Classifies code refactoring correctly" \
     "code-refactoring"
 
 run_test_with_output "Classifies document Q&A correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Answer questions about this document'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Answer this question using citations from the paper'" \
     "document-qa"
 
 run_test_with_output "Classifies function calling correctly" \
@@ -172,6 +184,22 @@ run_test_with_output "Classifies comparison correctly" \
 run_test_with_output "Falls back to custom for novel tasks" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Write a creative poem'" \
     "custom"
+
+run_test_with_output "Classifies test generation correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate pytest tests for this function'" \
+    "test-generation"
+
+run_test_with_output "Classifies code review correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Review this code for security issues'" \
+    "code-review"
+
+run_test_with_output "Classifies documentation generation correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate API documentation for this module'" \
+    "documentation-generator"
+
+run_test_with_output "Classifies data extraction correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract email addresses from this log file'" \
+    "data-extraction"
 
 echo ""
 

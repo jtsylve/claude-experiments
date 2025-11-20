@@ -1,6 +1,6 @@
 # Examples and Use Cases
 
-This document provides 6 detailed examples showing how the meta-prompt optimization system works in practice, including token consumption comparisons.
+This document provides 10 detailed examples showing how the meta-prompt optimization system works in practice, including token consumption comparisons.
 
 ---
 
@@ -11,7 +11,11 @@ This document provides 6 detailed examples showing how the meta-prompt optimizat
 3. [Example 3: Refactoring a Module (code-refactoring)](#example-3-refactoring-a-module)
 4. [Example 4: Building an API Client (function-calling)](#example-4-building-an-api-client)
 5. [Example 5: Creating a Tutor Bot (interactive-dialogue)](#example-5-creating-a-tutor-bot)
-6. [Example 6: Novel Task Requiring Custom Template](#example-6-novel-task-requiring-custom-template)
+6. [Example 6: Generating Unit Tests (test-generation)](#example-6-generating-unit-tests)
+7. [Example 7: Code Review for Security (code-review)](#example-7-code-review-for-security)
+8. [Example 8: Generating API Documentation (documentation-generator)](#example-8-generating-api-documentation)
+9. [Example 9: Extracting Data from Logs (data-extraction)](#example-9-extracting-data-from-logs)
+10. [Example 10: Novel Task Requiring Custom Template](#example-10-novel-task-requiring-custom-template)
 
 ---
 
@@ -472,7 +476,131 @@ Take a moment to think about it or write out the code if you'd like.
 
 ---
 
-## Example 6: Novel Task Requiring Custom Template
+## Example 6: Generating Unit Tests
+
+### User Input
+
+```bash
+/create-prompt "Generate pytest tests for this authentication function"
+```
+
+### Classification Process
+
+**Template Selected:** `test-generation`
+**Confidence:** 83%
+
+**Reasoning:**
+- "tests" is a strong indicator for test-generation
+- "pytest" adds supporting evidence (framework keyword)
+- "generate" is a supporting keyword
+- Confidence: 75% (base) + 8% (supporting) = 83%
+
+### Token Consumption
+
+| Approach | Tokens | Breakdown |
+|----------|--------|-----------|
+| **Without Optimization** | ~1600 | 250 (orchestration) + 1350 (template generation) |
+| **With Optimization** | ~25 | 25 (template retrieval) |
+| **Savings** | **1575 tokens** | **98.4% reduction** |
+
+**Key Benefit:** Test generation prompts follow a consistent pattern, making them ideal for templating. The template ensures comprehensive coverage (unit tests, edge cases, error handling) without requiring LLM orchestration.
+
+---
+
+## Example 7: Code Review for Security
+
+### User Input
+
+```bash
+/create-prompt "Review this authentication middleware for security issues"
+```
+
+### Classification Process
+
+**Template Selected:** `code-review`
+**Confidence:** 75%
+
+**Reasoning:**
+- "review" is a strong indicator for code-review
+- "security" adds supporting evidence
+- Clear focus on analysis rather than modification
+- Confidence: 75% (base indicator)
+
+### Token Consumption
+
+| Approach | Tokens | Breakdown |
+|----------|--------|-----------|
+| **Without Optimization** | ~1700 | 300 (orchestration) + 1400 (template generation) |
+| **With Optimization** | ~30 | 30 (template retrieval) |
+| **Savings** | **1670 tokens** | **98.2% reduction** |
+
+**Key Benefit:** Code review requires systematic analysis across multiple dimensions (security, performance, readability). The template provides a comprehensive framework without LLM overhead, ensuring consistent review quality.
+
+---
+
+## Example 8: Generating API Documentation
+
+### User Input
+
+```bash
+/create-prompt "Generate API documentation for this user service module"
+```
+
+### Classification Process
+
+**Template Selected:** `documentation-generator`
+**Confidence:** 83%
+
+**Reasoning:**
+- "documentation" is a strong indicator
+- "API" is a supporting keyword
+- "generate" adds supporting evidence
+- Confidence: 75% (base) + 8% (supporting) = 83%
+
+### Token Consumption
+
+| Approach | Tokens | Breakdown |
+|----------|--------|-----------|
+| **Without Optimization** | ~1550 | 200 (orchestration) + 1350 (template generation) |
+| **With Optimization** | ~25 | 25 (template retrieval) |
+| **Savings** | **1525 tokens** | **98.4% reduction** |
+
+**Key Benefit:** Documentation generation is highly structured (functions, parameters, return values, examples). The template ensures completeness and consistency across all documentation types (API docs, READMEs, docstrings).
+
+---
+
+## Example 9: Extracting Data from Logs
+
+### User Input
+
+```bash
+/create-prompt "Extract email addresses and timestamps from this error log"
+```
+
+### Classification Process
+
+**Template Selected:** `data-extraction`
+**Confidence:** 75%
+
+**Reasoning:**
+- "extract" is a strong indicator for data-extraction
+- "data" is a supporting keyword (implicit in "email addresses")
+- Clear extraction task
+- Confidence: 75% (base indicator)
+
+### Token Consumption
+
+| Approach | Tokens | Breakdown |
+|----------|--------|-----------|
+| **Without Optimization** | ~1400 | 200 (orchestration) + 1200 (template generation) |
+| **With Optimization** | ~20 | 20 (template retrieval) |
+| **Savings** | **1380 tokens** | **98.6% reduction** |
+
+**Key Benefit:** Data extraction tasks follow a consistent pattern (source, targets, format). The template handles various data formats (logs, JSON, HTML) and edge cases (missing data, malformed entries) without requiring LLM planning.
+
+---
+
+## Example 10: Novel Task Requiring Custom Template
 
 ### User Input
 

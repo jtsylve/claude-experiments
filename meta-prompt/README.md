@@ -52,7 +52,7 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 - **Token Reduction:** 40-60% overall, 100% for orchestration
 - **Classification Accuracy:** 90%+ for template routing
 - **Performance:** <100ms deterministic overhead
-- **Templates:** 6 pre-built templates covering common patterns
+- **Templates:** 10 pre-built templates covering common patterns
 - **Security:** Input sanitization, whitelist-based permissions
 
 ---
@@ -86,7 +86,7 @@ meta-prompt/
 │   └── settings.json  # Permissions and settings
 ├── commands/          # /prompt and /create-prompt slash commands
 │   └── scripts/       # Deterministic processing (zero tokens)
-├── templates/         # 6 pre-built prompt templates
+├── templates/         # 10 pre-built prompt templates
 ├── agents/            # LLM agent for novel cases
 ├── docs/              # Documentation suite
 ├── CONTRIBUTING.md    # Contribution guidelines
@@ -147,7 +147,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 **Quick checklist before submitting:**
 - [ ] All templates pass validation
-- [ ] Integration tests pass (31/31)
+- [ ] Integration tests pass (42/42)
 - [ ] Documentation updated
 - [ ] Permissions updated in settings.json
 
@@ -155,7 +155,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## Templates
 
-Six templates cover common patterns:
+Ten templates cover common patterns:
 
 | Template | Use Cases | Variables |
 |----------|-----------|-----------|
@@ -164,6 +164,10 @@ Six templates cover common patterns:
 | code-refactoring | Modify code, fix bugs, add features | 2 |
 | function-calling | API usage, tool invocation | 2 |
 | interactive-dialogue | Tutors, customer support bots | 4 |
+| test-generation | Generate unit tests, test suites, edge cases | 3 |
+| code-review | Security audits, quality analysis, feedback | 3 |
+| documentation-generator | API docs, READMEs, docstrings, user guides | 3 |
+| data-extraction | Extract data from logs, JSON, HTML, text | 3 |
 | custom | Novel tasks (LLM fallback) | 1 |
 
 See [Template Authoring Guide](docs/template-authoring.md) to create your own.
