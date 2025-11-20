@@ -1,7 +1,7 @@
 ---
 template_name: document-qa
 category: analysis
-keywords: [document, question, answer, cite, reference, quote, source, extract]
+keywords: [document, question, answer, cite, quote, source, extract]
 complexity: intermediate
 variables: [DOCUMENT, QUESTION]
 version: 1.0

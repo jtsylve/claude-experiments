@@ -116,7 +116,7 @@ classify_task() {
     local test_keywords=("coverage" "jest" "pytest" "junit" "mocha" "case" "suite" "edge" "unit" "generate")
     local review_keywords=("quality" "readability" "maintainability" "practices" "smell" "analyze")
     local documentation_keywords=("docs" "comment" "guide" "reference" "explain" "api" "write" "function")
-    local extraction_keywords=("data" "scrape" "find" "retrieve" "get" "from logs" "from file" "log file" "json" "html" "csv" "email" "address" "timestamp" "pull" "grab")
+    local extraction_keywords=("data" "scrape" "retrieve" "json" "html" "csv" "email" "address" "timestamp" "logs" "file")
 
     # Count supporting keyword matches for each category
     local code_count=$(count_matches "$task_lower" "${code_keywords[@]}")
