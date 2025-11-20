@@ -307,6 +307,86 @@ variable_descriptions:
 
 This helps users understand what to provide for each variable.
 
+### Variable Naming Patterns
+
+To maintain consistency across templates, follow these naming patterns:
+
+#### First Variable: The Primary Input
+
+Choose a pattern that clearly indicates what type of input the template expects:
+
+- **`SOURCE_*`** - For inputs that are the source material to work with:
+  - `SOURCE_CODE` (code to refactor)
+  - `SOURCE_DATA` (data to extract from)
+
+- **`*_TO_*`** - For inputs describing transformation or analysis:
+  - `CODE_TO_TEST` (code to generate tests for)
+  - `CODE_TO_REVIEW` (code to review)
+  - `TEXT_TO_ANALYZE` (text to analyze)
+
+- **`INPUT_*`** - For generic or diverse inputs:
+  - `DOCUMENT` (for document Q&A)
+  - `CODE_OR_CONTENT` (for flexible documentation generator)
+
+#### Second Variable: The Action/Configuration
+
+Describes what to do or how to do it:
+
+- **`*_FRAMEWORK`** - For tool/framework selection:
+  - `TEST_FRAMEWORK` (Jest, pytest, etc.)
+
+- **`*_FOCUS`** - For narrowing scope:
+  - `REVIEW_FOCUS` (security, performance, etc.)
+  - `TEST_SCOPE` (unit, integration, etc.)
+
+- **`*_TYPE`** - For categorization:
+  - `DOC_TYPE` (API docs, README, etc.)
+
+- **`*_CRITERIA`** - For evaluation standards:
+  - `CLASSIFICATION_CRITERIA` (how to classify items)
+
+#### Third Variable: The Output/Context
+
+Specifies output format or additional context:
+
+- **`OUTPUT_*`** - For output specification:
+  - `OUTPUT_FORMAT` (JSON, CSV, markdown, etc.)
+
+- **`*_CONVENTIONS`** or **`CONTEXT`** - For additional guidance:
+  - `LANGUAGE_CONVENTIONS` (coding standards to apply)
+  - `AUDIENCE` (who the output is for)
+
+#### Pattern Examples from Existing Templates
+
+| Template | Var 1 (Input) | Var 2 (Action) | Var 3 (Output/Context) | Additional |
+|----------|---------------|----------------|------------------------|------------|
+| test-generation | `CODE_TO_TEST` | `TEST_FRAMEWORK` | `TEST_SCOPE` | - |
+| code-review | `CODE_TO_REVIEW` | `REVIEW_FOCUS` | `LANGUAGE_CONVENTIONS` | - |
+| documentation-generator | `CODE_OR_CONTENT` | `DOC_TYPE` | `AUDIENCE` | - |
+| data-extraction | `SOURCE_DATA` | `EXTRACTION_TARGETS` | `OUTPUT_FORMAT` | - |
+| simple-classification | `ITEM1` | `ITEM2` | `CLASSIFICATION_CRITERIA` | - |
+| document-qa | `DOCUMENT` | `QUESTION` | - | - |
+
+#### Guidelines for New Templates
+
+1. **Be consistent within template categories:**
+   - All "analysis" templates should use similar patterns
+   - All "generation" templates should use similar patterns
+
+2. **First variable should clearly indicate input type:**
+   - Use `*_TO_*` when the action is clear from context
+   - Use `SOURCE_*` when emphasizing the source material
+   - Use specific names (`DOCUMENT`, `CODE`) when type is unambiguous
+
+3. **Avoid mixing patterns unnecessarily:**
+   - If most templates use `*_TO_*`, prefer that pattern
+   - If you deviate, document why in the template description
+
+4. **Keep variable counts consistent:**
+   - Simple templates: 2-3 variables
+   - Intermediate templates: 3-4 variables
+   - Complex templates: 3-5 variables
+
 ---
 
 ## Writing Effective Template Bodies

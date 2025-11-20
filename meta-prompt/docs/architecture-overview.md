@@ -183,7 +183,7 @@ Checks:  Frontmatter, required fields, variable consistency, XML tags, content
 
 **Location:** `templates/`
 
-Six task-specific templates covering common patterns:
+Ten task-specific templates covering common patterns:
 
 | Template | Category | Complexity | Variables | Use Cases |
 |----------|----------|------------|-----------|-----------|
@@ -192,6 +192,10 @@ Six task-specific templates covering common patterns:
 | **code-refactoring.md** | development | complex | 2 | Modify code, fix bugs, implement features |
 | **function-calling.md** | tool-use | complex | 2 | API usage, tool invocation, function orchestration |
 | **interactive-dialogue.md** | conversation | complex | 4 | Tutors, customer support, conversational agents |
+| **test-generation.md** | testing | intermediate | 3 | Generate unit tests, test suites, edge cases, coverage |
+| **code-review.md** | analysis | complex | 3 | Security audits, quality analysis, code feedback |
+| **documentation-generator.md** | generation | intermediate | 3 | API docs, READMEs, docstrings, user guides |
+| **data-extraction.md** | analysis | simple | 3 | Extract data from logs, JSON, HTML, text files |
 | **custom.md** | fallback | variable | 1 | Novel tasks, edge cases, LLM fallback |
 
 **Template Structure:**
