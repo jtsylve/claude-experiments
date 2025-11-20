@@ -81,6 +81,9 @@ echo ""
 # ===== PHASE 2: Template Validation =====
 echo -e "${YELLOW}Phase 2: Template Validation${NC}"
 
+run_test "Correct number of templates exist" \
+    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f | wc -l | tr -d ' ') -eq 10 ]"
+
 run_test_with_output "All templates pass validation" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/validate-templates.sh" \
     "Passed: 10"
@@ -200,6 +203,31 @@ run_test_with_output "Classifies documentation generation correctly" \
 run_test_with_output "Classifies data extraction correctly" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract email addresses from this log file'" \
     "data-extraction"
+
+run_test_with_output "Distinguishes document extraction from data extraction" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract quotes from this research paper'" \
+    "document-qa"
+
+echo ""
+
+# ===== PHASE 3B: Classification Confidence Range Tests =====
+echo -e "${YELLOW}Phase 3B: Classification Confidence Ranges${NC}"
+
+run_test_with_output "Test generation confidence in expected range (83-91%)" \
+    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate pytest tests with edge cases and mocking' 2>&1" \
+    "Confidence: [89][0-9]%"
+
+run_test_with_output "Code review confidence in expected range (75-91%)" \
+    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Review this authentication code for security vulnerabilities and best practices' 2>&1" \
+    "Confidence: [7-9][0-9]%"
+
+run_test_with_output "Documentation confidence in expected range (83-91%)" \
+    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate comprehensive API documentation with examples' 2>&1" \
+    "Confidence: [89][0-9]%"
+
+run_test_with_output "Data extraction confidence in expected range (75-91%)" \
+    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract timestamps and error codes from application logs' 2>&1" \
+    "Confidence: [7-9][0-9]%"
 
 echo ""
 

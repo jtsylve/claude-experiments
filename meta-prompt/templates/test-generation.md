@@ -79,9 +79,55 @@ describe/context: Main functionality being tested
 - Follow framework-specific conventions
 
 **Framework-Specific Guidance:**
-- **Jest/Mocha:** Use `describe`, `it`, `expect`, `beforeEach`, `afterEach`
-- **pytest:** Use fixtures, parametrize for multiple test cases, clear function names
-- **JUnit:** Use `@Test`, `@Before`, `@After`, assertions from appropriate class
-- **RSpec:** Use `describe`, `context`, `it`, `expect`, `before`, `after`
+
+**Jest (JavaScript/TypeScript):**
+- Use `describe` for test suites, `it` or `test` for individual tests
+- Assertions: `expect(value).toBe()`, `.toEqual()`, `.toMatchObject()`
+- Mocking: `jest.fn()`, `jest.mock()`, `jest.spyOn()`
+- Async testing: `async/await` or return promises
+- Setup/teardown: `beforeEach`, `afterEach`, `beforeAll`, `afterAll`
+- Quirk: Mock modules before importing them
+- Quirk: Use `.toEqual()` for objects/arrays, `.toBe()` for primitives
+
+**pytest (Python):**
+- Use clear function names: `test_function_name_when_condition_then_result`
+- Assertions: Simple `assert` statements with descriptive messages
+- Fixtures: Define with `@pytest.fixture` decorator, use as function parameters
+- Parametrize: `@pytest.mark.parametrize` for testing multiple inputs
+- Mocking: Use `unittest.mock` or `pytest-mock` with `mocker` fixture
+- Quirk: Fixtures have different scopes (function, class, module, session)
+- Quirk: Use `conftest.py` for shared fixtures across test files
+
+**JUnit (Java):**
+- Annotations: `@Test`, `@BeforeEach`, `@AfterEach`, `@BeforeAll`, `@AfterAll`
+- Assertions: `assertEquals()`, `assertTrue()`, `assertThrows()`, `assertNotNull()`
+- Test classes: Public class with test methods (JUnit 4) or any visibility (JUnit 5)
+- Mocking: Use Mockito: `@Mock`, `when().thenReturn()`, `verify()`
+- Quirk: JUnit 5 uses `@BeforeEach` not `@Before` (JUnit 4)
+- Quirk: Static methods for `@BeforeAll`/`@AfterAll`
+
+**Mocha (JavaScript):**
+- Structure: `describe` for suites, `it` for tests
+- Assertions: Requires assertion library (Chai: `expect().to.equal()`, `should`)
+- Async: Use `done()` callback, return promises, or `async/await`
+- Hooks: `before`, `after`, `beforeEach`, `afterEach`
+- Quirk: Tests timeout after 2000ms by default (increase with `this.timeout()`)
+- Quirk: Arrow functions discouraged in describe/it (lexical `this` binding)
+
+**RSpec (Ruby):**
+- Structure: `describe` for classes/modules, `context` for conditions, `it` for tests
+- Expectations: `expect(value).to eq()`, `.to be()`, `.to include()`
+- Mocking: `allow().to receive()`, `expect().to receive()`, `double()`
+- Setup: `before(:each)`, `before(:all)`, `let` for lazy evaluation
+- Quirk: Use `let!` to force evaluation before tests run
+- Quirk: `subject` for DRY test object instantiation
+
+**Go (testing package):**
+- Function signature: `func TestName(t *testing.T)`
+- Assertions: Manual checks with `t.Error()`, `t.Fatal()` (or use testify)
+- Table-driven tests: Use slice of test cases with struct
+- Subtests: `t.Run(name, func(t *testing.T) {...})`
+- Quirk: No built-in assertions, must write `if expected != actual`
+- Quirk: Use `t.Parallel()` for concurrent test execution
 
 Begin generating tests immediately. Provide complete, runnable test code.

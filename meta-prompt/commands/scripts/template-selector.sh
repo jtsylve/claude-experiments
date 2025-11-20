@@ -90,7 +90,7 @@ has_strong_indicator() {
             fi
             ;;
         "extraction")
-            if echo "$text" | grep -qiE "(^|[^a-z])(extract|parse|pull|grab)([^a-z]|$)"; then
+            if echo "$text" | grep -qiE "(^|[^a-z])(extract|parse)([^a-z]|$)"; then
                 return 0
             else
                 return 1
@@ -116,7 +116,7 @@ classify_task() {
     local test_keywords=("coverage" "jest" "pytest" "junit" "mocha" "case" "suite" "edge" "unit" "generate")
     local review_keywords=("quality" "readability" "maintainability" "practices" "smell" "analyze")
     local documentation_keywords=("docs" "comment" "guide" "reference" "explain" "api" "write" "function")
-    local extraction_keywords=("data" "scrape" "find" "retrieve" "get")
+    local extraction_keywords=("data" "scrape" "find" "retrieve" "get" "from logs" "from file" "log file" "json" "html" "csv" "email" "address" "timestamp" "pull" "grab")
 
     # Count supporting keyword matches for each category
     local code_count=$(count_matches "$task_lower" "${code_keywords[@]}")
@@ -124,10 +124,13 @@ classify_task() {
     local function_count=$(count_matches "$task_lower" "${function_keywords[@]}")
     local dialogue_count=$(count_matches "$task_lower" "${dialogue_keywords[@]}")
     local classification_count=$(count_matches "$task_lower" "${classification_keywords[@]}")
-    local test_count=$(count_matches "$task_lower" "${test_keywords[@]}")
+    local testgen_count=$(count_matches "$task_lower" "${test_keywords[@]}")
     local review_count=$(count_matches "$task_lower" "${review_keywords[@]}")
     local documentation_count=$(count_matches "$task_lower" "${documentation_keywords[@]}")
     local extraction_count=$(count_matches "$task_lower" "${extraction_keywords[@]}")
+
+    # Debug logging for keyword counts
+    [ -n "${DEBUG:-}" ] && echo "Keyword counts: code=$code_count doc=$doc_count function=$function_count dialogue=$dialogue_count classification=$classification_count testgen=$testgen_count review=$review_count documentation=$documentation_count extraction=$extraction_count" >&2
 
     # Calculate confidence scores
     # Strong indicator alone = 75%, + supporting keywords increases confidence
@@ -161,7 +164,7 @@ classify_task() {
     local function_confidence=$(calculate_confidence "function" $function_count)
     local dialogue_confidence=$(calculate_confidence "dialogue" $dialogue_count)
     local classification_confidence=$(calculate_confidence "classification" $classification_count)
-    local test_confidence=$(calculate_confidence "test" $test_count)
+    local test_confidence=$(calculate_confidence "test" $testgen_count)
     local review_confidence=$(calculate_confidence "review" $review_count)
     local documentation_confidence=$(calculate_confidence "documentation" $documentation_count)
     local extraction_confidence=$(calculate_confidence "extraction" $extraction_count)

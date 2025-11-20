@@ -52,8 +52,14 @@ Review across these dimensions:
 - SQL injection, XSS, command injection risks
 - Authentication and authorization checks
 - Sensitive data exposure
-- Cryptography usage
+- Cryptography usage (proper algorithms, key management)
 - Error messages revealing system information
+- CORS misconfigurations (overly permissive origins)
+- Insecure deserialization (untrusted data)
+- Missing security headers (CSP, X-Frame-Options, HSTS, etc.)
+- Path traversal vulnerabilities
+- Server-side request forgery (SSRF)
+- Timing attacks in authentication/comparison
 
 **3. Performance**
 - Algorithm efficiency (time complexity)

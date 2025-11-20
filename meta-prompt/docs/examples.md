@@ -16,6 +16,7 @@ This document provides 10 detailed examples showing how the meta-prompt optimiza
 8. [Example 8: Generating API Documentation (documentation-generator)](#example-8-generating-api-documentation)
 9. [Example 9: Extracting Data from Logs (data-extraction)](#example-9-extracting-data-from-logs)
 10. [Example 10: Novel Task Requiring Custom Template](#example-10-novel-task-requiring-custom-template)
+11. [Ambiguous Query Handling](#ambiguous-query-handling)
 
 ---
 
@@ -675,6 +676,160 @@ Your task is to compose a Shakespearean sonnet about the experience of debugging
 
 Write the sonnet directly without preamble.
 ```
+
+---
+
+## Ambiguous Query Handling
+
+### Overview
+
+Sometimes user queries could match multiple templates. The classification system handles these cases by selecting the template with the highest confidence score.
+
+### Example: "Review and document this authentication module"
+
+This query contains keywords for both **code-review** and **documentation-generator**. Let's see how the system resolves this:
+
+#### Classification Process
+
+**Keywords Detected:**
+- "review" → strong indicator for `code-review` (75% base confidence)
+- "document" → strong indicator for `documentation-generator` (75% base confidence)
+- "authentication" → supporting keyword for code-review (+8%)
+- "module" → supporting keyword for both templates (+8% each)
+
+**Confidence Calculation:**
+
+**code-review:**
+- Base: 75% (strong indicator "review")
+- Supporting: +8% ("authentication")
+- Supporting: +8% ("module")
+- **Total: 91%**
+
+**documentation-generator:**
+- Base: 75% (strong indicator "document")
+- Supporting: +8% ("module")
+- **Total: 83%**
+
+**Selected Template:** `code-review` (91% > 83%)
+
+**Reasoning:**
+- Both templates are valid interpretations
+- "Review" appears first in the query (intent priority)
+- "Authentication" is security-related, strengthening code-review classification
+- System correctly chooses the higher confidence template
+
+#### What If the User Wanted Documentation Instead?
+
+If the user's intent was actually documentation, they could rephrase:
+
+**Option 1:** Make documentation more explicit
+```bash
+/create-prompt "Generate API documentation for this authentication module"
+```
+→ Routes to `documentation-generator` (91% confidence)
+
+**Option 2:** Remove ambiguous keywords
+```bash
+/create-prompt "Document the authentication module functions and parameters"
+```
+→ Routes to `documentation-generator` (83% confidence)
+
+**Option 3:** Use explicit documentation keywords
+```bash
+/create-prompt "Write API docs for this auth module"
+```
+→ Routes to `documentation-generator` (91% confidence with "docs" + "api")
+
+### Example: "Extract quotes from this research paper"
+
+This query could match **document-qa** or **data-extraction**:
+
+#### Classification Process
+
+**Keywords Detected:**
+- "extract" → strong indicator for `data-extraction` (75% base confidence)
+- "quotes" → strong indicator for `document-qa` (75% base confidence)
+- "paper" → supporting keyword for document-qa (+8%)
+
+**Confidence Calculation:**
+
+**data-extraction:**
+- Base: 75% (strong indicator "extract")
+- **Total: 75%**
+
+**document-qa:**
+- Base: 75% (strong indicator "quotes")
+- Supporting: +8% ("paper")
+- **Total: 83%**
+
+**Selected Template:** `document-qa` (83% > 75%)
+
+**Reasoning:**
+- "Quotes from a paper" implies finding cited information with context
+- `document-qa` is designed for citation-based retrieval
+- `data-extraction` is for structured data (emails, timestamps, JSON)
+- The word "research paper" adds academic context → document-qa
+
+#### What If the User Wanted Data Extraction?
+
+If extracting structured data, the query should be more specific:
+
+```bash
+/create-prompt "Extract all email addresses and timestamps from this log file"
+```
+→ Routes to `data-extraction` (91% confidence with "extract" + "log file" + "email" + "timestamp")
+
+### Conflict Resolution Strategy
+
+The system uses multiple mechanisms to resolve ambiguous queries:
+
+1. **Confidence scoring:** Template with highest confidence wins
+2. **Supporting keywords:** Add context to disambiguate
+3. **Strong indicator specificity:** More specific keywords win ties
+4. **Query structure:** First keywords often indicate primary intent
+
+### Best Practices for Users
+
+When queries are ambiguous:
+
+1. **Be specific about the primary action:**
+   - "Review code for security" (not "Check code")
+   - "Generate test suite" (not "Create tests")
+
+2. **Include framework/format keywords:**
+   - "Generate pytest tests" (clarifies test framework)
+   - "Export to JSON format" (clarifies extraction intent)
+
+3. **Add context clues:**
+   - "API documentation for external developers" (clarifies doc type)
+   - "Extract structured data from logs" (clarifies extraction vs. search)
+
+4. **Check the selected template:**
+   - If wrong template selected, rephrase with more specific keywords
+   - The system returns the template name for transparency
+
+### Edge Cases
+
+#### Case 1: Equal Confidence Scores
+
+If two templates have exactly the same confidence (rare), the system selects based on the order templates are checked in the code (generally: newer templates first).
+
+**Example:** "Analyze and document code quality"
+- Both `code-review` and `documentation-generator` might score 83%
+- System would select whichever is checked first in template-selector.sh
+
+**Resolution:** User should rephrase for clarity.
+
+#### Case 2: Below Confidence Threshold
+
+If all templates score below 70% confidence, the system falls back to `custom`:
+
+**Example:** "Create a haiku about algorithms"
+- No strong indicators match any template
+- All scores < 70%
+- Routes to `custom` (LLM-generated prompt)
+
+**This is correct behavior** for genuinely novel tasks.
 
 ---
 
