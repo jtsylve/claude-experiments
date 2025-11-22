@@ -110,7 +110,7 @@ DEBUG=1 commands/scripts/template-selector.sh "test task"
 
 **Success criteria:**
 - All templates pass validation (10/10 or more)
-- All integration tests pass (48/48 or more)
+- All integration tests pass (50/50 or more)
 - Manual testing confirms expected behavior
 
 ### Step 4: Update Documentation
@@ -304,7 +304,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
    ## Testing
    - [ ] All templates pass validation
-   - [ ] All integration tests pass (48/48)
+   - [ ] All integration tests pass (50/50)
    - [ ] Manual testing completed
    - [ ] Documentation updated
 
@@ -407,8 +407,8 @@ Passed: 10+
 Failed: 0
 
 === Integration Tests ===
-Total Tests: 48+
-Passed: 48+
+Total Tests: 50+
+Passed: 50+
 Failed: 0
 ✓ ALL TESTS PASSED!
 ```

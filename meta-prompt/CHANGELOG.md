@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bash scripts no longer use fragile `cd` and `dirname` logic for path resolution
 - Documentation inaccuracies corrected across 9 files:
   - Template count updated from 6 to 10 (test-generation, code-review, documentation-generator, data-extraction were present but undocumented)
-  - Test count updated from 31/42 to 48 (reflecting actual test suite coverage)
+  - Test count updated from 31/42 to 50 (reflecting actual test suite coverage)
   - All four previously undocumented templates now have complete documentation in getting-started.md with descriptions, variables, examples, and expected outputs
   - Template variables documented in README.md for all 10 templates
   - File tree diagrams updated in infrastructure.md to include all templates
