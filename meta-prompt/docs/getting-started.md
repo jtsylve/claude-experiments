@@ -125,7 +125,7 @@ For tasks that don't match existing templates, use `/create-prompt`:
 
 ## Step 5: Explore Available Templates (1 minute)
 
-Six templates cover common patterns:
+Ten templates cover common patterns:
 
 ### 1. Simple Classification
 **Use for:** Comparing two items, checking equivalence
@@ -157,7 +157,31 @@ Six templates cover common patterns:
 /create-prompt "Act as a Python tutor helping with list comprehensions"
 ```
 
-### 6. Custom (Fallback)
+### 6. Test Generation
+**Use for:** Generating unit tests, test suites, edge cases
+```bash
+/create-prompt "Generate unit tests for the authentication module"
+```
+
+### 7. Code Review
+**Use for:** Security audits, quality analysis, code feedback
+```bash
+/create-prompt "Review this code for security vulnerabilities"
+```
+
+### 8. Documentation Generator
+**Use for:** Creating API docs, READMEs, docstrings, user guides
+```bash
+/create-prompt "Generate API documentation for the REST endpoints"
+```
+
+### 9. Data Extraction
+**Use for:** Extracting data from logs, JSON, HTML, text files
+```bash
+/create-prompt "Extract all error messages from this log file"
+```
+
+### 10. Custom (Fallback)
 **Use for:** Novel tasks that don't fit other templates
 - Automatically selected when confidence < 70%
 - Full LLM prompt engineering
@@ -181,11 +205,11 @@ Validating: simple-classification
   ✓ Has required fields
   [... more checks ...]
 PASSED: simple-classification
-[... 5 more templates ...]
+[... 9 more templates ...]
 
 === Summary ===
-Total templates: 6
-Passed: 6
+Total templates: 10
+Passed: 10
 Failed: 0
 ```
 
@@ -197,8 +221,8 @@ commands/scripts/test-integration.sh
 
 **Expected output:**
 ```
-Total Tests: 31
-Passed: 31
+Total Tests: 48
+Passed: 48
 Failed: 0
 ✓ ALL TESTS PASSED!
 ```

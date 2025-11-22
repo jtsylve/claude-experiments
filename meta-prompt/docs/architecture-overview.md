@@ -498,7 +498,7 @@ meta-prompt/                         # Plugin root
 
 ### Template Expansion
 
-**Current:** 6 templates covering 5 categories + 1 fallback
+**Current:** 10 templates covering 9 categories + 1 fallback
 **Scalability:** New templates can be added by:
 1. Creating new `.md` file in `/templates/`
 2. Adding keywords to `template-selector.sh`

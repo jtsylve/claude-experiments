@@ -22,8 +22,12 @@ meta-prompt/                                   # Plugin root
 │   ├── simple-classification.md               # Comparison template (37 lines)
 │   ├── document-qa.md                         # Document Q&A template (39 lines)
 │   ├── code-refactoring.md                    # Code modification template (64 lines)
+│   ├── code-review.md                         # Code review template
 │   ├── function-calling.md                    # Function/API usage template (52 lines)
 │   ├── interactive-dialogue.md                # Conversational agent template (38 lines)
+│   ├── test-generation.md                     # Test generation template
+│   ├── documentation-generator.md             # Documentation generator template
+│   ├── data-extraction.md                     # Data extraction template
 │   └── custom.md                              # LLM fallback template (20 lines)
 │
 ├── docs/                                      # Documentation
@@ -56,8 +60,12 @@ meta-prompt/                                   # Plugin root
 │   │   ├── simple-classification.md           # Comparison template (37 lines)
 │   │   ├── document-qa.md                     # Document Q&A template (39 lines)
 │   │   ├── code-refactoring.md                # Code modification template (64 lines)
+│   │   ├── code-review.md                     # Code review template
 │   │   ├── function-calling.md                # Function/API usage template (52 lines)
 │   │   ├── interactive-dialogue.md            # Conversational agent template (38 lines)
+│   │   ├── test-generation.md                 # Test generation template
+│   │   ├── documentation-generator.md         # Documentation generator template
+│   │   ├── data-extraction.md                 # Data extraction template
 │   │   └── custom.md                          # LLM fallback template (20 lines)
 │   │
 │
@@ -107,7 +115,7 @@ meta-prompt/                                   # Plugin root
 #### `templates/`
 **Purpose:** Pre-built prompt templates
 **File Format:** Markdown with YAML frontmatter
-**Count:** 6 templates
+**Count:** 10 templates
 **Version:** Tracked in frontmatter (`version: 1.0`)
 **Validation:** Via `validate-templates.sh`
 
@@ -616,7 +624,7 @@ Threshold: 70%
    - Commands reference correct scripts
    - Agent is streamlined (<100 lines)
 
-**Total Tests:** 31 tests across 7 phases
+**Total Tests:** 48 tests across 7 phases
 
 ### Running Tests
 
@@ -641,8 +649,8 @@ Phase 1: Script Existence
            Test Summary
 =====================================
 
-Total Tests:  31
-Passed:       31
+Total Tests:  48
+Passed:       48
 Failed:       0
 
 Pass Rate:    100%

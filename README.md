@@ -29,7 +29,7 @@ The meta-prompt plugin replaces LLM-based orchestration with shell scripts and p
 - **Token Reduction:** 40-60% overall, 100% for orchestration
 - **Classification Accuracy:** 90%+ for template routing
 - **Performance:** <100ms deterministic overhead
-- **Templates:** 6 pre-built templates covering common patterns
+- **Templates:** 10 pre-built templates covering common patterns
 - **Security:** Input sanitization, whitelist-based permissions
 
 #### Commands
@@ -47,6 +47,10 @@ The meta-prompt plugin replaces LLM-based orchestration with shell scripts and p
 | code-refactoring | Modify code, fix bugs, add features | 2 |
 | function-calling | API usage, tool invocation | 2 |
 | interactive-dialogue | Tutors, customer support bots | 4 |
+| test-generation | Generate unit tests, test suites, edge cases | 3 |
+| code-review | Security audits, quality analysis, feedback | 3 |
+| documentation-generator | API docs, READMEs, docstrings, user guides | 3 |
+| data-extraction | Extract data from logs, JSON, HTML, text | 3 |
 | custom | Novel tasks (LLM fallback) | 1 |
 
 #### Quick Start
