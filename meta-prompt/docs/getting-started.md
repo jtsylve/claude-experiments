@@ -158,28 +158,72 @@ Ten templates cover common patterns:
 ```
 
 ### 6. Test Generation
-**Use for:** Generating unit tests, test suites, edge cases
+**Use for:** Generating comprehensive test suites including unit tests, edge cases, and integration tests
+
+This template creates runnable test code following framework-specific conventions (Jest, pytest, JUnit, Mocha, RSpec, Go testing). It analyzes your code to identify happy paths, edge cases, error conditions, and generates tests with proper setup/teardown, mocking, and assertions.
+
+**Variables:**
+- `CODE_TO_TEST`: The code that needs test coverage
+- `TEST_FRAMEWORK`: Testing framework (Jest, pytest, JUnit, etc.)
+- `TEST_SCOPE`: What to test (edge cases, happy path, integration tests)
+
+**Example:**
 ```bash
-/create-prompt "Generate unit tests for the authentication module"
+/create-prompt "Generate pytest tests for the user registration function covering edge cases and error handling"
 ```
+
+**Expected output:** Complete test suite with descriptive test names, proper assertions, mocking examples, and coverage of normal operation, edge cases, and error conditions.
 
 ### 7. Code Review
-**Use for:** Security audits, quality analysis, code feedback
+**Use for:** Comprehensive code analysis covering security, performance, maintainability, and best practices
+
+This template performs systematic code review across seven dimensions: correctness, security (XSS, SQL injection, CSRF, etc.), performance, readability, error handling, testability, and language conventions. It categorizes issues by severity (Critical/High/Medium/Low) and provides specific, actionable feedback with code examples.
+
+**Variables:**
+- `CODE_TO_REVIEW`: The code to analyze
+- `REVIEW_FOCUS`: Specific areas (security, performance, all aspects)
+- `LANGUAGE_CONVENTIONS`: Language/framework standards (PEP 8, Node.js patterns)
+
+**Example:**
 ```bash
-/create-prompt "Review this code for security vulnerabilities"
+/create-prompt "Review this authentication middleware for security vulnerabilities and Node.js best practices"
 ```
+
+**Expected output:** Structured review with severity-categorized issues, specific line references, explanations of why issues matter, and concrete suggestions with code examples.
 
 ### 8. Documentation Generator
-**Use for:** Creating API docs, READMEs, docstrings, user guides
+**Use for:** Creating comprehensive documentation in various formats (API docs, READMEs, docstrings, user guides, technical specs)
+
+This template generates documentation tailored to your audience (developers, end users, technical leads) with appropriate technical depth. It structures content based on documentation type (API reference, README, inline comments, user guide, or technical spec) and follows documentation best practices.
+
+**Variables:**
+- `CODE_OR_CONTENT`: The code or content to document
+- `DOC_TYPE`: Documentation type (API reference, README, inline comments, user guide)
+- `AUDIENCE`: Target audience (external developers, internal team, end users)
+
+**Example:**
 ```bash
-/create-prompt "Generate API documentation for the REST endpoints"
+/create-prompt "Generate API reference documentation for the payment processing endpoints targeting external developers"
 ```
 
+**Expected output:** Complete documentation with clear structure, code examples, parameter tables, return value descriptions, error documentation, and appropriate technical depth for the audience.
+
 ### 9. Data Extraction
-**Use for:** Extracting data from logs, JSON, HTML, text files
+**Use for:** Extracting specific information from unstructured or semi-structured data (logs, text files, HTML, JSON, CSV)
+
+This template pulls targeted data from raw sources and formats it according to your needs (JSON, CSV, markdown table, plain list). It handles common patterns (emails, URLs, dates, phone numbers, IPs), deals with malformed data gracefully, and provides summaries of extraction results.
+
+**Variables:**
+- `SOURCE_DATA`: The raw data to extract from
+- `EXTRACTION_TARGETS`: What to extract (emails, timestamps, error codes, etc.)
+- `OUTPUT_FORMAT`: Desired format (JSON, CSV, markdown table, plain list)
+
+**Example:**
 ```bash
-/create-prompt "Extract all error messages from this log file"
+/create-prompt "Extract all error messages and timestamps from this application log and format as JSON"
 ```
+
+**Expected output:** Extracted data in the requested format, plus a summary with count of items extracted and notes about any anomalies or patterns discovered.
 
 ### 10. Custom (Fallback)
 **Use for:** Novel tasks that don't fit other templates
@@ -221,10 +265,38 @@ commands/scripts/test-integration.sh
 
 **Expected output:**
 ```
-Total Tests: 48
-Passed: 48
+Total Tests: 50
+Passed: 50
 Failed: 0
 ✓ ALL TESTS PASSED!
+```
+
+Verify documentation accuracy:
+
+```bash
+commands/scripts/verify-documentation-counts.sh
+```
+
+**Expected output:**
+```
+=== Documentation Count Verification ===
+
+Counting actual files...
+  Actual templates: 10
+  Actual tests: 50
+
+Verifying template counts in documentation...
+  ✓ README.md template count: 10
+  ✓ meta-prompt/README.md template count: 10
+  ✓ getting-started.md template count: 10
+
+Verifying test counts in documentation...
+  ✓ getting-started.md test count: 50
+  ✓ migration.md test count: 50
+  ✓ infrastructure.md test count: 50
+
+=== Summary ===
+All documentation counts are accurate!
 ```
 
 ---

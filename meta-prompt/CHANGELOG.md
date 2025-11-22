@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License with copyright notice
 - Environment variable validation in bash scripts to prevent silent failures
 - `CLAUDE_PLUGIN_ROOT` validation in `template-processor.sh` and `validate-templates.sh`
+- `verify-documentation-counts.sh` script to validate that documentation counts match actual file counts, preventing future documentation drift
 
 ### Changed
 - **BREAKING:** Agent references now use fully-qualified names (`meta-prompt:prompt-optimizer` instead of `prompt-optimizer`)
@@ -28,6 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Integration test suite updated to reference correct agent file path (`agents/prompt-optimizer.md`)
 - Bash scripts no longer use fragile `cd` and `dirname` logic for path resolution
+- Documentation inaccuracies corrected across 9 files:
+  - Template count updated from 6 to 10 (test-generation, code-review, documentation-generator, data-extraction were present but undocumented)
+  - Test count updated from 31/42 to 48 (reflecting actual test suite coverage)
+  - All four previously undocumented templates now have complete documentation in getting-started.md with descriptions, variables, examples, and expected outputs
+  - Template variables documented in README.md for all 10 templates
+  - File tree diagrams updated in infrastructure.md to include all templates
 
 ## [1.0.0] - Previous Release
 

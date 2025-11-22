@@ -16,6 +16,7 @@ meta-prompt/                                   # Plugin root
 │       ├── template-selector.sh               # Task classification (194 lines)
 │       ├── template-processor.sh              # Variable substitution (116 lines)
 │       ├── validate-templates.sh              # Template validation (180 lines)
+│       ├── verify-documentation-counts.sh     # Doc count verification (160 lines)
 │       └── test-integration.sh                # Integration tests (240 lines)
 │
 ├── templates/                                 # Template library
@@ -54,6 +55,7 @@ meta-prompt/                                   # Plugin root
 │   │       ├── template-selector.sh           # Task classification (194 lines)
 │   │       ├── template-processor.sh          # Variable substitution (116 lines)
 │   │       ├── validate-templates.sh          # Template validation (180 lines)
+│   │       ├── verify-documentation-counts.sh # Doc count verification (160 lines)
 │   │       └── test-integration.sh            # Integration tests (240 lines)
 │   │
 │   ├── templates/                             # Template library
@@ -624,7 +626,7 @@ Threshold: 70%
    - Commands reference correct scripts
    - Agent is streamlined (<100 lines)
 
-**Total Tests:** 48 tests across 7 phases
+**Total Tests:** 50 tests across 7 phases
 
 ### Running Tests
 
@@ -649,8 +651,8 @@ Phase 1: Script Existence
            Test Summary
 =====================================
 
-Total Tests:  48
-Passed:       48
+Total Tests:  50
+Passed:       50
 Failed:       0
 
 Pass Rate:    100%

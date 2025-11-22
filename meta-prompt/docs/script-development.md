@@ -651,6 +651,33 @@ fi
 
 **Location:** `commands/scripts/test-integration.sh`
 
+### verify-documentation-counts.sh
+
+**Purpose:** Verify that documentation counts match actual file counts
+
+**Input:** None
+
+**Output:** Verification results showing matches/mismatches between documented and actual counts
+
+**Checks:**
+- Template count in README.md, getting-started.md, CONTRIBUTING.md
+- Test count in getting-started.md, migration.md, infrastructure.md
+- Actual template count (files in templates/)
+- Actual test count (run_test calls in test-integration.sh)
+
+**Usage:**
+```bash
+CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt commands/scripts/verify-documentation-counts.sh
+```
+
+**Exit codes:**
+- 0: All documentation counts are accurate
+- 1: Documentation counts don't match actual counts or script error
+
+**Location:** `commands/scripts/verify-documentation-counts.sh`
+
+**Note:** Run this script before releases or after adding/removing templates or tests to ensure documentation stays synchronized with the codebase.
+
 ---
 
 ## Best Practices
