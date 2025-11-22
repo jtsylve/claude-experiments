@@ -2,7 +2,7 @@
 name: create-prompt
 description: Create expert-level prompt templates for Claude Code with best practices, examples, and structured output
 argument-hint: <task description>
-allowed-tools: [Bash, Read]
+allowed-tools: [Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh:*), Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh:*), Read(${CLAUDE_PLUGIN_ROOT}/templates/**), Read(${CLAUDE_PLUGIN_ROOT}/guides/**)]
 ---
 
 You will create expert-level prompt templates using an intelligent template routing system.
