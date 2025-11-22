@@ -100,10 +100,10 @@ git log -p commands/scripts/template-selector.sh
 
 **Includes:**
 - 10 templates (simple-classification, document-qa, code-refactoring, function-calling, interactive-dialogue, test-generation, code-review, documentation-generator, data-extraction, custom)
-- 5 bash scripts (prompt-handler, template-selector, template-processor, validate-templates, test-integration)
+- 6 bash scripts (prompt-handler, template-selector, template-processor, validate-templates, verify-documentation-counts, test-integration)
 - Classification system with 90%+ accuracy
 - Comprehensive documentation suite
-- Full test coverage (48 tests)
+- Full test coverage (50 tests)
 
 **Installation:**
 ```bash
@@ -179,7 +179,7 @@ export CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt
 cd meta-prompt
 CLAUDE_PLUGIN_ROOT=$(pwd) commands/scripts/test-integration.sh
 
-# Expected: All 48 tests pass
+# Expected: All 50 tests pass
 ```
 
 **4. Test Commands**

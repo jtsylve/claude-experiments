@@ -53,6 +53,21 @@ The meta-prompt plugin replaces LLM-based orchestration with shell scripts and p
 | data-extraction | Extract data from logs, JSON, HTML, text | 3 |
 | custom | Novel tasks (LLM fallback) | 1 |
 
+#### Template Variables
+
+Each template uses specific variables to customize behavior:
+
+**simple-classification:** ITEM1, ITEM2, COMPARISON_CRITERIA
+**document-qa:** DOCUMENT_CONTENT, QUESTION
+**code-refactoring:** CODE_TO_REFACTOR, REFACTORING_GOAL
+**function-calling:** API_DESCRIPTION, TASK_OBJECTIVE
+**interactive-dialogue:** ROLE_DESCRIPTION, DOMAIN_EXPERTISE, INTERACTION_STYLE, USER_LEVEL
+**test-generation:** CODE_TO_TEST, TEST_FRAMEWORK, TEST_SCOPE
+**code-review:** CODE_TO_REVIEW, REVIEW_FOCUS, LANGUAGE_CONVENTIONS
+**documentation-generator:** CODE_OR_CONTENT, DOC_TYPE, AUDIENCE
+**data-extraction:** SOURCE_DATA, EXTRACTION_TARGETS, OUTPUT_FORMAT
+**custom:** TASK_DESCRIPTION
+
 #### Quick Start
 
 ```bash
