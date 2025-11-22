@@ -2,7 +2,7 @@
 name: prompt
 description: Optimize a prompt and optionally execute it in a fresh context
 argument-hint: <task or prompt to optimize> [--return-only]
-allowed-tools: [Task, Bash]
+allowed-tools: [Task, Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh:*)]
 ---
 
 You will use deterministic bash orchestration to handle this request efficiently.
