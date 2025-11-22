@@ -445,6 +445,46 @@ Passed: 6
 Failed: 0
 ```
 
+### Environment Variables
+
+#### CLAUDE_PLUGIN_ROOT
+
+**Purpose:** The `CLAUDE_PLUGIN_ROOT` environment variable is automatically set by Claude Code when running plugin commands and scripts. It contains the absolute path to the plugin's root directory.
+
+**Usage in Commands:**
+- Slash commands can reference scripts using `${CLAUDE_PLUGIN_ROOT}/commands/scripts/script-name.sh`
+- Read operations can access templates using `${CLAUDE_PLUGIN_ROOT}/templates/**`
+- Ensures portability across different installation locations
+
+**Example in Frontmatter:**
+```yaml
+allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh:*)
+  - Read(${CLAUDE_PLUGIN_ROOT}/templates/**)
+```
+
+**When Testing Scripts Manually:**
+
+When running scripts directly from the command line (outside of Claude Code), the variable may not be set. The test scripts automatically detect this and set a default value:
+
+```bash
+# Example from test-validation.sh
+if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+fi
+```
+
+**Platform Notes:**
+- **macOS/Linux:** Works seamlessly
+- **WSL (Windows):** Works correctly
+- **Native Windows:** Not currently supported due to a Claude Code path normalization bug. See [Troubleshooting - Windows Compatibility](#issue-windows-compatibility---claude_plugin_root-path-normalization-claude-code-bug)
+
+**Security:**
+- Only allowed paths specified in frontmatter `allowed-tools` can be accessed
+- The variable should point to a trusted plugin directory
+- Path restrictions follow the principle of least privilege
+
 ### Configuration
 
 #### 1. Update settings.json

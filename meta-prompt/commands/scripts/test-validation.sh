@@ -48,7 +48,9 @@ print_section() {
 print_section "Environment Setup"
 
 if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-    export CLAUDE_PLUGIN_ROOT="/Users/joe/src/claude-experiments/meta-prompt"
+    # Get the script directory and navigate to plugin root (two levels up from scripts/)
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
     echo "Setting CLAUDE_PLUGIN_ROOT=$CLAUDE_PLUGIN_ROOT"
 fi
 
@@ -253,6 +255,46 @@ if ! echo "$UNAUTHORIZED_PATH" | grep -qE "^${CLAUDE_PLUGIN_ROOT}/(templates|gui
     print_result "Reject unauthorized path (/etc/passwd)" "PASS"
 else
     print_result "Reject unauthorized path (/etc/passwd)" "FAIL"
+fi
+
+# Test path traversal attempt
+TRAVERSAL_PATH="${CLAUDE_PLUGIN_ROOT}/templates/../../etc/passwd"
+if ! echo "$TRAVERSAL_PATH" | grep -qE "^${CLAUDE_PLUGIN_ROOT}/(templates|guides)/[^/]*\.md$"; then
+    print_result "Reject path traversal attempt (../..)" "PASS"
+else
+    print_result "Reject path traversal attempt (../..)" "FAIL"
+fi
+
+# Test unauthorized script outside allowed directory
+UNAUTHORIZED_SCRIPT="/tmp/malicious-script.sh"
+if ! echo "$UNAUTHORIZED_SCRIPT" | grep -qE "^${CLAUDE_PLUGIN_ROOT}/commands/scripts/(prompt-handler|template-selector|template-processor)\.sh"; then
+    print_result "Reject unauthorized script path" "PASS"
+else
+    print_result "Reject unauthorized script path" "FAIL"
+fi
+
+# Test file in root directory (not in templates/ or guides/)
+ROOT_FILE="${CLAUDE_PLUGIN_ROOT}/README.md"
+if ! echo "$ROOT_FILE" | grep -qE "^${CLAUDE_PLUGIN_ROOT}/(templates|guides)/.*"; then
+    print_result "Reject file in plugin root (not in allowed dirs)" "PASS"
+else
+    print_result "Reject file in plugin root (not in allowed dirs)" "FAIL"
+fi
+
+# Test that only .md files in templates are allowed
+NON_MD_FILE="${CLAUDE_PLUGIN_ROOT}/templates/malicious.sh"
+if ! echo "$NON_MD_FILE" | grep -qE "^${CLAUDE_PLUGIN_ROOT}/templates/.*\.md$"; then
+    print_result "Reject non-.md file in templates directory" "PASS"
+else
+    print_result "Reject non-.md file in templates directory" "FAIL"
+fi
+
+# Test subdirectory access (should be allowed with ** pattern)
+NESTED_TEMPLATE="${CLAUDE_PLUGIN_ROOT}/templates/subdir/template.md"
+if echo "$NESTED_TEMPLATE" | grep -qE "^${CLAUDE_PLUGIN_ROOT}/templates/.*\.md$"; then
+    print_result "Allow nested template files with ** pattern" "PASS"
+else
+    print_result "Allow nested template files with ** pattern" "FAIL"
 fi
 
 # Test 8: Verify frontmatter configurations
