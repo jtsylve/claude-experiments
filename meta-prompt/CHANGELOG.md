@@ -67,6 +67,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Template variables documented in README.md for all 10 templates
   - File tree diagrams updated in infrastructure.md to include all templates
 
+### Removed
+- **function-calling template:** Removed deprecated `function-calling.md` template
+  - Low usage and better served by the `custom` template for tool/API orchestration tasks
+  - Tasks that previously matched function-calling now route to `custom` template
+  - Template count reduced from 7 to 6 (excluding custom fallback)
+  - All documentation updated to reflect 6 templates across 14 files
+- **Classifier keyword refinement:** Removed redundant keywords from template-selector.sh to improve classification accuracy
+  - Removed "quality" and "analyze" from `review_keywords` (these terms are already covered by strong indicator pattern `PATTERN_REVIEW` which includes "analyze", "assess", "evaluate", etc.)
+  - Removed "docs" from `documentation_keywords` (covered by strong indicator `PATTERN_DOCUMENTATION` which includes "documentation", "docstring", "docs", etc.)
+  - These changes prevent over-weighting of certain keywords and improve classification precision
+  - Strong indicators still catch these terms, so classification behavior remains accurate
+  - Added test case to verify "analyze code quality" still routes correctly to code-review template
+
 ## [1.0.0] - Previous Release
 
 Initial release with template-based prompt optimization infrastructure.

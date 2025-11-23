@@ -5,16 +5,20 @@
 
 set -euo pipefail
 
-# Validate required environment variables
-# TEMPORARY: Commented out for Windows compatibility workaround (will be restored)
-# if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-#     echo "ERROR: CLAUDE_PLUGIN_ROOT environment variable is not set" >&2
-#     exit 1
-# fi
+# Setup: Set CLAUDE_PLUGIN_ROOT if not already set
+# TEMPORARY: For Windows compatibility, fallback to script-based location or hardcoded path
+if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    # Try to derive from script location (commands/scripts/ -> 2 levels up)
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ -d "$SCRIPT_DIR/../../templates" ]; then
+        CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+    else
+        # Fallback to hardcoded path for standard installation
+        CLAUDE_PLUGIN_ROOT="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt"
+    fi
+fi
 
-# TEMPORARY: Hardcoded path for Windows compatibility workaround
-TEMPLATE_DIR="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates"
-# ORIGINAL: TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
+TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 
 # Function: Load template file
 load_template() {

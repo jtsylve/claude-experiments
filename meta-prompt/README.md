@@ -127,7 +127,14 @@ Install from claude-experiments:
 
 The meta-prompt plugin will be available immediately with `/prompt` and `/create-prompt` commands.
 
-**Windows Users:** A temporary workaround for Windows compatibility has been implemented (hardcoded paths instead of `${CLAUDE_PLUGIN_ROOT}`). However, WSL (Windows Subsystem for Linux) is still recommended for the best experience. See [Infrastructure Guide - Troubleshooting](docs/infrastructure.md#issue-windows-compatibility---claude_plugin_root-path-normalization-claude-code-bug) for details.
+**Windows Users:**
+⚠️ **Temporary Limitation**: This version uses intelligent path detection with a fallback to the standard installation location (`~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`) due to a Windows path normalization bug in Claude Code.
+
+- The plugin will work correctly if installed via `/plugin install` to the standard location
+- For development/custom installations, scripts derive the path from their location
+- If you encounter path issues, run `meta-prompt/commands/scripts/verify-installation.sh` to diagnose
+- WSL (Windows Subsystem for Linux) is recommended for the most reliable experience
+- See [Infrastructure Guide - Troubleshooting](docs/infrastructure.md#windows-compatibility) for details
 
 ### For Development
 

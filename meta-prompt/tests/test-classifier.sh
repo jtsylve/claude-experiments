@@ -78,6 +78,10 @@ run_test "Code review with strong indicator" \
     "Review the pull request for code quality issues" \
     "code-review" 70
 
+run_test "Code review with 'quality' keyword (removed from supporting keywords)" \
+    "Analyze code quality" \
+    "code-review" 70
+
 run_test "Documentation generation with strong indicator" \
     "Write documentation for the API endpoints" \
     "documentation-generator" 70
