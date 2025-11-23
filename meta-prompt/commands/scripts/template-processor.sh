@@ -73,18 +73,29 @@ substitute_variables() {
 # Function: Process default values for optional variables
 process_defaults() {
     local template="$1"
+    local iteration_count=0
+    local max_iterations=100
 
     # Extract all variables with defaults and their values
     # Then replace both {$VAR:default} and {$VAR} with the default value
     while [[ "$template" =~ \{\$([A-Z_][A-Z0-9_]*):([^}]+)\} ]]; do
+        # Prevent infinite loops
+        iteration_count=$((iteration_count + 1))
+        if [ $iteration_count -gt $max_iterations ]; then
+            echo "ERROR: Maximum iterations ($max_iterations) exceeded in process_defaults. Possible infinite loop." >&2
+            return 1
+        fi
+
         local var_name="${BASH_REMATCH[1]}"
         local default_value="${BASH_REMATCH[2]}"
 
-        # Escape special characters in default value for sed
-        local escaped_default=$(printf '%s\n' "$default_value" | sed 's/[&/\]/\\&/g')
+        # Escape special characters in default value for sed replacement string
+        # Need to escape: & (replacement ref), / (delimiter), \ (escape char), and regex special chars
+        local escaped_default=$(printf '%s\n' "$default_value" | sed 's/[&/\()]/\\&/g')
 
-        # Replace both {$VAR:default} and {$VAR} with the default value
-        template=$(echo "$template" | sed -E "s/\{\\\$${var_name}(:[^}]*)?\}/${escaped_default}/g")
+        # The sed pattern below matches {$VAR} and {$VAR:default}
+        # We use single quotes and concatenate the variable name for clarity and portability
+        template=$(echo "$template" | sed -E 's/\{\$'"${var_name}"'(:[^}]*)?\}/'"${escaped_default}"'/g')
     done
 
     echo "$template"
