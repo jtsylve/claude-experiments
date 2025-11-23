@@ -277,8 +277,8 @@ tests/test-integration.sh
 
 **Expected output:**
 ```
-Total Tests: 50
-Passed: 50
+Total Tests: 53
+Passed: 53
 Failed: 0
 ✓ ALL TESTS PASSED!
 ```
@@ -295,7 +295,7 @@ tests/verify-documentation-counts.sh
 
 Counting actual files...
   Actual templates: 10
-  Actual tests: 50
+  Actual tests: 53
 
 Verifying template counts in documentation...
   ✓ README.md template count: 10
@@ -303,9 +303,9 @@ Verifying template counts in documentation...
   ✓ getting-started.md template count: 10
 
 Verifying test counts in documentation...
-  ✓ getting-started.md test count: 50
-  ✓ migration.md test count: 50
-  ✓ infrastructure.md test count: 50
+  ✓ getting-started.md test count: 53
+  ✓ migration.md test count: 53
+  ✓ infrastructure.md test count: 53
 
 === Summary ===
 All documentation counts are accurate!

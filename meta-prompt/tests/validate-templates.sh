@@ -38,16 +38,19 @@ extract_body() {
     awk '/^---$/{c++} c==2{print; next} c>2' "$file"
 }
 
-# Function: Get variables from frontmatter
+# Function: Get variables from frontmatter (includes both required and optional)
 get_declared_variables() {
     local frontmatter="$1"
-    echo "$frontmatter" | grep "^variables:" | sed 's/variables: \[\(.*\)\]/\1/' | tr ',' '\n' | sed 's/[][ ]//g'
+    {
+        echo "$frontmatter" | grep "^variables:" | sed 's/variables: \[\(.*\)\]/\1/' | tr ',' '\n' | sed 's/[][ ]//g'
+        echo "$frontmatter" | grep "^optional_variables:" | sed 's/optional_variables: \[\(.*\)\]/\1/' | tr ',' '\n' | sed 's/[][ ]//g'
+    } | grep -v '^$' | sort -u
 }
 
-# Function: Get variables used in body
+# Function: Get variables used in body (handles both {$VAR} and {$VAR:default} syntax)
 get_used_variables() {
     local body="$1"
-    echo "$body" | grep -oE '\{\$[A-Z_][A-Z0-9_]*\}' | sed 's/[{}$]//g' | sort -u
+    echo "$body" | grep -oE '\{\$[A-Z_][A-Z0-9_]*[^}]*\}' | sed -E 's/\{\$([A-Z_][A-Z0-9_]*).*/\1/' | sort -u
 }
 
 # Function: Validate single template

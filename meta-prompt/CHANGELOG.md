@@ -44,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All optional variables provide sensible defaults (e.g., "inferred from code", "comprehensive coverage")
 
 ### Fixed
+- **Quote handling in prompt-handler.sh:** Fixed "unterminated quote" errors when task descriptions contain apostrophes or quotes
+  - Replaced `xargs` with POSIX-compliant `sed` pattern for whitespace normalization
+  - `xargs` was interpreting quotes as special characters, causing failures on inputs like "don't pass"
+  - New sed pattern `[[:space:]][[:space:]]*` works on both GNU sed and macOS BSD sed
+  - Added regression tests for apostrophes, double quotes, and mixed quote scenarios
+  - Resolves issue where `/prompt --code Write a pre-push hook to run tests if they don't pass` would fail
 - **Template processing error handling:** `/create-prompt` now gracefully falls back to custom template when template-processor.sh fails
   - Previously, template processing failures would crash the entire prompt optimization flow
   - Now falls back to custom template crafting using the engineering guide
