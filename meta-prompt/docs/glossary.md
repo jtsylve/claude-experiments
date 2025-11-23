@@ -18,7 +18,7 @@ A bash script that makes routing and processing decisions without consuming LLM 
 ### Template
 A pre-built prompt pattern with variable placeholders that can be reused for similar tasks. Templates eliminate the need for LLM-based prompt generation.
 
-**Example:** The `simple-classification` template handles comparison tasks like "Compare Python and JavaScript".
+**Example:** The `code-comparison` template handles comparison tasks like "Compare Python and JavaScript".
 
 **File location:** `templates/*.md`
 
@@ -86,7 +86,7 @@ Metadata section at the top of template files, enclosed in `---` delimiters. Con
 **Format:**
 ```yaml
 ---
-template_name: simple-classification
+template_name: code-comparison
 category: comparison
 keywords: [compare, classify, similar]
 complexity: simple
@@ -144,7 +144,7 @@ Analyze whether these items match...
 A broad grouping of related templates. Used for organization and naming conventions.
 
 **Current categories:**
-- `comparison`: Comparing items (simple-classification)
+- `comparison`: Comparing items (code-comparison)
 - `analysis`: Analyzing documents or data (document-qa)
 - `development`: Code-related tasks (code-refactoring)
 - `tool-use`: API/function calling (function-calling)

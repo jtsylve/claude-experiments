@@ -98,12 +98,13 @@ graph TD
 #### create-prompt.md
 - **Purpose:** Generate optimized prompts using templates or LLM
 - **Type:** Claude Code slash command
-- **Lines:** ~196 (with comprehensive LLM fallback instructions)
-- **Token Savings:** 75% when templates used
+- **Lines:** ~89 (streamlined with LLM fallback for borderline cases)
+- **Token Savings:** 75% when templates used, improved accuracy with LLM fallback
 - **Dependencies:**
-  - `scripts/template-selector.sh`
-  - `scripts/template-processor.sh`
-  - `templates/*.md`
+  - `scripts/template-selector.sh` (keyword classification + confidence scoring)
+  - `scripts/template-processor.sh` (variable substitution)
+  - `templates/*.md` (pre-built templates)
+- **LLM Fallback:** For borderline confidence (60-69%), agent performs template selection
 
 ### 2. Script Layer (Deterministic Processing)
 
@@ -131,7 +132,7 @@ Flow:    Parse args → Detect mode → Generate instructions → Output
 ```bash
 Purpose: Classify tasks and route to templates
 Input:   $1 = task_description
-Output:  template_name (or "custom") + confidence score
+Output:  template_name confidence (e.g., "code-refactoring 75")
 Flow:    Normalize → Extract keywords → Score categories → Select best
 ```
 
@@ -142,10 +143,19 @@ Flow:    Normalize → Extract keywords → Score categories → Select best
 4. Calculate confidence per category
 5. Select highest confidence >= 70% threshold
 6. Fallback to "custom" if below threshold
+7. Preserve borderline confidence scores (60-69%) for LLM fallback
+8. Set low confidence (<60%) to 0
 
 **Performance:** <50ms average, 90%+ accuracy
 
-**Referenced by:** `commands/create-prompt.md:21`
+**Output Format:** `<template-name> <confidence>` (both values on single line)
+
+**Confidence Ranges:**
+- High (70-100): Use keyword-selected template
+- Borderline (60-69): Trigger LLM-based fallback in create-prompt
+- Low (0-59): Use custom template with full prompt engineering
+
+**Referenced by:** `commands/create-prompt.md:19`
 
 #### template-processor.sh
 ```bash
@@ -183,19 +193,17 @@ Checks:  Frontmatter, required fields, variable consistency, XML tags, content
 
 **Location:** `templates/`
 
-Ten task-specific templates covering common patterns:
+Seven task-specific templates optimized for software development:
 
 | Template | Category | Complexity | Variables | Use Cases |
 |----------|----------|------------|-----------|-----------|
-| **simple-classification.md** | comparison | simple | 3 | Compare items, check equivalence, binary classification |
-| **document-qa.md** | analysis | intermediate | 2 | Answer questions with citations, extract information |
 | **code-refactoring.md** | development | complex | 2 | Modify code, fix bugs, implement features |
-| **function-calling.md** | tool-use | complex | 2 | API usage, tool invocation, function orchestration |
-| **interactive-dialogue.md** | conversation | complex | 4 | Tutors, customer support, conversational agents |
-| **test-generation.md** | testing | intermediate | 3 | Generate unit tests, test suites, edge cases, coverage |
 | **code-review.md** | analysis | complex | 3 | Security audits, quality analysis, code feedback |
+| **test-generation.md** | testing | intermediate | 3 | Generate unit tests, test suites, edge cases, coverage |
 | **documentation-generator.md** | generation | intermediate | 3 | API docs, READMEs, docstrings, user guides |
+| **function-calling.md** | tool-use | complex | 2 | API usage, tool invocation, function orchestration |
 | **data-extraction.md** | analysis | simple | 3 | Extract data from logs, JSON, HTML, text files |
+| **code-comparison.md** | comparison | simple | 3 | Compare code, configs, check equivalence |
 | **custom.md** | fallback | variable | 1 | Novel tasks, edge cases, LLM fallback |
 
 **Template Structure:**
@@ -292,9 +300,9 @@ sequenceDiagram
 - Optimizer agent: ~500 tokens (coordination only)
 - Total saved vs. original: ~300 tokens (100% of orchestration)
 
-### Flow 2: /create-prompt Command (Template Match)
+### Flow 2: /create-prompt Command (Template Match - High Confidence)
 
-**Flow Description:** This is the most common flow (90%+ of tasks). The template-selector.sh script classifies the task using keyword matching (0 tokens), identifies the best template with confidence scoring, and template-processor.sh substitutes variables (0 tokens). The entire prompt generation happens deterministically, saving ~1480 tokens compared to LLM-based generation. The only tokens consumed are for reading the template file (~20 tokens).
+**Flow Description:** This is the most common flow (70%+ of tasks). The template-selector.sh script classifies the task using keyword matching (0 tokens), identifies the best template with high confidence (70-100%), and template-processor.sh substitutes variables (0 tokens). The entire prompt generation happens deterministically, saving ~1480 tokens compared to LLM-based generation. The only tokens consumed are for reading the template file (~20 tokens).
 
 ```mermaid
 sequenceDiagram
@@ -307,7 +315,7 @@ sequenceDiagram
     User->>CreatePromptMD: /create-prompt "Compare apples and oranges"
     CreatePromptMD->>Selector: Classify task
     Selector->>Selector: Extract keywords, score
-    Selector->>CreatePromptMD: "simple-classification" (85%)
+    Selector->>CreatePromptMD: "code-comparison 85"
     CreatePromptMD->>Template: Read template
     Template->>CreatePromptMD: Template content
     CreatePromptMD->>Processor: Substitute variables
@@ -322,9 +330,45 @@ sequenceDiagram
 - Read operations: ~20 tokens (template retrieval)
 - Total saved: ~1480 tokens (98% reduction vs. LLM generation)
 
-### Flow 3: /create-prompt Command (Custom Fallback)
+### Flow 2B: /create-prompt Command (Borderline Confidence - LLM Fallback)
 
-**Flow Description:** When no template matches with sufficient confidence (<70%), the system gracefully falls back to full LLM-based prompt engineering. This ensures that novel or unusual tasks (like creative writing, complex multi-step workflows) still receive high-quality custom prompts. No token savings occur in this flow, but it only happens for ~10% of tasks, preserving the overall 40-60% reduction.
+**Flow Description:** When keyword classification yields borderline confidence (60-69%), the system uses LLM-based template selection to improve accuracy. This hybrid approach applies to ~20% of tasks where keyword matching is uncertain (synonyms, implicit intent, ambiguous phrasing). The agent selects the best template using its understanding, then proceeds with deterministic variable substitution. This flow consumes minimal LLM tokens while significantly improving template routing accuracy.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant CreatePromptMD as create-prompt.md
+    participant Selector as template-selector.sh
+    participant Agent as LLM Agent
+    participant Processor as template-processor.sh
+    participant Template as Template File
+
+    User->>CreatePromptMD: /create-prompt "Reorganize the auth module"
+    CreatePromptMD->>Selector: Classify task
+    Selector->>Selector: Keywords uncertain
+    Selector->>CreatePromptMD: "custom 65" (borderline)
+    CreatePromptMD->>Agent: LLM selects best template
+    Agent->>Agent: Analyze task context
+    Agent->>CreatePromptMD: "code-refactoring" (LLM decision)
+    CreatePromptMD->>Template: Read template
+    Template->>CreatePromptMD: Template content
+    CreatePromptMD->>Processor: Substitute variables
+    Processor->>CreatePromptMD: Processed prompt
+    CreatePromptMD->>User: Return optimized prompt
+```
+
+**Token Consumption:**
+- Selector script: 0 tokens (deterministic)
+- LLM template selection: ~200 tokens (lightweight decision)
+- Processor script: 0 tokens (deterministic)
+- Read operations: ~20 tokens (template retrieval)
+- Total: ~220 tokens (85% reduction vs. full LLM generation)
+
+**Benefit:** Improves accuracy for edge cases while maintaining high token efficiency
+
+### Flow 3: /create-prompt Command (Low Confidence - Custom Fallback)
+
+**Flow Description:** When no template matches with sufficient confidence (<60%), the system gracefully falls back to full LLM-based prompt engineering. This ensures that novel or unusual tasks (like creative writing, complex multi-step workflows) still receive high-quality custom prompts. No token savings occur in this flow, but it only happens for ~10% of tasks, preserving the overall 40-60% reduction.
 
 ```mermaid
 sequenceDiagram
@@ -336,7 +380,7 @@ sequenceDiagram
     User->>CreatePromptMD: /create-prompt "Write a sonnet"
     CreatePromptMD->>Selector: Classify task
     Selector->>Selector: No keywords match
-    Selector->>CreatePromptMD: "custom" (0%)
+    Selector->>CreatePromptMD: "custom 0"
     CreatePromptMD->>LLM: Full prompt engineering instructions
     LLM->>LLM: Generate custom prompt
     LLM->>CreatePromptMD: Custom prompt
@@ -440,7 +484,7 @@ Automated validation prevents malformed templates:
 - Required metadata validation
 - Content non-empty validation
 
-**Location:** `commands/scripts/validate-templates.sh`
+**Location:** `tests/validate-templates.sh`
 
 **Usage in CI/CD:** Can be integrated to prevent deployment of invalid templates.
 
@@ -466,12 +510,14 @@ meta-prompt/                         # Plugin root
 │       ├── template-processor.sh
 │       ├── validate-templates.sh
 │       └── test-integration.sh
-├── templates/                       # Template library
-│   ├── simple-classification.md
-│   ├── document-qa.md
+├── templates/                       # Template library (7 templates)
 │   ├── code-refactoring.md
+│   ├── code-review.md
+│   ├── test-generation.md
+│   ├── documentation-generator.md
 │   ├── function-calling.md
-│   ├── interactive-dialogue.md
+│   ├── data-extraction.md
+│   ├── code-comparison.md
 │   └── custom.md
 ├── docs/                            # Documentation (this directory)
 │   ├── architecture-overview.md
@@ -498,7 +544,7 @@ meta-prompt/                         # Plugin root
 
 ### Template Expansion
 
-**Current:** 10 templates covering 9 categories + 1 fallback
+**Current:** 7 templates covering 6 categories + 1 fallback
 **Scalability:** New templates can be added by:
 1. Creating new `.md` file in `/templates/`
 2. Adding keywords to `template-selector.sh`
@@ -537,7 +583,7 @@ meta-prompt/                         # Plugin root
 
 - **Design Decisions:** `docs/design-decisions.md`
 - **Infrastructure Details:** `docs/infrastructure.md`
-- **Test Suite:** `commands/scripts/test-integration.sh`
+- **Test Suite:** `tests/test-integration.sh`
 
 ---
 

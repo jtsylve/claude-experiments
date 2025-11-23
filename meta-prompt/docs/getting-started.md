@@ -29,7 +29,7 @@ ls commands/
 
 If scripts aren't executable:
 ```bash
-chmod +x commands/scripts/*.sh
+chmod +x commands/scripts/*.sh tests/*.sh
 ```
 
 ---
@@ -44,7 +44,7 @@ Let's start with a simple task using `/prompt`:
 
 **What happens:**
 1. The bash handler script parses your request (0 tokens)
-2. The task is classified as "simple-classification" (0 tokens)
+2. The task is classified as "code-comparison" (0 tokens)
 3. Variables are extracted: ITEM1="Python", ITEM2="JavaScript" (0 tokens)
 4. Template is loaded and processed (minimal tokens)
 5. LLM executes the optimized prompt
@@ -65,13 +65,13 @@ DEBUG=1 commands/scripts/template-selector.sh "Compare Python and JavaScript for
 
 **Expected output:**
 ```
-simple-classification
+code-comparison
 Confidence: 85%
 Threshold: 70%
 ```
 
 This shows:
-- **Template selected:** simple-classification
+- **Template selected:** code-comparison
 - **Confidence:** 85% (well above the 70% threshold)
 - **Tokens consumed:** 0 (deterministic bash script)
 
@@ -144,6 +144,8 @@ Ten templates cover common patterns:
 ```bash
 /create-prompt "Add error handling to the user registration function"
 ```
+
+**Note:** Complex templates automatically guide sub-agents to use TodoWrite for tracking multi-step tasks. This ensures systematic progress and completion verification.
 
 ### 4. Function Calling
 **Use for:** Using APIs or tools to complete tasks
@@ -238,17 +240,17 @@ Check that everything is working:
 
 ```bash
 # Validate all templates
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 ```
 
 **Expected output:**
 ```
 === Template Validation ===
-Validating: simple-classification
+Validating: code-comparison
   ✓ Has valid frontmatter
   ✓ Has required fields
   [... more checks ...]
-PASSED: simple-classification
+PASSED: code-comparison
 [... 9 more templates ...]
 
 === Summary ===
@@ -260,7 +262,7 @@ Failed: 0
 Run integration tests:
 
 ```bash
-commands/scripts/test-integration.sh
+tests/test-integration.sh
 ```
 
 **Expected output:**
@@ -274,7 +276,7 @@ Failed: 0
 Verify documentation accuracy:
 
 ```bash
-commands/scripts/verify-documentation-counts.sh
+tests/verify-documentation-counts.sh
 ```
 
 **Expected output:**
@@ -341,7 +343,7 @@ SAVINGS: 1800 tokens (64% reduction)
 ```bash
 /prompt "Compare REST and GraphQL APIs"
 ```
-→ Uses simple-classification template (3 variables)
+→ Uses code-comparison template (3 variables)
 
 ### Pattern 2: Document Analysis
 ```bash
@@ -369,7 +371,7 @@ SAVINGS: 1800 tokens (64% reduction)
 
 **Solution:**
 ```bash
-chmod +x commands/scripts/*.sh
+chmod +x commands/scripts/*.sh tests/*.sh
 ```
 
 ### Issue: Template always returns "custom"
@@ -386,14 +388,14 @@ If confidence is consistently low, the keywords might need adjustment. See [Temp
 **Solution:** Verify templates exist
 ```bash
 ls templates/
-# Should show: simple-classification.md, document-qa.md, etc.
+# Should show: code-comparison.md, document-qa.md, etc.
 ```
 
 ### Issue: Tests failing
 
 **Solution:** Run validation first
 ```bash
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 # Fix any reported issues before running tests
 ```
 
@@ -442,10 +444,10 @@ Want to improve the system? See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 ### Validation
 ```bash
 # Validate templates
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 
 # Run tests
-commands/scripts/test-integration.sh
+tests/test-integration.sh
 
 # Debug classification
 DEBUG=1 commands/scripts/template-selector.sh "task"

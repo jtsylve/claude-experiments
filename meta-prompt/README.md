@@ -19,7 +19,7 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 /create-prompt "Compare two code snippets for semantic equivalence"
 ```
 
-**How it works:** Your task is classified into a template category (zero tokens), variables are substituted (zero tokens), and the LLM executes only the actual work. Result: 40-60% token savings.
+**How it works:** Your task is classified into a template category (zero tokens), variables are substituted (zero tokens), and the LLM executes only the actual work. For borderline cases, the agent intelligently selects the best template to maximize accuracy. Result: 40-60% token savings with improved template routing.
 
 ---
 
@@ -50,9 +50,10 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 ## Key Features
 
 - **Token Reduction:** 40-60% overall, 100% for orchestration
-- **Classification Accuracy:** 90%+ for template routing
+- **Classification Accuracy:** 90%+ for template routing with LLM fallback for edge cases
 - **Performance:** <100ms deterministic overhead
-- **Templates:** 10 pre-built templates covering common patterns
+- **Templates:** 7 pre-built templates optimized for software development
+- **Hybrid Routing:** Keyword-based classification with intelligent LLM fallback for borderline cases
 - **Security:** Input sanitization, whitelist-based permissions
 
 ---
@@ -65,16 +66,16 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 
 ```bash
 # Validate all templates
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 
 # Run integration tests
-commands/scripts/test-integration.sh
+tests/test-integration.sh
 
 # Debug template classification
 DEBUG=1 commands/scripts/template-selector.sh "your task"
 
 # Make scripts executable
-chmod +x commands/scripts/*.sh
+chmod +x commands/scripts/*.sh tests/*.sh
 ```
 
 ### Project Structure
@@ -108,7 +109,7 @@ meta-prompt/
 
 ### As a Claude Code Plugin (Recommended)
 
-Install via the claude-experiments marketplace:
+Install from claude-experiments:
 
 ```bash
 /plugin install jtsylve/claude-experiments
@@ -121,16 +122,16 @@ The meta-prompt plugin will be available immediately with `/prompt` and `/create
 ### For Development
 
 ```bash
-# Clone the marketplace repository
+# Clone the repository
 git clone https://github.com/jtsylve/claude-experiments
 cd claude-experiments/meta-prompt
 
 # Make scripts executable
-chmod +x commands/scripts/*.sh
+chmod +x commands/scripts/*.sh tests/*.sh
 
 # Validate installation
-commands/scripts/validate-templates.sh
-commands/scripts/test-integration.sh
+tests/validate-templates.sh
+tests/test-integration.sh
 ```
 
 See [Infrastructure Guide](docs/infrastructure.md#environment-setup) for detailed setup instructions.
@@ -155,19 +156,17 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## Templates
 
-Ten templates cover common patterns:
+Seven templates optimized for software development workflows:
 
 | Template | Use Cases | Variables |
 |----------|-----------|-----------|
-| simple-classification | Compare items, check equivalence | 3 |
-| document-qa | Answer with citations, extract info | 2 |
 | code-refactoring | Modify code, fix bugs, add features | 2 |
-| function-calling | API usage, tool invocation | 2 |
-| interactive-dialogue | Tutors, customer support bots | 4 |
-| test-generation | Generate unit tests, test suites, edge cases | 3 |
 | code-review | Security audits, quality analysis, feedback | 3 |
+| test-generation | Generate unit tests, test suites, edge cases | 3 |
 | documentation-generator | API docs, READMEs, docstrings, user guides | 3 |
+| function-calling | API usage, tool invocation | 2 |
 | data-extraction | Extract data from logs, JSON, HTML, text | 3 |
+| code-comparison | Compare code, configs, check equivalence | 3 |
 | custom | Novel tasks (LLM fallback) | 1 |
 
 See [Template Authoring Guide](docs/template-authoring.md) to create your own.

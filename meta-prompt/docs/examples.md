@@ -1,16 +1,16 @@
 # Examples and Use Cases
 
-This document provides 10 detailed examples showing how the meta-prompt optimization system works in practice, including token consumption comparisons.
+This document provides examples showing how the meta-prompt optimization system works in practice, with 7 templates optimized for software development workflows.
+
+> **Note:** Examples 2 (document-qa) and 5 (interactive-dialogue) have been removed as these templates were deprecated in favor of the streamlined software development template set.
 
 ---
 
 ## Table of Contents
 
-1. [Example 1: Comparing Code Snippets (simple-classification)](#example-1-comparing-code-snippets)
-2. [Example 2: Answering Questions from Documentation (document-qa)](#example-2-answering-questions-from-documentation)
+1. [Example 1: Comparing Code Snippets (code-comparison)](#example-1-comparing-code-snippets)
 3. [Example 3: Refactoring a Module (code-refactoring)](#example-3-refactoring-a-module)
 4. [Example 4: Building an API Client (function-calling)](#example-4-building-an-api-client)
-5. [Example 5: Creating a Tutor Bot (interactive-dialogue)](#example-5-creating-a-tutor-bot)
 6. [Example 6: Generating Unit Tests (test-generation)](#example-6-generating-unit-tests)
 7. [Example 7: Code Review for Security (code-review)](#example-7-code-review-for-security)
 8. [Example 8: Generating API Documentation (documentation-generator)](#example-8-generating-api-documentation)
@@ -39,7 +39,7 @@ DEBUG=1 commands/scripts/template-selector.sh \
 
 **Output:**
 ```
-simple-classification
+code-comparison
 Confidence: 85%
 Threshold: 70%
 ```
@@ -59,7 +59,7 @@ The system extracts:
 
 **Step 3: Template Processing**
 
-Template loaded: `templates/simple-classification.md`
+Template loaded: `templates/code-comparison.md`
 
 Variables substituted:
 ```markdown
@@ -837,7 +837,7 @@ If all templates score below 70% confidence, the system falls back to `custom`:
 
 | Example | Template | Without Opt. | With Opt. | Savings | Reduction |
 |---------|----------|--------------|-----------|---------|-----------|
-| 1. Code comparison | simple-classification | 1800 | 20 | 1780 | 98.9% |
+| 1. Code comparison | code-comparison | 1800 | 20 | 1780 | 98.9% |
 | 2. Document Q&A | document-qa | 1800 | 20 | 1780 | 98.9% |
 | 3. Code refactoring | code-refactoring | 1800 | 25 | 1775 | 98.6% |
 | 4. API client | function-calling | 1800 | 25 | 1775 | 98.6% |
@@ -914,7 +914,7 @@ If tasks consistently mis-classify:
 - **Template Library:** `templates/` directory
 - **Classification Logic:** `commands/scripts/template-selector.sh:83-166`
 - **Processing Logic:** `commands/scripts/template-processor.sh`
-- **Validation:** `commands/scripts/validate-templates.sh`
+- **Validation:** `tests/validate-templates.sh`
 
 **Next Steps:**
 - Try `/prompt` with your own tasks

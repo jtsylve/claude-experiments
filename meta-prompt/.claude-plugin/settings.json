@@ -5,8 +5,10 @@
       "Bash(commands/scripts/prompt-handler.sh:*)",
       "Bash(commands/scripts/template-processor.sh:*)",
       "Bash(commands/scripts/template-selector.sh:*)",
-      "Bash(commands/scripts/validate-templates.sh:*)",
-      "Bash(commands/scripts/test-integration.sh:*)",
+      "Bash(tests/validate-templates.sh:*)",
+      "Bash(tests/verify-documentation-counts.sh:*)",
+      "Bash(tests/test-integration.sh:*)",
+      "Bash(tests/test-validation.sh:*)",
       "Bash(DEBUG=1 commands/scripts/template-selector.sh:*)",
       "Bash(chmod:*)"
     ],

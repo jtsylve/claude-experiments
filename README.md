@@ -194,7 +194,7 @@ All plugins in this marketplace must:
 
 ## Marketplace Maintenance
 
-This marketplace is maintained by the Meta Marketplace Team. We review all pull requests and ensure:
+This marketplace is maintained by the claude-experiments team. We review all pull requests and ensure:
 - Code quality and security standards
 - Documentation completeness
 - Compatibility with Claude Code

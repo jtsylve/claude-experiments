@@ -14,13 +14,16 @@ meta-prompt/                                   # Plugin root
 │   └── scripts/                               # Deterministic processing scripts
 │       ├── prompt-handler.sh                  # /prompt orchestration (77 lines)
 │       ├── template-selector.sh               # Task classification (194 lines)
-│       ├── template-processor.sh              # Variable substitution (116 lines)
-│       ├── validate-templates.sh              # Template validation (180 lines)
-│       ├── verify-documentation-counts.sh     # Doc count verification (160 lines)
-│       └── test-integration.sh                # Integration tests (240 lines)
+│       └── template-processor.sh              # Variable substitution (116 lines)
+│
+├── tests/                                     # Test scripts
+│   ├── test-integration.sh                    # Integration tests (240 lines)
+│   ├── test-validation.sh                     # Validation tests (360 lines)
+│   ├── validate-templates.sh                  # Template validation (180 lines)
+│   └── verify-documentation-counts.sh         # Doc count verification (160 lines)
 │
 ├── templates/                                 # Template library
-│   ├── simple-classification.md               # Comparison template (37 lines)
+│   ├── code-comparison.md               # Comparison template (37 lines)
 │   ├── document-qa.md                         # Document Q&A template (39 lines)
 │   ├── code-refactoring.md                    # Code modification template (64 lines)
 │   ├── code-review.md                         # Code review template
@@ -53,13 +56,10 @@ meta-prompt/                                   # Plugin root
 │   │   └── scripts/                           # Deterministic processing scripts
 │   │       ├── prompt-handler.sh              # /prompt orchestration (77 lines)
 │   │       ├── template-selector.sh           # Task classification (194 lines)
-│   │       ├── template-processor.sh          # Variable substitution (116 lines)
-│   │       ├── validate-templates.sh          # Template validation (180 lines)
-│   │       ├── verify-documentation-counts.sh # Doc count verification (160 lines)
-│   │       └── test-integration.sh            # Integration tests (240 lines)
+│   │       └── template-processor.sh          # Variable substitution (116 lines)
 │   │
 │   ├── templates/                             # Template library
-│   │   ├── simple-classification.md           # Comparison template (37 lines)
+│   │   ├── code-comparison.md           # Comparison template (37 lines)
 │   │   ├── document-qa.md                     # Document Q&A template (39 lines)
 │   │   ├── code-refactoring.md                # Code modification template (64 lines)
 │   │   ├── code-review.md                     # Code review template
@@ -114,12 +114,18 @@ meta-prompt/                                   # Plugin root
 **Execution:** Called from commands via Bash tool
 **Token Cost:** Zero (deterministic execution)
 
+#### `tests/`
+**Purpose:** Test and validation scripts
+**File Format:** Bash shell scripts (.sh)
+**Permissions:** Executable (`chmod +x`)
+**Contents:** Integration tests, validation utilities, and verification scripts
+
 #### `templates/`
 **Purpose:** Pre-built prompt templates
 **File Format:** Markdown with YAML frontmatter
-**Count:** 10 templates
+**Count:** 7 templates
 **Version:** Tracked in frontmatter (`version: 1.0`)
-**Validation:** Via `validate-templates.sh`
+**Validation:** Via `tests/validate-templates.sh`
 
 #### `docs/`
 **Purpose:** Project documentation
@@ -146,7 +152,7 @@ meta-prompt/                                   # Plugin root
       "Bash(commands/scripts/prompt-handler.sh:*)",
       "Bash(chmod:*)",
       "Bash(commands/scripts/template-processor.sh:*)",
-      "Bash(commands/scripts/validate-templates.sh:*)",
+      "Bash(tests/validate-templates.sh:*)",
       "Bash(DEBUG=1 commands/scripts/template-selector.sh:*)",
       "Bash(./commands/scripts/test-integration.sh)",
       "Bash(commands/scripts/template-selector.sh:*)",
@@ -229,7 +235,7 @@ variable_descriptions:          # Optional: Detailed variable explanations
 Run validation before committing template changes:
 
 ```bash
-commands/scripts/validate-templates.sh [template-name]
+tests/validate-templates.sh [template-name]
 ```
 
 ---
@@ -263,7 +269,7 @@ This project has **no build step**. All components are interpreted at runtime:
 cd .claude
 
 # Validate all templates
-./commands/scripts/validate-templates.sh
+./tests/validate-templates.sh
 
 # Run integration tests
 ./commands/scripts/test-integration.sh
@@ -402,7 +408,7 @@ cd claude-meta-prompt
 chmod +x commands/scripts/*.sh
 
 # Validate installation
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 commands/scripts/test-integration.sh
 ```
 
@@ -419,7 +425,7 @@ mkdir -p {agents,commands/scripts,templates,docs}
 chmod +x commands/scripts/*.sh
 
 # Validate setup
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 ```
 
 ### Verification
@@ -432,7 +438,7 @@ bash --version
 ls -l commands/scripts/*.sh
 
 # Run validation
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 
 # Run integration tests
 commands/scripts/test-integration.sh
@@ -441,11 +447,11 @@ commands/scripts/test-integration.sh
 **Expected Output:**
 ```
 === Template Validation ===
-Validating: simple-classification
+Validating: code-comparison
   ✓ Has valid frontmatter
   ✓ Has required field: template_name
   [... more checks ...]
-PASSED: simple-classification
+PASSED: code-comparison
 
 [... 5 more templates ...]
 
@@ -508,7 +514,7 @@ Ensure all scripts are in the `allow` list:
       "Bash(commands/scripts/prompt-handler.sh:*)",
       "Bash(commands/scripts/template-selector.sh:*)",
       "Bash(commands/scripts/template-processor.sh:*)",
-      "Bash(commands/scripts/validate-templates.sh:*)",
+      "Bash(tests/validate-templates.sh:*)",
       "Bash(commands/scripts/test-integration.sh:*)"
     ]
   }
@@ -532,7 +538,7 @@ DEBUG=1 commands/scripts/template-selector.sh "Your task description"
 
 **Debug Output Example:**
 ```
-simple-classification
+code-comparison
 Confidence: 85%
 Threshold: 70%
 ```
@@ -717,7 +723,7 @@ jobs:
       - name: Make scripts executable
         run: chmod +x commands/scripts/*.sh
       - name: Validate templates
-        run: commands/scripts/validate-templates.sh
+        run: tests/validate-templates.sh
       - name: Run integration tests
         run: commands/scripts/test-integration.sh
 ```
@@ -729,7 +735,7 @@ jobs:
 # .git/hooks/pre-commit
 
 # Run tests before allowing commit
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 if [ $? -ne 0 ]; then
     echo "Template validation failed. Commit aborted."
     exit 1
@@ -829,7 +835,7 @@ Currently manual. Future improvements:
 
 4. **Validate:**
    ```bash
-   commands/scripts/validate-templates.sh new-template
+   tests/validate-templates.sh new-template
    ```
 
 5. **Test:**
@@ -1294,7 +1300,7 @@ Threshold: 70%
 ```bash
 # Normal usage
 template=$(commands/scripts/template-selector.sh "Compare Python and JavaScript")
-echo "$template"  # Output: simple-classification
+echo "$template"  # Output: code-comparison
 
 # Debug mode
 DEBUG=1 commands/scripts/template-selector.sh "Refactor authentication module"
@@ -1353,7 +1359,7 @@ Processed template with substituted variables
 **Example Usage:**
 ```bash
 # Simple classification example
-commands/scripts/template-processor.sh simple-classification \
+commands/scripts/template-processor.sh code-comparison \
     ITEM1='Python' \
     ITEM2='JavaScript' \
     CLASSIFICATION_CRITERIA='execution model'
@@ -1382,7 +1388,7 @@ commands/scripts/template-processor.sh code-refactoring \
 
 **Purpose:** Validate template structure and metadata
 
-**Location:** `commands/scripts/validate-templates.sh`
+**Location:** `tests/validate-templates.sh`
 
 **Synopsis:**
 ```bash
@@ -1418,10 +1424,10 @@ Failed: 0
 **Example Usage:**
 ```bash
 # Validate all templates
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 
 # Validate specific template
-commands/scripts/validate-templates.sh simple-classification
+tests/validate-templates.sh code-comparison
 ```
 
 **Validation Checks:**

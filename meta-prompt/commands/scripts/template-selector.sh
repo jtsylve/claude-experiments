@@ -9,6 +9,20 @@ set -euo pipefail
 # Confidence threshold (0-100)
 CONFIDENCE_THRESHOLD=70
 
+# Borderline confidence range for LLM fallback (60-69%)
+BORDERLINE_MIN=60
+BORDERLINE_MAX=69
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Log directory and file
+LOG_DIR="${SCRIPT_DIR}/../../logs"
+LOG_FILE="${LOG_DIR}/template-selections.jsonl"
+
+# Create log directory if it doesn't exist
+mkdir -p "${LOG_DIR}" 2>/dev/null || true
+
 # Convert text to lowercase for case-insensitive matching
 to_lowercase() {
     echo "$1" | tr '[:upper:]' '[:lower:]'
@@ -34,14 +48,7 @@ has_strong_indicator() {
 
     case "$category" in
         "code")
-            if echo "$text" | grep -qiE "(^|[^a-z])(refactor|codebase|implement|fix|update|modify|create|build)([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
-            ;;
-        "doc")
-            if echo "$text" | grep -qiE "(^|[^a-z])(cite|quotes?)([^a-z]|$)"; then
+            if echo "$text" | grep -qiE "(^|[^a-z])(refactor|codebase|implement|fix|update|modify|create|build|reorganize|improve|enhance|transform|optimize|rework|revamp|refine|polish|modernize|clean|streamline)([^a-z]|$)"; then
                 return 0
             else
                 return 1
@@ -54,15 +61,8 @@ has_strong_indicator() {
                 return 1
             fi
             ;;
-        "dialogue")
-            if echo "$text" | grep -qiE "(^|[^a-z])(tutors?|dialogue|conversations?|conversational|agents?|support|teachers?)([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
-            ;;
-        "classification")
-            if echo "$text" | grep -qiE "(^|[^a-z])(compare|classify|check|same|different)([^a-z]|$)"; then
+        "comparison")
+            if echo "$text" | grep -qiE "(^|[^a-z])(compare|classify|check|same|different|verify|determine|match|matches|equivalent|equals?|similar|duplicate|identical)([^a-z]|$)"; then
                 return 0
             else
                 return 1
@@ -76,21 +76,21 @@ has_strong_indicator() {
             fi
             ;;
         "review")
-            if echo "$text" | grep -qiE "(^|[^a-z])(review|feedback|critique)([^a-z]|$)"; then
+            if echo "$text" | grep -qiE "(^|[^a-z])(review|feedback|critique|analyze|assess|evaluate|examine|inspect|scrutinize|audit|scan|survey|vet|investigate|appraise)([^a-z]|$)"; then
                 return 0
             else
                 return 1
             fi
             ;;
         "documentation")
-            if echo "$text" | grep -qiE "(^|[^a-z])(documentation|readme|docstring|docs|document)([^a-z]|$)"; then
+            if echo "$text" | grep -qiE "(^|[^a-z])(documentation|readme|docstring|docs|document|write.*(comment|docstring|documentation|guide|instruction)|author.*(documentation|instruction|guide))([^a-z]|$)"; then
                 return 0
             else
                 return 1
             fi
             ;;
         "extraction")
-            if echo "$text" | grep -qiE "(^|[^a-z])(extract|parse)([^a-z]|$)"; then
+            if echo "$text" | grep -qiE "(^|[^a-z])(extract|parse|pull|retrieve|mine|harvest|collect|scrape|distill|gather|isolate|obtain|sift|fish|pluck|glean|cull|unearth|dredge|winnow)([^a-z]|$)"; then
                 return 0
             else
                 return 1
@@ -109,28 +109,24 @@ classify_task() {
 
     # Define keywords for each category (supporting keywords)
     local code_keywords=("code" "file" "class" "bug" "module" "system" "endpoint")
-    local doc_keywords=("question" "answer" "reference" "source" "paper")
     local function_keywords=("call" "invoke" "execute" "use" "available" "functions")
-    local dialogue_keywords=("chat" "interactive" "teach" "socratic" "customer" "math")
-    local classification_keywords=("sentence" "match" "equal" "whether" "mean")
+    local comparison_keywords=("sentence" "equal" "whether" "mean" "version" "duplicate" "similarity")
     local test_keywords=("coverage" "jest" "pytest" "junit" "mocha" "case" "suite" "edge" "unit" "generate")
     local review_keywords=("quality" "readability" "maintainability" "practices" "smell" "analyze")
-    local documentation_keywords=("docs" "comment" "guide" "reference" "explain" "api" "write" "function")
+    local documentation_keywords=("docs" "comment" "guide" "reference" "explain" "api" "write" "function" "inline" "author" "instructions" "setup" "method")
     local extraction_keywords=("data" "scrape" "retrieve" "json" "html" "csv" "email" "address" "timestamp" "logs" "file")
 
     # Count supporting keyword matches for each category
     local code_count=$(count_matches "$task_lower" "${code_keywords[@]}")
-    local doc_count=$(count_matches "$task_lower" "${doc_keywords[@]}")
     local function_count=$(count_matches "$task_lower" "${function_keywords[@]}")
-    local dialogue_count=$(count_matches "$task_lower" "${dialogue_keywords[@]}")
-    local classification_count=$(count_matches "$task_lower" "${classification_keywords[@]}")
+    local comparison_count=$(count_matches "$task_lower" "${comparison_keywords[@]}")
     local testgen_count=$(count_matches "$task_lower" "${test_keywords[@]}")
     local review_count=$(count_matches "$task_lower" "${review_keywords[@]}")
     local documentation_count=$(count_matches "$task_lower" "${documentation_keywords[@]}")
     local extraction_count=$(count_matches "$task_lower" "${extraction_keywords[@]}")
 
     # Debug logging for keyword counts
-    [ -n "${DEBUG:-}" ] && echo "Keyword counts: code=$code_count doc=$doc_count function=$function_count dialogue=$dialogue_count classification=$classification_count testgen=$testgen_count review=$review_count documentation=$documentation_count extraction=$extraction_count" >&2
+    [ -n "${DEBUG:-}" ] && echo "Keyword counts: code=$code_count function=$function_count comparison=$comparison_count testgen=$testgen_count review=$review_count documentation=$documentation_count extraction=$extraction_count" >&2
 
     # Calculate confidence scores
     # Strong indicator alone = 75%, + supporting keywords increases confidence
@@ -160,10 +156,8 @@ classify_task() {
     }
 
     local code_confidence=$(calculate_confidence "code" $code_count)
-    local doc_confidence=$(calculate_confidence "doc" $doc_count)
     local function_confidence=$(calculate_confidence "function" $function_count)
-    local dialogue_confidence=$(calculate_confidence "dialogue" $dialogue_count)
-    local classification_confidence=$(calculate_confidence "classification" $classification_count)
+    local comparison_confidence=$(calculate_confidence "comparison" $comparison_count)
     local test_confidence=$(calculate_confidence "test" $testgen_count)
     local review_confidence=$(calculate_confidence "review" $review_count)
     local documentation_confidence=$(calculate_confidence "documentation" $documentation_count)
@@ -178,24 +172,14 @@ classify_task() {
         selected_template="code-refactoring"
     fi
 
-    if [ $doc_confidence -gt $max_confidence ]; then
-        max_confidence=$doc_confidence
-        selected_template="document-qa"
-    fi
-
     if [ $function_confidence -gt $max_confidence ]; then
         max_confidence=$function_confidence
         selected_template="function-calling"
     fi
 
-    if [ $dialogue_confidence -gt $max_confidence ]; then
-        max_confidence=$dialogue_confidence
-        selected_template="interactive-dialogue"
-    fi
-
-    if [ $classification_confidence -gt $max_confidence ]; then
-        max_confidence=$classification_confidence
-        selected_template="simple-classification"
+    if [ $comparison_confidence -gt $max_confidence ]; then
+        max_confidence=$comparison_confidence
+        selected_template="code-comparison"
     fi
 
     if [ $test_confidence -gt $max_confidence ]; then
@@ -219,9 +203,29 @@ classify_task() {
     fi
 
     # If confidence below threshold, use custom template
+    # Keep actual confidence for borderline detection (60-69%)
     if [ $max_confidence -lt $CONFIDENCE_THRESHOLD ]; then
         selected_template="custom"
-        max_confidence=0
+        # Only set to 0 if truly low confidence (< 60%)
+        if [ $max_confidence -lt $BORDERLINE_MIN ]; then
+            max_confidence=0
+        fi
+    fi
+
+    # Log the selection decision
+    if [ "${ENABLE_LOGGING:-1}" = "1" ]; then
+        # Create task hash for privacy
+        local task_hash
+        task_hash=$(echo -n "$task_description" | shasum -a 256 | cut -d' ' -f1 | cut -c1-16)
+
+        # Create log entry with all confidence scores
+        local log_entry
+        log_entry=$(cat <<EOF
+{"timestamp":"$(date -u +%Y-%m-%dT%H:%M:%SZ)","task_hash":"$task_hash","selected_template":"$selected_template","confidence":$max_confidence,"confidences":{"code":$code_confidence,"function":$function_confidence,"comparison":$comparison_confidence,"test":$test_confidence,"review":$review_confidence,"documentation":$documentation_confidence,"extraction":$extraction_confidence}}
+EOF
+)
+        # Append to log file
+        echo "$log_entry" >> "${LOG_FILE}" 2>/dev/null || true
     fi
 
     # Output: template_name confidence
@@ -242,8 +246,8 @@ main() {
     local template_name=$(echo "$result" | cut -d' ' -f1)
     local confidence=$(echo "$result" | cut -d' ' -f2)
 
-    # Output just the template name (for easy scripting)
-    echo "$template_name"
+    # Output: template_name confidence
+    echo "$template_name $confidence"
 
     # Debug info to stderr (optional)
     if [ "${DEBUG:-0}" = "1" ]; then

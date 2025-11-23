@@ -1,14 +1,14 @@
 ---
-template_name: simple-classification
+template_name: code-comparison
 category: comparison
-keywords: [compare, classify, check, same, different, similar, match, equal]
+keywords: [compare, classify, check, same, different, similar, match, equal, duplicate, equivalent, identical, version]
 complexity: simple
 variables: [ITEM1, ITEM2, CLASSIFICATION_CRITERIA]
-version: 1.0
-description: Compare or classify items based on specific criteria
+version: 2.0
+description: Compare code, configurations, or technical artifacts to check similarity or equivalence
 ---
 
-You are checking whether two items match based on specific criteria.
+You are comparing two items to determine if they match based on specific criteria. This is commonly used for comparing code snippets, configurations, API responses, or other technical artifacts.
 
 <item1>
 {$ITEM1}
