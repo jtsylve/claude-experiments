@@ -381,13 +381,26 @@ main() {
         return 1
     fi
 
+    # Setup: Set CLAUDE_PLUGIN_ROOT if not already set (for template validation)
+    # TEMPORARY: For Windows compatibility, fallback to script-based location or hardcoded path
+    if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+        # Try to derive from script location (commands/scripts/ -> 2 levels up)
+        if [ -d "$SCRIPT_DIR/../../templates" ]; then
+            CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+        else
+            # Fallback to hardcoded path for standard installation
+            CLAUDE_PLUGIN_ROOT="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt"
+        fi
+    fi
+
     # Validate template file exists (unless it's custom)
     if [ "$template_name" != "custom" ]; then
-        # TEMPORARY: Hardcoded path for Windows compatibility workaround
-        local template_file="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/${template_name}.md"
-        # ORIGINAL: local template_file="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}/../..}/templates/${template_name}.md"
+        local template_file="${CLAUDE_PLUGIN_ROOT}/templates/${template_name}.md"
         if [ ! -f "$template_file" ]; then
-            [ "${DEBUG:-0}" = "1" ] && echo "Warning: Template file not found: $template_file" >&2
+            echo "ERROR: Template file not found at: $template_file" >&2
+            echo "This may indicate an installation issue. Expected location:" >&2
+            echo "  $CLAUDE_PLUGIN_ROOT/templates/" >&2
+            [ "${DEBUG:-0}" = "1" ] && echo "Debug: Falling back to 'custom' template" >&2
             echo "custom 0"
             return 0
         fi

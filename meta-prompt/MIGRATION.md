@@ -74,6 +74,7 @@ Three templates were removed in this version:
 | `document-qa` | `data-extraction` | For extracting structured data |
 | `document-qa` | `custom` | For complex document analysis |
 | `interactive-dialogue` | `custom` | All conversational tasks |
+| `function-calling` | `custom` | Deprecated - use custom template |
 | `code-refactoring` | `code-refactoring` | ✓ No change |
 | `test-generation` | `test-generation` | ✓ No change |
 | `code-review` | `code-review` | ✓ No change |
