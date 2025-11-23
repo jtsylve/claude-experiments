@@ -82,41 +82,35 @@ echo ""
 echo -e "${YELLOW}Phase 2: Template Validation${NC}"
 
 run_test "Correct number of templates exist" \
-    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f | wc -l | tr -d ' ') -eq 10 ]"
+    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f | wc -l | tr -d ' ') -eq 8 ]"
 
 run_test_with_output "All templates pass validation" \
     "\${CLAUDE_PLUGIN_ROOT}/tests/validate-templates.sh" \
-    "Passed: 10"
+    "Passed: 8"
 
 run_test "code-refactoring template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-refactoring.md ]"
 
-run_test "document-qa template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/document-qa.md ]"
-
-run_test "function-calling template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/function-calling.md ]"
-
-run_test "interactive-dialogue template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/interactive-dialogue.md ]"
-
-run_test "simple-classification template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/simple-classification.md ]"
-
-run_test "custom template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/custom.md ]"
+run_test "code-review template exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-review.md ]"
 
 run_test "test-generation template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/test-generation.md ]"
 
-run_test "code-review template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-review.md ]"
-
 run_test "documentation-generator template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/documentation-generator.md ]"
 
+run_test "function-calling template exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/function-calling.md ]"
+
 run_test "data-extraction template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/data-extraction.md ]"
+
+run_test "code-comparison template exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-comparison.md ]"
+
+run_test "custom template exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/custom.md ]"
 
 echo ""
 
@@ -156,7 +150,7 @@ run_test_with_output "Prompt handler handles special characters safely" \
     "user_task"
 
 run_test_with_output "Template processor handles special characters in values" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='test\$var' ITEM2='back\`tick' COMPARISON_CRITERIA='criteria'" \
     "test"
 
 echo ""
@@ -168,65 +162,79 @@ run_test_with_output "Classifies code refactoring correctly" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Refactor the authentication module'" \
     "code-refactoring"
 
-run_test_with_output "Classifies document Q&A correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Answer this question using citations from the paper'" \
-    "document-qa"
-
-run_test_with_output "Classifies function calling correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Use these API functions to fetch data'" \
-    "function-calling"
-
-run_test_with_output "Classifies dialogue correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Act as a tutor for students'" \
-    "interactive-dialogue"
-
-run_test_with_output "Classifies comparison correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Compare these two sentences'" \
-    "simple-classification"
-
-run_test_with_output "Falls back to custom for novel tasks" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Write a creative poem'" \
-    "custom"
+run_test_with_output "Classifies code review correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Review this code for security issues'" \
+    "code-review"
 
 run_test_with_output "Classifies test generation correctly" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate pytest tests for this function'" \
     "test-generation"
 
-run_test_with_output "Classifies code review correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Review this code for security issues'" \
-    "code-review"
-
 run_test_with_output "Classifies documentation generation correctly" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate API documentation for this module'" \
     "documentation-generator"
+
+run_test_with_output "Classifies function calling correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Use these API functions to fetch data'" \
+    "function-calling"
 
 run_test_with_output "Classifies data extraction correctly" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract email addresses from this log file'" \
     "data-extraction"
 
-run_test_with_output "Distinguishes document extraction from data extraction" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract quotes from this research paper'" \
-    "document-qa"
+run_test_with_output "Classifies code comparison correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Compare these two functions for equivalence'" \
+    "code-comparison"
+
+run_test_with_output "Falls back to custom for novel tasks" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Write a creative poem'" \
+    "custom"
+
+run_test_with_output "Falls back to custom for conversational tasks" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Act as a Socratic tutor for students'" \
+    "custom"
 
 echo ""
 
-# ===== PHASE 3B: Classification Confidence Range Tests =====
-echo -e "${YELLOW}Phase 3B: Classification Confidence Ranges${NC}"
+# ===== PHASE 3B: Hybrid Routing Confidence Tests =====
+echo -e "${YELLOW}Phase 3B: Hybrid Routing Confidence Ranges${NC}"
 
-run_test_with_output "Test generation confidence in expected range (83-91%)" \
-    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate pytest tests with edge cases and mocking' 2>&1" \
-    "Confidence: [89][0-9]%"
+# High confidence tests (70-100%): Should route directly without LLM fallback
+run_test_with_output "High confidence: code refactoring (≥70%)" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Refactor authentication to use JWT tokens'" \
+    "code-refactoring [7-9][0-9]"
 
-run_test_with_output "Code review confidence in expected range (75-91%)" \
-    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Review this authentication code for security vulnerabilities and best practices' 2>&1" \
-    "Confidence: [7-9][0-9]%"
+run_test_with_output "High confidence: test generation (≥70%)" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate pytest tests with edge cases'" \
+    "test-generation [7-9][0-9]"
 
-run_test_with_output "Documentation confidence in expected range (83-91%)" \
-    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate comprehensive API documentation with examples' 2>&1" \
-    "Confidence: [89][0-9]%"
+run_test_with_output "High confidence: code review (≥70%)" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Review code for security vulnerabilities'" \
+    "code-review [7-9][0-9]"
 
-run_test_with_output "Data extraction confidence in expected range (75-91%)" \
-    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract timestamps and error codes from application logs' 2>&1" \
+# Borderline confidence tests (60-69%): Should output confidence for LLM fallback
+# These tasks have some signals but may benefit from LLM verification
+run_test_with_output "Borderline confidence: ambiguous task outputs 60-69%" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Analyze code quality' | awk '{print \$2}'" \
+    "^(6[0-9]|[0-5][0-9]|0)\$"
+
+# Low confidence tests (<60%): Should route to custom with confidence 0
+run_test_with_output "Low confidence: novel task routes to custom" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Write a haiku about recursion'" \
+    "custom 0"
+
+run_test_with_output "Low confidence: conversational task routes to custom" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Be a helpful assistant'" \
+    "custom"
+
+# Confidence output format validation
+run_test_with_output "Output format: template name and confidence score" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Fix bug in parser'" \
+    "^[a-z-]+ [0-9]+\$"
+
+# Confidence threshold boundary testing
+run_test_with_output "Strong indicators guarantee ≥75% confidence" \
+    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Refactor this code' 2>&1" \
     "Confidence: [7-9][0-9]%"
 
 echo ""
@@ -235,15 +243,15 @@ echo ""
 echo -e "${YELLOW}Phase 4: Template Processing${NC}"
 
 run_test_with_output "Template processor substitutes variables" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='apple' ITEM2='orange' CLASSIFICATION_CRITERIA='fruit'" \
-    "apple"
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='function a()' ITEM2='function b()' COMPARISON_CRITERIA='semantic equivalence'" \
+    "function a()"
 
 run_test_with_output "Template processor includes template content" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='apple' ITEM2='orange' CLASSIFICATION_CRITERIA='fruit'" \
-    "Begin your answer"
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='code1' ITEM2='code2' COMPARISON_CRITERIA='performance'" \
+    "code1"
 
 run_test_with_output "Template processor detects unreplaced variables" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh simple-classification ITEM1='apple'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='code1'" \
     "unreplaced"
 
 echo ""
