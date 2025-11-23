@@ -173,6 +173,42 @@ run_test "Strong indicator + many supporting keywords = capped at 100%" \
     "Refactor the code file class module system endpoint" \
     "code-refactoring" 100 100
 
+# ===== PHASE 7: Negative Test Cases =====
+echo -e "${YELLOW}Phase 7: Negative Test Cases (Misleading Keywords)${NC}"
+
+# Note: Keyword-based classifiers cannot understand negation semantics
+# These tests verify current behavior rather than ideal behavior
+run_test "Negation with keyword - 'don't refactor' (still matches refactor)" \
+    "Don't refactor the code, just review it" \
+    "code-refactoring" 70
+
+run_test "Negation with keyword - 'not a test' (document wins with higher confidence)" \
+    "This is not a test, just document the API" \
+    "documentation-generator" 70
+
+run_test "Keyword in different context - 'test environment' (refactor wins)" \
+    "Refactor the test environment configuration" \
+    "code-refactoring" 70
+
+run_test "Strong indicator tie - 'extract documentation' (documentation checked first)" \
+    "Extract the documentation string from files" \
+    "documentation-generator" 75 75
+
+# ===== PHASE 8: Boundary Value Tests =====
+echo -e "${YELLOW}Phase 8: Boundary Value Tests (Exact Thresholds)${NC}"
+
+run_test "Exactly at borderline minimum (60%)" \
+    "code file" \
+    "code-refactoring" 60 69
+
+run_test "Just above borderline (70%+)" \
+    "Refactor" \
+    "code-refactoring" 75 75
+
+run_test "Just below borderline (<60% becomes custom)" \
+    "code" \
+    "custom" 0 0
+
 # ===== Summary =====
 echo ""
 echo -e "${YELLOW}=== Summary ===${NC}"

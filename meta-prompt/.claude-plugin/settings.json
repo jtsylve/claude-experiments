@@ -9,6 +9,7 @@
       "Bash(tests/verify-documentation-counts.sh:*)",
       "Bash(tests/test-integration.sh:*)",
       "Bash(tests/test-validation.sh:*)",
+      "Bash(tests/test-logging.sh:*)",
       "Bash(DEBUG=1 commands/scripts/template-selector.sh:*)",
       "Bash(chmod:*)"
     ],

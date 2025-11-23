@@ -10,6 +10,20 @@
 
 set -euo pipefail
 
+# Check for required dependencies
+for cmd in grep cut tr wc date; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: Required command '$cmd' not found" >&2
+        exit 1
+    fi
+done
+
+# Check for at least one hash command
+if ! command -v shasum &>/dev/null && ! command -v sha256sum &>/dev/null && ! command -v cksum &>/dev/null; then
+    echo "Error: No hash command found (shasum, sha256sum, or cksum required)" >&2
+    exit 1
+fi
+
 # Confidence thresholds (0-100)
 # NOTE: These values were initially determined by Claude during development and may need
 # empirical tuning based on real-world usage patterns. Consider adjusting based on:
@@ -78,12 +92,13 @@ PATTERN_DOCUMENTATION="documentation|readme|docstring|docs|document|write.*(comm
 PATTERN_EXTRACTION="extract|parse|pull|retrieve|mine|harvest|collect|scrape|distill|gather|isolate|obtain|sift|fish|pluck|glean|cull|unearth|dredge|winnow"
 
 # Portable hash function (supports both shasum and sha256sum)
+# Uses 32-character hash for better collision resistance while keeping logs manageable
 compute_hash() {
     local input="$1"
     if command -v shasum &>/dev/null; then
-        printf %s "$input" | shasum -a 256 | cut -d' ' -f1 | cut -c1-16
+        printf %s "$input" | shasum -a 256 | cut -d' ' -f1 | cut -c1-32
     elif command -v sha256sum &>/dev/null; then
-        printf %s "$input" | sha256sum | cut -d' ' -f1 | cut -c1-16
+        printf %s "$input" | sha256sum | cut -d' ' -f1 | cut -c1-32
     else
         # Fallback: use simple checksum if neither is available
         printf %s "$input" | cksum | cut -d' ' -f1
@@ -113,48 +128,32 @@ count_matches() {
 compute_strong_indicators() {
     local text="$1"
 
-    # Check all patterns and store results in variables (using word boundaries)
-    if echo "$text" | grep -qiE "\b($PATTERN_CODE)\b"; then
-        HAS_STRONG_CODE=1
-    else
-        HAS_STRONG_CODE=0
-    fi
+    # Array of categories and their pattern variables
+    # Format: "VARIABLE_NAME:PATTERN_VAR_NAME"
+    local categories=(
+        "HAS_STRONG_CODE:PATTERN_CODE"
+        "HAS_STRONG_FUNCTION:PATTERN_FUNCTION"
+        "HAS_STRONG_COMPARISON:PATTERN_COMPARISON"
+        "HAS_STRONG_TEST:PATTERN_TEST"
+        "HAS_STRONG_REVIEW:PATTERN_REVIEW"
+        "HAS_STRONG_DOCUMENTATION:PATTERN_DOCUMENTATION"
+        "HAS_STRONG_EXTRACTION:PATTERN_EXTRACTION"
+    )
 
-    if echo "$text" | grep -qiE "\b($PATTERN_FUNCTION)\b"; then
-        HAS_STRONG_FUNCTION=1
-    else
-        HAS_STRONG_FUNCTION=0
-    fi
+    # Check all patterns and store results (using word boundaries)
+    local category var_name pattern_var pattern
+    for category in "${categories[@]}"; do
+        var_name="${category%%:*}"
+        pattern_var="${category##*:}"
+        # Use indirect variable reference to get pattern value
+        pattern="${!pattern_var}"
 
-    if echo "$text" | grep -qiE "\b($PATTERN_COMPARISON)\b"; then
-        HAS_STRONG_COMPARISON=1
-    else
-        HAS_STRONG_COMPARISON=0
-    fi
-
-    if echo "$text" | grep -qiE "\b($PATTERN_TEST)\b"; then
-        HAS_STRONG_TEST=1
-    else
-        HAS_STRONG_TEST=0
-    fi
-
-    if echo "$text" | grep -qiE "\b($PATTERN_REVIEW)\b"; then
-        HAS_STRONG_REVIEW=1
-    else
-        HAS_STRONG_REVIEW=0
-    fi
-
-    if echo "$text" | grep -qiE "\b($PATTERN_DOCUMENTATION)\b"; then
-        HAS_STRONG_DOCUMENTATION=1
-    else
-        HAS_STRONG_DOCUMENTATION=0
-    fi
-
-    if echo "$text" | grep -qiE "\b($PATTERN_EXTRACTION)\b"; then
-        HAS_STRONG_EXTRACTION=1
-    else
-        HAS_STRONG_EXTRACTION=0
-    fi
+        if echo "$text" | grep -qiE "\b($pattern)\b"; then
+            eval "$var_name=1"
+        else
+            eval "$var_name=0"
+        fi
+    done
 }
 
 # Check if task contains strong indicator keywords (worth 75% confidence alone)
@@ -314,8 +313,8 @@ classify_task() {
         # Append to log file with error handling and race condition protection
         # Use flock for atomic writes to prevent corruption from concurrent instances
         (
-            # Try to acquire exclusive lock (timeout after 1 second)
-            if command -v flock &>/dev/null && flock -w 1 200; then
+            # Try to acquire exclusive lock (timeout after 3 seconds to handle heavy load)
+            if command -v flock &>/dev/null && flock -w 3 200; then
                 echo "$log_entry" >> "${LOG_FILE}" 2>/dev/null
             else
                 # Fallback: write without lock if flock unavailable or times out
@@ -374,6 +373,16 @@ main() {
         echo "Error: Invalid confidence value: $confidence" >&2
         echo "custom 0"
         return 1
+    fi
+
+    # Validate template file exists (unless it's custom)
+    if [ "$template_name" != "custom" ]; then
+        local template_file="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}/../..}/templates/${template_name}.md"
+        if [ ! -f "$template_file" ]; then
+            [ "${DEBUG:-0}" = "1" ] && echo "Warning: Template file not found: $template_file" >&2
+            echo "custom 0"
+            return 0
+        fi
     fi
 
     # Output: template_name confidence

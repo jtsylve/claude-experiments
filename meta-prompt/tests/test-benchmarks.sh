@@ -18,7 +18,8 @@ SELECTOR="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}/..}/commands/scripts/template-sele
 # Performance threshold (in milliseconds)
 # Set to 70ms to provide headroom for different system environments
 # Actual performance is ~60ms but varies by system load and hardware
-THRESHOLD_MS=70
+# Can be overridden via BENCHMARK_THRESHOLD_MS environment variable
+THRESHOLD_MS="${BENCHMARK_THRESHOLD_MS:-70}"
 
 # Disable logging for accurate performance measurement
 export ENABLE_LOGGING=0
