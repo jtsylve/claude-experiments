@@ -20,6 +20,17 @@ CONFIDENCE_THRESHOLD=70
 BORDERLINE_MIN=60
 BORDERLINE_MAX=69
 
+# Validate threshold relationships
+if [ $BORDERLINE_MIN -ge $BORDERLINE_MAX ]; then
+    echo "Error: BORDERLINE_MIN ($BORDERLINE_MIN) must be less than BORDERLINE_MAX ($BORDERLINE_MAX)" >&2
+    exit 1
+fi
+
+if [ $BORDERLINE_MAX -ge $CONFIDENCE_THRESHOLD ]; then
+    echo "Error: BORDERLINE_MAX ($BORDERLINE_MAX) must be less than CONFIDENCE_THRESHOLD ($CONFIDENCE_THRESHOLD)" >&2
+    exit 1
+fi
+
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -311,6 +322,20 @@ main() {
     local result=$(classify_task "$task_description")
     local template_name=$(echo "$result" | cut -d' ' -f1)
     local confidence=$(echo "$result" | cut -d' ' -f2)
+
+    # Validate parsed output
+    if [ -z "$template_name" ] || [ -z "$confidence" ]; then
+        echo "Error: Failed to parse template selector output" >&2
+        echo "custom 0"
+        return 1
+    fi
+
+    # Validate confidence is a number
+    if ! [[ "$confidence" =~ ^[0-9]+$ ]]; then
+        echo "Error: Invalid confidence value: $confidence" >&2
+        echo "custom 0"
+        return 1
+    fi
 
     # Output: template_name confidence
     echo "$template_name $confidence"
