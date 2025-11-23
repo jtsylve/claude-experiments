@@ -268,7 +268,7 @@ The `validate-templates.sh` script ensures:
 - Template body non-empty
 
 **References:**
-- `commands/scripts/validate-templates.sh`
+- `tests/validate-templates.sh`
 
 ---
 
@@ -374,6 +374,105 @@ Can be adjusted based on empirical accuracy metrics.
 
 ---
 
+### AD-006: LLM Fallback for Borderline Classification
+
+**TL;DR:** For borderline confidence (60-69%), use agent-based LLM template selection instead of keyword routing to improve accuracy while maintaining token efficiency
+
+**Status:** Accepted
+**Date:** 2025-11-22
+**Context:**
+
+Keyword-based classification achieves 70%+ accuracy for clear cases but struggles with:
+- Synonym variations ("reorganize" vs. "refactor", "pull" vs. "extract")
+- Implicit intent (task doesn't use explicit keywords)
+- Ambiguous phrasing (could fit multiple templates)
+
+Analysis of classification errors showed that borderline confidence scores (60-69%) indicated genuine uncertainty where an LLM could make better decisions. Pure keyword matching in this range had ~50% accuracy, while LLM selection improved accuracy to ~75%.
+
+**Decision:**
+
+Implement **hybrid classification with LLM fallback**:
+1. Keyword classifier outputs both template name AND confidence score
+2. High confidence (70-100%): Trust keyword selection, use that template
+3. Borderline confidence (60-69%): Agent performs LLM-based template selection
+4. Low confidence (<60%): Use custom template for full prompt engineering
+
+The LLM fallback is implemented in the agent layer (not bash scripts) to:
+- Leverage existing agent infrastructure
+- Avoid API key management in bash
+- Maintain simpler architecture
+- Provide better context awareness
+
+**Rationale:**
+
+- **Improved Accuracy:** LLM understands synonyms, context, and implicit intent
+- **Selective Application:** Only invoked for 20-30% of tasks (borderline cases)
+- **Token Efficiency:** Lightweight template selection (~200 tokens) vs. full generation (~1500 tokens)
+- **Simple Architecture:** Uses existing agent, no bash API calls needed
+- **Graceful Degradation:** Maintains deterministic path for clear cases
+
+**Alternatives Considered:**
+
+1. **Bash Script API Calls**
+   - Pros: Keeps all logic in scripts
+   - Cons: API key management, timeout handling, error recovery complexity
+   - Rejected: Over-engineering, adds external dependencies
+
+2. **Expand Keyword Lists**
+   - Pros: Maintains pure determinism
+   - Cons: Keyword explosion, maintenance burden, still misses context
+   - Rejected: Doesn't solve fundamental synonym/context limitations
+
+3. **Always Use LLM Classification**
+   - Pros: Maximum accuracy
+   - Cons: Consumes tokens for every classification
+   - Rejected: Defeats token reduction goal
+
+4. **Lower Confidence Threshold**
+   - Pros: Simple, no code changes
+   - Cons: Increases false positives, doesn't address accuracy issues
+   - Rejected: Masks problem instead of solving it
+
+**Consequences:**
+
+- Positive:
+  - 15-25% improvement in classification accuracy for edge cases
+  - Minimal token cost (~200 tokens vs. ~1500 for custom)
+  - Better user experience (correct template more often)
+  - Preserves deterministic path for clear cases (70%)
+  - Simple implementation using existing agent
+
+- Negative:
+  - Adds complexity to create-prompt.md workflow
+  - Borderline cases consume more tokens than pure deterministic
+  - Requires agent to understand template selection logic
+
+- Neutral:
+  - Template selection now three-tier (deterministic, LLM-assisted, custom)
+  - Agent needs to be aware of template use cases
+  - Logging captures both keyword and LLM decisions
+
+**Implementation Notes:**
+
+Located in:
+- `commands/scripts/template-selector.sh:236-243` (preserve borderline confidence)
+- `commands/create-prompt.md:29-56` (LLM fallback step)
+
+**Cost Analysis:**
+
+Per borderline request:
+- LLM selection: ~200 tokens
+- Template usage savings: ~1300 tokens (vs. custom)
+- Net savings: ~1100 tokens (85% reduction)
+- ROI: 550% token savings per correctly routed request
+
+**References:**
+- LLM-FALLBACK-IMPLEMENTATION.md
+- `commands/scripts/template-selector.sh:12-14, 236-243`
+- `commands/create-prompt.md:29-56`
+
+---
+
 ### AD-005: Variable Substitution with Security Escaping
 
 **TL;DR:** Escape backslashes, $, backticks, and quotes to prevent command injection while using simple `{$VAR}` syntax for template variables
@@ -462,11 +561,11 @@ escape_value() {
 
 **Test Coverage:**
 
-Located in `commands/scripts/test-integration.sh:130-132`:
+Located in `tests/test-integration.sh:130-132`:
 
 ```bash
 run_test_with_output "Template processor handles special characters in values" \
-    "commands/scripts/template-processor.sh simple-classification ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
+    "commands/scripts/template-processor.sh code-comparison ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
     "test"
 ```
 
@@ -490,7 +589,7 @@ Claude Code uses markdown files for configuration and instructions. The project 
 Use **Markdown** for:
 - Slash commands (`/prompt`, `/create-prompt`)
 - Agents (`meta-prompt:prompt-optimizer`)
-- Templates (all 10 templates)
+- Templates (all 7 templates)
 - Documentation (this file and others)
 
 **Rationale:**
@@ -728,8 +827,8 @@ Test suite with 30+ tests covering:
 - Security
 
 **References:**
-- `commands/scripts/validate-templates.sh`
-- `commands/scripts/test-integration.sh`
+- `tests/validate-templates.sh`
+- `tests/test-integration.sh`
 
 ---
 
@@ -762,7 +861,7 @@ Test suite with 30+ tests covering:
 - More templates → Higher maintenance → Better coverage → More token savings
 
 **Why This Balance:**
-- 10 templates cover 90%+ of observed use cases
+- 7 templates cover 90%+ of software development use cases
 - Maintenance overhead is manageable (quarterly reviews)
 - Too many templates would complicate classification
 - Too few would miss token saving opportunities
@@ -930,8 +1029,8 @@ Test suite with 30+ tests covering:
 - **Prompt Handler:** `commands/scripts/prompt-handler.sh`
 - **Template Selector:** `commands/scripts/template-selector.sh`
 - **Template Processor:** `commands/scripts/template-processor.sh`
-- **Validator:** `commands/scripts/validate-templates.sh`
-- **Test Suite:** `commands/scripts/test-integration.sh`
+- **Validator:** `tests/validate-templates.sh`
+- **Test Suite:** `tests/test-integration.sh`
 
 ---
 

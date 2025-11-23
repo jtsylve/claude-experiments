@@ -39,7 +39,7 @@ Create a new template when:
 
 ### Current Template Capacity
 
-- **Current:** 10 templates
+- **Current:** 7 templates
 - **Recommended maximum:** 15-20 templates before classification complexity increases
 - **Sweet spot:** 8-12 templates for most projects
 
@@ -208,7 +208,7 @@ fi
 ### Step 7: Validate
 
 ```bash
-commands/scripts/validate-templates.sh sentiment-analysis
+tests/validate-templates.sh sentiment-analysis
 ```
 
 **Expected output:**
@@ -246,7 +246,7 @@ Threshold: 70%
 
 ### Step 9: Add Integration Tests
 
-Edit `commands/scripts/test-integration.sh`:
+Edit `tests/test-integration.sh`:
 
 Add test case in Phase 3 (Template Selection Accuracy):
 
@@ -260,7 +260,7 @@ run_test "Sentiment analysis task routes to sentiment-analysis template" \
 
 ```bash
 # Run complete test suite
-commands/scripts/test-integration.sh
+tests/test-integration.sh
 
 # Test actual usage
 /create-prompt "Analyze the sentiment of this movie review: [review text]"
@@ -435,6 +435,8 @@ Begin your response immediately without preamble.
 - ✓ Include edge case handling
 - ✓ Use clear, imperative language
 - ✓ Number steps for complex processes
+- ✓ Include TodoWrite step for complex templates (7+ steps or multi-file changes)
+- ✓ Specify when to update TodoWrite progress (mark completed immediately after finishing each task)
 
 **DON'T:**
 - ✗ Use vague instructions ("try to", "maybe")
@@ -442,6 +444,7 @@ Begin your response immediately without preamble.
 - ✗ Mix multiple unrelated tasks
 - ✗ Over-explain (keep it concise)
 - ✗ Use placeholder variables in examples
+- ✗ Forget TodoWrite for complex, multi-step templates
 
 ### Complexity Levels
 
@@ -463,14 +466,20 @@ Begin your response immediately without preamble.
 
 **Complex** (7+ steps):
 ```markdown
-1. Plan with TodoWrite
+1. Use TodoWrite to plan the work (search, identify files, implementation steps, testing)
 2. Search for target patterns
 3. Read files
 4. Make modifications
 5. Test changes
-6. Update todos
-7. Report results
+6. Update TodoWrite as you progress (mark completed immediately after finishing each task)
+7. Mark all todos as completed when done
 ```
+
+**Important:** Complex templates should ALWAYS include TodoWrite instructions as Step 1. This ensures sub-agents:
+- Break down work into trackable tasks
+- Maintain progress visibility
+- Complete tasks systematically
+- Verify all work is finished
 
 ---
 
@@ -524,7 +533,7 @@ DEBUG=1 commands/scripts/template-selector.sh "update the class"
 
 ```bash
 # Validates structure, variables, XML tags
-commands/scripts/validate-templates.sh your-template-name
+tests/validate-templates.sh your-template-name
 ```
 
 **What it checks:**
@@ -547,7 +556,7 @@ DEBUG=1 commands/scripts/template-selector.sh "task description"
 
 ### Integration Tests
 
-Add to `commands/scripts/test-integration.sh`:
+Add to `tests/test-integration.sh`:
 
 ```bash
 run_test "Your template routes correctly" \
@@ -669,7 +678,7 @@ fi
 ### Step 5: Validate
 
 ```bash
-commands/scripts/validate-templates.sh code-comparison
+tests/validate-templates.sh code-comparison
 # Should pass all checks
 ```
 
@@ -781,10 +790,10 @@ Update:
 - Complex: `templates/code-refactoring.md`
 
 ### Scripts
-- Validation: `commands/scripts/validate-templates.sh`
+- Validation: `tests/validate-templates.sh`
 - Classification: `commands/scripts/template-selector.sh`
 - Processing: `commands/scripts/template-processor.sh`
-- Testing: `commands/scripts/test-integration.sh`
+- Testing: `tests/test-integration.sh`
 
 ### Documentation
 - [Architecture Overview](architecture-overview.md) - Template system design

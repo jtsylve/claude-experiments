@@ -74,7 +74,7 @@ run_test "template-processor.sh exists and is executable" \
     "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh ]"
 
 run_test "validate-templates.sh exists and is executable" \
-    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/validate-templates.sh ]"
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/tests/validate-templates.sh ]"
 
 echo ""
 
@@ -85,7 +85,7 @@ run_test "Correct number of templates exist" \
     "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f | wc -l | tr -d ' ') -eq 10 ]"
 
 run_test_with_output "All templates pass validation" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/validate-templates.sh" \
+    "\${CLAUDE_PLUGIN_ROOT}/tests/validate-templates.sh" \
     "Passed: 10"
 
 run_test "code-refactoring template exists" \

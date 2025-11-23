@@ -13,29 +13,54 @@ You will create expert-level prompt templates using an intelligent template rout
 
 ## Process
 
-**Step 1: Template Selection**
+**Step 1: Keyword-Based Template Selection**
 
-Execute the template selector to determine the best template:
+Execute the keyword-based template selector to determine the best template:
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh "{$ARGUMENTS}"
 ```
 
-**Error Handling**: If the script fails or is not available, fall back to `custom` template and use the full LLM-based prompt engineering process below.
+**Error Handling**: If the script fails or is not available, fall back to step to Step 2 directly.
 
-This will return one of:
-- `code-refactoring` - For code modification tasks
-- `document-qa` - For document analysis with citations
-- `function-calling` - For tasks using provided functions/tools
-- `interactive-dialogue` - For conversational agents, tutors, support
-- `simple-classification` - For comparison or classification tasks
-- `custom` - For novel tasks requiring LLM-based prompt engineering
+The script outputs: `<template-name> <confidence>` (e.g., `code-refactoring 75`)
 
-**Step 2: Route Based on Selection**
+Parse both the template name and confidence score from the output.
 
-If the script returns anything OTHER than `custom`:
+**Step 2: LLM-Based Fallback for Borderline Cases**
+
+If the confidence score from Step 1 is between 60-69% (borderline confidence) or if the script failed:
+
+1. The keyword-based classifier is uncertain, so you should use your own judgment as an LLM to select the best template
+2. Consider the task description: `{$ARGUMENTS}`
+3. Available templates and their use cases:
+   - `code-refactoring`: For modifying, updating, refactoring, fixing, building, creating, or implementing code changes (includes TodoWrite guidance for complex tasks)
+   - `document-qa`: For answering questions about documents with citations, quotes, or references
+   - `function-calling`: For tasks that use provided functions, APIs, or tools to accomplish goals
+   - `interactive-dialogue`: For conversational agents, tutors, customer support, teaching, or guided interactions
+   - `simple-classification`: For comparing, classifying, checking similarity, or determining equivalence
+   - `test-generation`: For creating tests, test cases, test suites, or validation scenarios (includes TodoWrite for test planning)
+   - `code-review`: For reviewing code quality, security, maintainability, providing feedback or critique
+   - `documentation-generator`: For creating documentation, README files, docstrings, guides, or technical writing
+   - `data-extraction`: For extracting, parsing, retrieving, or mining data from text, logs, files, or structured formats
+   - `custom`: For novel tasks that don't fit existing templates or require custom prompt engineering
+
+   Note: Complex templates (code-refactoring, test-generation, code-review) include TodoWrite instructions to help sub-agents track progress through multi-step tasks.
+
+4. Select the BEST template based on your understanding of the task. If truly novel and doesn't fit any template well, select `custom`.
+5. Use this LLM-selected template instead of the keyword-based selection
+6. Continue to Step 3 with your selected template
+
+If confidence is >= 70% (high confidence):
+- Trust the keyword-based selection and proceed to Step 3
+
+If confidence is < 60% (low confidence):
+- The task likely doesn't fit standard templates, proceed to Step 3 with `custom`
+
+**Step 3: Route Based on Selection**
+
+If the previous step returns anything OTHER than `custom`:
 1. Read the selected template using the Read tool:
    - Use: Read tool with path `${CLAUDE_PLUGIN_ROOT}/templates/<template-name>.md`
-   - Or bash: `cat ${CLAUDE_PLUGIN_ROOT}/templates/<template-name>.md`
 2. Examine the template's required variables (in the YAML frontmatter)
 3. Extract appropriate values from the task description using these heuristics:
    - **ITEM1, ITEM2**: Look for nouns, quoted strings, or entities to compare
@@ -54,9 +79,7 @@ If the script returns anything OTHER than `custom`:
 
 If the script returns `custom`:
 1. Load the comprehensive prompt engineering guide:
-   ```bash
-   cat ${CLAUDE_PLUGIN_ROOT}/guides/engineering-guide.md
-   ```
+   - Use: Read tool with path `${CLAUDE_PLUGIN_ROOT}/guides/engineering-guide.md`
 
    **Error Handling**: If the guide file is not available, fall back to using general prompt engineering best practices (clear instructions, specific examples, structured output format, error handling, and deterministic criteria).
 

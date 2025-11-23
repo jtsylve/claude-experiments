@@ -36,11 +36,11 @@ git clone <repository-url> meta-prompt
 cd meta-prompt
 
 # Make scripts executable
-chmod +x commands/scripts/*.sh
+chmod +x commands/scripts/*.sh tests/*.sh
 
 # Validate installation
-commands/scripts/validate-templates.sh
-commands/scripts/test-integration.sh
+tests/validate-templates.sh
+tests/test-integration.sh
 
 # Expected: All templates pass, all tests pass
 ```
@@ -99,10 +99,10 @@ git checkout -b fix/bug-description
 
 ```bash
 # Validate templates
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 
 # Run integration tests
-commands/scripts/test-integration.sh
+tests/test-integration.sh
 
 # Test manually with debug mode
 DEBUG=1 commands/scripts/template-selector.sh "test task"
@@ -393,10 +393,10 @@ When reviewing PRs, check:
 
 ```bash
 # Validate all templates
-commands/scripts/validate-templates.sh
+tests/validate-templates.sh
 
 # Run integration tests
-commands/scripts/test-integration.sh
+tests/test-integration.sh
 ```
 
 **Expected results:**

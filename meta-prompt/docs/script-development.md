@@ -114,14 +114,14 @@ result=$(grep "pattern" file.txt | wc -l)
 
 ```bash
 # Good
-template_name="simple-classification"
+template_name="code-comparison"
 confidence_score=85
 task_description="$1"
 
 # Bad
-TemplateName="simple-classification"  # PascalCase
-TEMPLATE_NAME="simple-classification"  # ALL_CAPS (reserved for env vars)
-templatename="simple-classification"   # No separator
+TemplateName="code-comparison"  # PascalCase
+TEMPLATE_NAME="code-comparison"  # ALL_CAPS (reserved for env vars)
+templatename="code-comparison"   # No separator
 ```
 
 **Constants: UPPER_SNAKE_CASE**
@@ -266,7 +266,7 @@ esac
 ```bash
 # Good: whitelist valid templates
 case "$template_name" in
-    simple-classification|document-qa|code-refactoring|function-calling|interactive-dialogue|custom)
+    code-refactoring|code-review|test-generation|documentation-generator|function-calling|data-extraction|code-comparison|custom)
         template_path="$TEMPLATE_DIR/$template_name.md"
         ;;
     *)
@@ -332,16 +332,16 @@ test_sanitize() {
 # Test classification accuracy
 test_classification() {
     local result=$(./template-selector.sh "Compare Python and JavaScript")
-    if [[ "$result" == "simple-classification" ]]; then
+    if [[ "$result" == "code-comparison" ]]; then
         echo "PASS: Classification"
     else
-        echo "FAIL: Expected simple-classification, got $result"
+        echo "FAIL: Expected code-comparison, got $result"
         exit 1
     fi
 }
 ```
 
-See `commands/scripts/test-integration.sh` for complete test suite.
+See `tests/test-integration.sh` for complete test suite.
 
 ### 3. Edge Case Testing
 
@@ -359,7 +359,7 @@ test_empty_input() {
 
 # Test special characters
 test_special_chars() {
-    ./template-processor.sh simple-classification \
+    ./template-processor.sh code-comparison \
         ITEM1='test$var' \
         ITEM2='back`tick`' \
         CLASSIFICATION_CRITERIA='quote"test'
@@ -630,7 +630,7 @@ fi
 - XML tags balanced
 - Template has content
 
-**Location:** `commands/scripts/validate-templates.sh`
+**Location:** `tests/validate-templates.sh`
 
 ### test-integration.sh
 
@@ -649,7 +649,7 @@ fi
 6. Prompt handler (3 tests)
 7. File modifications (3 tests)
 
-**Location:** `commands/scripts/test-integration.sh`
+**Location:** `tests/test-integration.sh`
 
 ### verify-documentation-counts.sh
 
@@ -667,14 +667,14 @@ fi
 
 **Usage:**
 ```bash
-CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt commands/scripts/verify-documentation-counts.sh
+CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt tests/verify-documentation-counts.sh
 ```
 
 **Exit codes:**
 - 0: All documentation counts are accurate
 - 1: Documentation counts don't match actual counts or script error
 
-**Location:** `commands/scripts/verify-documentation-counts.sh`
+**Location:** `tests/verify-documentation-counts.sh`
 
 **Note:** Run this script before releases or after adding/removing templates or tests to ensure documentation stays synchronized with the codebase.
 
@@ -701,7 +701,7 @@ calculate_score() {
 }
 
 # Call from multiple places
-score_simple=$(calculate_score "simple-classification" "$task")
+score_simple=$(calculate_score "code-comparison" "$task")
 score_document=$(calculate_score "document-qa" "$task")
 ```
 

@@ -13,7 +13,7 @@ fi
 
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 DOCS_DIR="${CLAUDE_PLUGIN_ROOT}/docs"
-TEST_SCRIPT="${CLAUDE_PLUGIN_ROOT}/commands/scripts/test-integration.sh"
+TEST_SCRIPT="${CLAUDE_PLUGIN_ROOT}/tests/test-integration.sh"
 README_FILE="${CLAUDE_PLUGIN_ROOT}/../README.md"
 
 # ANSI color codes

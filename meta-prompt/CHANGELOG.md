@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - MIT License with copyright notice
 - Environment variable validation in bash scripts to prevent silent failures
-- `CLAUDE_PLUGIN_ROOT` validation in `template-processor.sh` and `validate-templates.sh`
-- `verify-documentation-counts.sh` script to validate that documentation counts match actual file counts, preventing future documentation drift
+- `CLAUDE_PLUGIN_ROOT` validation in `template-processor.sh` and `tests/validate-templates.sh`
+- `tests/verify-documentation-counts.sh` script to validate that documentation counts match actual file counts, preventing future documentation drift
 
 ### Changed
 - **BREAKING:** Agent references now use fully-qualified names (`meta-prompt:prompt-optimizer` instead of `prompt-optimizer`)

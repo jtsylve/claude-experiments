@@ -47,7 +47,7 @@ This project follows **Semantic Versioning (semver)** - `MAJOR.MINOR.PATCH`
 **Template versions:** Individual template frontmatter
 ```yaml
 ---
-template_name: simple-classification
+template_name: code-comparison
 version: 1.0
 ---
 ```
@@ -71,7 +71,7 @@ grep "Current Version" README.md
 
 ```bash
 # Check specific template
-grep "version:" templates/simple-classification.md
+grep "version:" templates/code-comparison.md
 
 # Check all templates
 for template in templates/*.md; do
@@ -99,7 +99,7 @@ git log -p commands/scripts/template-selector.sh
 **Status:** Production Ready
 
 **Includes:**
-- 10 templates (simple-classification, document-qa, code-refactoring, function-calling, interactive-dialogue, test-generation, code-review, documentation-generator, data-extraction, custom)
+- 7 templates (code-comparison, document-qa, code-refactoring, function-calling, interactive-dialogue, test-generation, code-review, documentation-generator, data-extraction, custom)
 - 6 bash scripts (prompt-handler, template-selector, template-processor, validate-templates, verify-documentation-counts, test-integration)
 - Classification system with 90%+ accuracy
 - Comprehensive documentation suite
@@ -112,11 +112,11 @@ git clone <repository-url> meta-prompt
 cd meta-prompt
 
 # Make scripts executable
-chmod +x commands/scripts/*.sh
+chmod +x commands/scripts/*.sh tests/*.sh
 
 # Validate
-commands/scripts/validate-templates.sh
-commands/scripts/test-integration.sh
+tests/validate-templates.sh
+tests/test-integration.sh
 ```
 
 **No migration needed** - this is the initial release
@@ -135,7 +135,7 @@ commands/scripts/test-integration.sh
 **1. Agent Reference Namespacing**
 - **Old:** `subagent_type="prompt-optimizer"`
 - **New:** `subagent_type="meta-prompt:prompt-optimizer"`
-- **Reason:** Required by Claude Code plugin marketplace namespacing system
+- **Reason:** Required by Claude Code plugin namespacing system
 - **Migration Required:** Yes - Update all Task tool calls
 
 **2. Model Reference Update**
@@ -169,7 +169,7 @@ The `${CLAUDE_PLUGIN_ROOT}` environment variable is automatically set by Claude 
 
 ```bash
 export CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt
-./commands/scripts/template-processor.sh simple-classification ITEM1='test' ...
+./commands/scripts/template-processor.sh code-comparison ITEM1='test' ...
 ```
 
 **3. Validate Migration**
@@ -177,7 +177,7 @@ export CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt
 ```bash
 # Run integration tests
 cd meta-prompt
-CLAUDE_PLUGIN_ROOT=$(pwd) commands/scripts/test-integration.sh
+CLAUDE_PLUGIN_ROOT=$(pwd) tests/test-integration.sh
 
 # Expected: All 50 tests pass
 ```
@@ -272,8 +272,8 @@ EOF
 
 **5. Validate Migration**
 ```bash
-commands/scripts/validate-templates.sh
-commands/scripts/test-integration.sh
+tests/validate-templates.sh
+tests/test-integration.sh
 ```
 
 **6. Test Manually**
@@ -358,13 +358,13 @@ git checkout -b rollback-to-v1.0 v1.0
 **3. Restore Scripts**
 ```bash
 # Make scripts executable again
-chmod +x commands/scripts/*.sh
+chmod +x commands/scripts/*.sh tests/*.sh
 ```
 
 **4. Validate Rollback**
 ```bash
-commands/scripts/validate-templates.sh
-commands/scripts/test-integration.sh
+tests/validate-templates.sh
+tests/test-integration.sh
 ```
 
 **5. Test Functionality**
@@ -377,7 +377,7 @@ commands/scripts/test-integration.sh
 
 **Rollback single template:**
 ```bash
-git checkout v1.0 -- templates/simple-classification.md
+git checkout v1.0 -- templates/code-comparison.md
 ```
 
 **Rollback single script:**
@@ -462,7 +462,7 @@ git checkout v1.0 -- .claude-plugin/settings.json
 - [ ] Update custom templates (if needed)
 - [ ] Update configuration files (if needed)
 - [ ] Update permissions in settings.json (if needed)
-- [ ] Make scripts executable: `chmod +x commands/scripts/*.sh`
+- [ ] Make scripts executable: `chmod +x commands/scripts/*.sh tests/*.sh`
 
 ### Post-Migration
 
