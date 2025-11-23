@@ -159,7 +159,7 @@ if [ -n "$TEMPLATE" ]; then
 fi
 
 # Normalize whitespace - use sed instead of xargs to avoid quote interpretation issues
-RAW_TASK_DESCRIPTION=$(printf '%s' "$RAW_TASK_DESCRIPTION" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/[[:space:]]\+/ /g')
+RAW_TASK_DESCRIPTION=$(printf '%s' "$RAW_TASK_DESCRIPTION" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/[[:space:]][[:space:]]*/ /g')
 
 # Sanitize the task description after flag processing
 TASK_DESCRIPTION=$(sanitize_input "$RAW_TASK_DESCRIPTION")

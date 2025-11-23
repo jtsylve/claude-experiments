@@ -149,8 +149,20 @@ run_test_with_output "Prompt handler handles special characters safely" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Task with \$SPECIAL and \`backticks\`'" \
     "user_task"
 
+run_test_with_output "Prompt handler handles apostrophes correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh \"Fix the code so it doesn't crash\"" \
+    "doesn't crash"
+
+run_test_with_output "Prompt handler handles double quotes correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Review the \"main\" function'" \
+    "main"
+
+run_test_with_output "Prompt handler handles multiple apostrophes correctly" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh \"Fix user's auth so it doesn't allow access\"" \
+    "user's auth so it doesn't"
+
 run_test_with_output "Template processor handles special characters in values" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='test\$var' ITEM2='back\`tick' COMPARISON_CRITERIA='criteria'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
     "test"
 
 echo ""
@@ -243,11 +255,11 @@ echo ""
 echo -e "${YELLOW}Phase 4: Template Processing${NC}"
 
 run_test_with_output "Template processor substitutes variables" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='function a()' ITEM2='function b()' COMPARISON_CRITERIA='semantic equivalence'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='function a()' ITEM2='function b()' CLASSIFICATION_CRITERIA='semantic equivalence'" \
     "function a()"
 
 run_test_with_output "Template processor includes template content" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='code1' ITEM2='code2' COMPARISON_CRITERIA='performance'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='code1' ITEM2='code2' CLASSIFICATION_CRITERIA='performance'" \
     "code1"
 
 run_test_with_output "Template processor detects unreplaced variables" \

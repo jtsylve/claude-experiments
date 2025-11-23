@@ -168,7 +168,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 **Quick checklist before submitting:**
 - [ ] All templates pass validation
-- [ ] Integration tests pass (50/50)
+- [ ] Integration tests pass (53/53)
 - [ ] Documentation updated
 - [ ] Permissions updated in settings.json
 
