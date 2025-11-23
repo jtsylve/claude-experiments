@@ -26,13 +26,21 @@ The script outputs: `<template-name> <confidence>` (e.g., `code-refactoring 75`)
 
 Parse both the template name and confidence score from the output.
 
-**Step 2: LLM-Based Fallback for Borderline Cases**
+**Step 2: Evaluate Confidence and Route Accordingly**
 
-If the confidence score from Step 1 is between 60-69% (borderline confidence) or if the script failed:
+The script in Step 1 always outputs both the template name AND confidence score.
+Your job as an LLM is to interpret the confidence and route accordingly:
 
-1. The keyword-based classifier is uncertain, so you should use your own judgment as an LLM to select the best template
-2. Consider the task description: `{$ARGUMENTS}`
-3. Available templates and their use cases:
+**If confidence >= 70% (High Confidence):**
+- The keyword-based classifier is confident in its selection
+- Trust the keyword-selected template and proceed to Step 3
+
+**If confidence 60-69% (Borderline - LLM Fallback):**
+- The keyword-based classifier is uncertain
+- Use your own judgment as an LLM to select the best template
+- The keyword suggestion is provided as a hint, but you should verify it
+- Consider the task description: `{$ARGUMENTS}`
+- Available templates and their use cases:
    - `code-refactoring`: For modifying, updating, refactoring, fixing, building, creating, or implementing code changes (includes TodoWrite guidance for complex tasks)
    - `function-calling`: For tasks that use provided functions, APIs, or tools to accomplish goals
    - `code-comparison`: For comparing, classifying, checking similarity, or determining equivalence
@@ -43,16 +51,13 @@ If the confidence score from Step 1 is between 60-69% (borderline confidence) or
    - `custom`: For novel tasks that don't fit existing templates or require custom prompt engineering
 
    Note: Complex templates (code-refactoring, test-generation, code-review) include TodoWrite instructions to help sub-agents track progress through multi-step tasks.
+- Select the BEST template based on your understanding of the task. If truly novel and doesn't fit any template well, select `custom`.
+- Use this LLM-selected template instead of the keyword-based selection
+- Continue to Step 3 with your selected template
 
-4. Select the BEST template based on your understanding of the task. If truly novel and doesn't fit any template well, select `custom`.
-5. Use this LLM-selected template instead of the keyword-based selection
-6. Continue to Step 3 with your selected template
-
-If confidence is >= 70% (high confidence):
-- Trust the keyword-based selection and proceed to Step 3
-
-If confidence is < 60% (low confidence):
-- The task likely doesn't fit standard templates, proceed to Step 3 with `custom`
+**If confidence < 60% (Low Confidence):**
+- The task likely doesn't fit standard templates
+- Proceed to Step 3 with `custom` template
 
 **Step 3: Route Based on Selection**
 
