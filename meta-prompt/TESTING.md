@@ -132,7 +132,7 @@ $env:CLAUDE_PLUGIN_ROOT="C:\Users\joe\src\claude-experiments\meta-prompt"
 bash ./meta-prompt/commands/scripts/test-validation.sh
 ```
 
-**Note:** Windows path normalization for `CLAUDE_PLUGIN_ROOT` is a known issue (see GitHub #11984). Test carefully on Windows systems.
+**Note:** Windows path normalization for `CLAUDE_PLUGIN_ROOT` is a known issue (see GitHub #11984). A temporary workaround has been implemented using hardcoded paths - see docs/infrastructure.md for details. Test scripts automatically derive the plugin root from their location, so manual setting of CLAUDE_PLUGIN_ROOT is optional for testing.
 
 ---
 

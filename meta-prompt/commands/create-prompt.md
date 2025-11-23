@@ -2,7 +2,7 @@
 name: create-prompt
 description: Create expert-level prompt templates for Claude Code with best practices, examples, and structured output
 argument-hint: <task description>
-allowed-tools: [Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/*.sh), Read(${CLAUDE_PLUGIN_ROOT}/templates/**), Read(${CLAUDE_PLUGIN_ROOT}/guides/**)]
+allowed-tools: [Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/*.sh), Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/**), Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/guides/**)]
 ---
 
 You will create expert-level prompt templates using an intelligent template routing system.
@@ -17,7 +17,7 @@ You will create expert-level prompt templates using an intelligent template rout
 
 Execute the keyword-based template selector to determine the best template:
 ```bash
-${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh "{$ARGUMENTS}"
+~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/template-selector.sh "{$ARGUMENTS}"
 ```
 
 **Error Handling**: If the script fails or is not available, fall back to Step 2 directly.
@@ -63,7 +63,7 @@ Your job as an LLM is to interpret the confidence and route accordingly:
 
 If the previous step returns anything OTHER than `custom`:
 1. Read the selected template using the Read tool:
-   - Use: Read tool with path `${CLAUDE_PLUGIN_ROOT}/templates/<template-name>.md`
+   - Use: Read tool with path `~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/<template-name>.md`
 2. Examine the template's required variables (in the YAML frontmatter)
    - Distinguish between `variables` (required) and `optional_variables` (optional with defaults)
    - Only required variables MUST be extracted from the task description
@@ -79,7 +79,7 @@ If the previous step returns anything OTHER than `custom`:
    - For optional variables: only extract if clearly specified; omit otherwise to use defaults
 4. Use the template processor to substitute variables:
    ```bash
-   ${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh <template-name> VAR1='value1' VAR2='value2' ...
+   ~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/template-processor.sh <template-name> VAR1='value1' VAR2='value2' ...
    ```
 
    **Error Handling**: If template-processor.sh fails:
@@ -92,7 +92,7 @@ If the previous step returns anything OTHER than `custom`:
 
 If the script returns `custom`:
 1. Load the comprehensive prompt engineering guide:
-   - Use: Read tool with path `${CLAUDE_PLUGIN_ROOT}/guides/engineering-guide.md`
+   - Use: Read tool with path `~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/guides/engineering-guide.md`
 
    **Error Handling**: If the guide file is not available, fall back to using general prompt engineering best practices (clear instructions, specific examples, structured output format, error handling, and deterministic criteria).
 

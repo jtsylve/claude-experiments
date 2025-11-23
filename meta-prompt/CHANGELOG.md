@@ -32,9 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ensures consistent behavior with specific model version
   - Future updates: Consider updating to newer model versions as they become available
 - Author information standardized to "Joe T. Sylve, Ph.D." across all files
-- All script paths updated to use `${CLAUDE_PLUGIN_ROOT}` environment variable instead of relative paths
-  - Improves portability and reliability when scripts are invoked from different directories
-  - Scripts will now fail fast with clear error messages if `CLAUDE_PLUGIN_ROOT` is not set
+- **TEMPORARY WORKAROUND:** All script paths temporarily use hardcoded paths instead of `${CLAUDE_PLUGIN_ROOT}` due to Windows compatibility issue
+  - Core scripts (`template-selector.sh`, `template-processor.sh`) use hardcoded `~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`
+  - Command files (`create-prompt.md`, `prompt.md`) and agent files (`prompt-optimizer.md`) use hardcoded paths in allowed-tools
+  - Test scripts intelligently derive plugin root from their own location for local testing
+  - All workaround changes marked with `TEMPORARY` comments for easy reverting when Claude Code issue #11984 is fixed
+  - See docs/infrastructure.md for detailed explanation of Windows path normalization issue
+  - **Original design:** Script paths should use `${CLAUDE_PLUGIN_ROOT}` for portability - will be restored once Claude Code fixes path normalization
 - **Template updates (v1.0 → v1.1):** Multiple templates updated to make contextual variables optional
   - `code-review`: `REVIEW_FOCUS` and `LANGUAGE_CONVENTIONS` now optional (only `CODE_TO_REVIEW` required)
   - `code-refactoring`: `TARGET_PATTERNS` now optional (only `TASK_REQUIREMENTS` required)

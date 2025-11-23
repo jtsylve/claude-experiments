@@ -6,12 +6,15 @@
 set -euo pipefail
 
 # Validate required environment variables
-if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-    echo "ERROR: CLAUDE_PLUGIN_ROOT environment variable is not set" >&2
-    exit 1
-fi
+# TEMPORARY: Commented out for Windows compatibility workaround (will be restored)
+# if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+#     echo "ERROR: CLAUDE_PLUGIN_ROOT environment variable is not set" >&2
+#     exit 1
+# fi
 
-TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
+# TEMPORARY: Hardcoded path for Windows compatibility workaround
+TEMPLATE_DIR="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates"
+# ORIGINAL: TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 
 # Function: Load template file
 load_template() {

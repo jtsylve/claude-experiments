@@ -84,7 +84,6 @@ mkdir -p "${LOG_DIR}" 2>/dev/null || true
 # Regex patterns for strong indicators (extracted for maintainability)
 # Each pattern matches whole words only using word boundary assertions
 PATTERN_CODE="refactor|codebase|implement|fix|update|modify|create|build|reorganize|improve|enhance|transform|optimize|rework|revamp|refine|polish|modernize|clean|streamline"
-PATTERN_FUNCTION="functions?|apis?|tools?"
 PATTERN_COMPARISON="compare|classify|check|same|different|verify|determine|match|matches|equivalent|equals?|similar|duplicate|identical"
 PATTERN_TEST="tests?|spec|testing|unittest"
 PATTERN_REVIEW="review|feedback|critique|analyze|assess|evaluate|examine|inspect|scrutinize|audit|scan|survey|vet|investigate|appraise"
@@ -132,7 +131,6 @@ compute_strong_indicators() {
     # Format: "VARIABLE_NAME:PATTERN_VAR_NAME"
     local categories=(
         "HAS_STRONG_CODE:PATTERN_CODE"
-        "HAS_STRONG_FUNCTION:PATTERN_FUNCTION"
         "HAS_STRONG_COMPARISON:PATTERN_COMPARISON"
         "HAS_STRONG_TEST:PATTERN_TEST"
         "HAS_STRONG_REVIEW:PATTERN_REVIEW"
@@ -165,9 +163,6 @@ has_strong_indicator() {
         "code")
             return $((1 - HAS_STRONG_CODE))
             ;;
-        "function")
-            return $((1 - HAS_STRONG_FUNCTION))
-            ;;
         "comparison")
             return $((1 - HAS_STRONG_COMPARISON))
             ;;
@@ -199,16 +194,14 @@ classify_task() {
 
     # Define keywords for each category (supporting keywords)
     local code_keywords=("code" "file" "class" "bug" "module" "system" "endpoint")
-    local function_keywords=("call" "invoke" "execute" "use" "available" "functions")
     local comparison_keywords=("sentence" "equal" "whether" "mean" "version" "duplicate" "similarity")
     local test_keywords=("coverage" "jest" "pytest" "junit" "mocha" "case" "suite" "edge" "unit" "generate")
-    local review_keywords=("quality" "readability" "maintainability" "practices" "smell" "analyze")
-    local documentation_keywords=("docs" "comment" "guide" "reference" "explain" "api" "write" "function" "inline" "author" "instructions" "setup" "method")
+    local review_keywords=("readability" "maintainability" "practices" "smell")
+    local documentation_keywords=("comment" "guide" "reference" "explain" "api" "write" "function" "inline" "author" "instructions" "setup" "method")
     local extraction_keywords=("data" "scrape" "retrieve" "json" "html" "csv" "email" "address" "timestamp" "logs" "file")
 
     # Count supporting keyword matches for each category
     local code_count=$(count_matches "$task_lower" "${code_keywords[@]}")
-    local function_count=$(count_matches "$task_lower" "${function_keywords[@]}")
     local comparison_count=$(count_matches "$task_lower" "${comparison_keywords[@]}")
     local testgen_count=$(count_matches "$task_lower" "${test_keywords[@]}")
     local review_count=$(count_matches "$task_lower" "${review_keywords[@]}")
@@ -216,7 +209,7 @@ classify_task() {
     local extraction_count=$(count_matches "$task_lower" "${extraction_keywords[@]}")
 
     # Debug logging for keyword counts
-    [ -n "${DEBUG:-}" ] && echo "Keyword counts: code=$code_count function=$function_count comparison=$comparison_count testgen=$testgen_count review=$review_count documentation=$documentation_count extraction=$extraction_count" >&2
+    [ -n "${DEBUG:-}" ] && echo "Keyword counts: code=$code_count comparison=$comparison_count testgen=$testgen_count review=$review_count documentation=$documentation_count extraction=$extraction_count" >&2
 
     # Calculate confidence scores using configured constants
     calculate_confidence() {
@@ -244,7 +237,6 @@ classify_task() {
     }
 
     local code_confidence=$(calculate_confidence "code" $code_count)
-    local function_confidence=$(calculate_confidence "function" $function_count)
     local comparison_confidence=$(calculate_confidence "comparison" $comparison_count)
     local test_confidence=$(calculate_confidence "test" $testgen_count)
     local review_confidence=$(calculate_confidence "review" $review_count)
@@ -258,11 +250,6 @@ classify_task() {
     if [ $code_confidence -gt $max_confidence ]; then
         max_confidence=$code_confidence
         selected_template="code-refactoring"
-    fi
-
-    if [ $function_confidence -gt $max_confidence ]; then
-        max_confidence=$function_confidence
-        selected_template="function-calling"
     fi
 
     if [ $comparison_confidence -gt $max_confidence ]; then
@@ -306,19 +293,18 @@ classify_task() {
         task_hash=$(compute_hash "$task_description")
 
         # Validate template name (defense-in-depth: ensure only expected values)
-        local valid_templates="custom|code-refactoring|function-calling|code-comparison|test-generation|code-review|documentation-generator|data-extraction"
+        local valid_templates="custom|code-refactoring|code-comparison|test-generation|code-review|documentation-generator|data-extraction"
         if ! echo "$selected_template" | grep -qE "^($valid_templates)$"; then
             [ "${DEBUG:-0}" = "1" ] && echo "Warning: Invalid template name '$selected_template', defaulting to 'custom'" >&2
             selected_template="custom"
         fi
 
         # Validate all confidence values are integers (defense-in-depth)
-        local safe_max_confidence safe_code_confidence safe_function_confidence safe_comparison_confidence
+        local safe_max_confidence safe_code_confidence safe_comparison_confidence
         local safe_test_confidence safe_review_confidence safe_documentation_confidence safe_extraction_confidence
 
         if [[ "$max_confidence" =~ ^[0-9]+$ ]]; then safe_max_confidence="$max_confidence"; else safe_max_confidence=0; fi
         if [[ "$code_confidence" =~ ^[0-9]+$ ]]; then safe_code_confidence="$code_confidence"; else safe_code_confidence=0; fi
-        if [[ "$function_confidence" =~ ^[0-9]+$ ]]; then safe_function_confidence="$function_confidence"; else safe_function_confidence=0; fi
         if [[ "$comparison_confidence" =~ ^[0-9]+$ ]]; then safe_comparison_confidence="$comparison_confidence"; else safe_comparison_confidence=0; fi
         if [[ "$test_confidence" =~ ^[0-9]+$ ]]; then safe_test_confidence="$test_confidence"; else safe_test_confidence=0; fi
         if [[ "$review_confidence" =~ ^[0-9]+$ ]]; then safe_review_confidence="$review_confidence"; else safe_review_confidence=0; fi
@@ -328,7 +314,7 @@ classify_task() {
         # Create log entry with all confidence scores
         # Note: Using single-line format to prevent log injection from newlines in task descriptions
         local log_entry
-        log_entry="{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task_hash\":\"$task_hash\",\"selected_template\":\"$selected_template\",\"confidence\":$safe_max_confidence,\"confidences\":{\"code\":$safe_code_confidence,\"function\":$safe_function_confidence,\"comparison\":$safe_comparison_confidence,\"test\":$safe_test_confidence,\"review\":$safe_review_confidence,\"documentation\":$safe_documentation_confidence,\"extraction\":$safe_extraction_confidence}}"
+        log_entry="{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task_hash\":\"$task_hash\",\"selected_template\":\"$selected_template\",\"confidence\":$safe_max_confidence,\"confidences\":{\"code\":$safe_code_confidence,\"comparison\":$safe_comparison_confidence,\"test\":$safe_test_confidence,\"review\":$safe_review_confidence,\"documentation\":$safe_documentation_confidence,\"extraction\":$safe_extraction_confidence}}"
 
         # Append to log file with error handling and race condition protection
         # Use flock for atomic writes to prevent corruption from concurrent instances
@@ -397,7 +383,9 @@ main() {
 
     # Validate template file exists (unless it's custom)
     if [ "$template_name" != "custom" ]; then
-        local template_file="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}/../..}/templates/${template_name}.md"
+        # TEMPORARY: Hardcoded path for Windows compatibility workaround
+        local template_file="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/${template_name}.md"
+        # ORIGINAL: local template_file="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}/../..}/templates/${template_name}.md"
         if [ ! -f "$template_file" ]; then
             [ "${DEBUG:-0}" = "1" ] && echo "Warning: Template file not found: $template_file" >&2
             echo "custom 0"

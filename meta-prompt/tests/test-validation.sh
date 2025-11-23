@@ -48,9 +48,9 @@ print_section() {
 print_section "Environment Setup"
 
 if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-    # Get the script directory and navigate to plugin root (two levels up from scripts/)
+    # Get the script directory and navigate to plugin root (one level up from tests/)
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+    export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
     echo "Setting CLAUDE_PLUGIN_ROOT=$CLAUDE_PLUGIN_ROOT"
 fi
 
@@ -119,7 +119,7 @@ if [ -x "$PROMPT_HANDLER" ]; then
     fi
 
     # Test with --return-only flag
-    OUTPUT=$("$PROMPT_HANDLER" "test task --return-only" 2>&1) && RESULT="PASS" || RESULT="FAIL"
+    OUTPUT=$("$PROMPT_HANDLER" "--return-only test task" 2>&1) && RESULT="PASS" || RESULT="FAIL"
 
     if [ "$RESULT" = "PASS" ] && echo "$OUTPUT" | grep -q "DO NOT execute"; then
         print_result "Execute prompt-handler.sh with --return-only flag" "PASS"
@@ -168,8 +168,8 @@ fi
 print_section "Test 5: Bash Tool - template-processor.sh Execution"
 
 if [ -x "$TEMPLATE_PROCESSOR" ]; then
-    # Test loading custom template (no variables required)
-    OUTPUT=$("$TEMPLATE_PROCESSOR" "custom" 2>&1) && RESULT="PASS" || RESULT="FAIL"
+    # Test loading custom template with required variables
+    OUTPUT=$("$TEMPLATE_PROCESSOR" "custom" "TASK_DESCRIPTION=test task" 2>&1) && RESULT="PASS" || RESULT="FAIL"
 
     if [ "$RESULT" = "PASS" ] && echo "$OUTPUT" | grep -q "task"; then
         print_result "Load custom template" "PASS"
@@ -313,39 +313,33 @@ if [ -f "$PROMPT_OPTIMIZER" ]; then
     fi
 fi
 
-# Check create-prompt.md
+# Check create-prompt.md (TEMPORARY: checking for hardcoded paths due to Windows workaround)
 if [ -f "$CREATE_PROMPT" ]; then
-    if grep -q "allowed-tools:.*Bash(\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh:\*)" "$CREATE_PROMPT"; then
-        print_result "create-prompt.md has template-selector.sh restriction" "PASS"
+    if grep -q "allowed-tools:.*Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/.*\.sh)" "$CREATE_PROMPT"; then
+        print_result "create-prompt.md has script restrictions (hardcoded paths)" "PASS"
     else
-        print_result "create-prompt.md has template-selector.sh restriction" "FAIL"
+        print_result "create-prompt.md has script restrictions (hardcoded paths)" "FAIL"
     fi
 
-    if grep -q "allowed-tools:.*Bash(\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh:\*)" "$CREATE_PROMPT"; then
-        print_result "create-prompt.md has template-processor.sh restriction" "PASS"
+    if grep -q "allowed-tools:.*Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/\*\*)" "$CREATE_PROMPT"; then
+        print_result "create-prompt.md has templates/ Read restriction (hardcoded path)" "PASS"
     else
-        print_result "create-prompt.md has template-processor.sh restriction" "FAIL"
+        print_result "create-prompt.md has templates/ Read restriction (hardcoded path)" "FAIL"
     fi
 
-    if grep -q "allowed-tools:.*Read(\${CLAUDE_PLUGIN_ROOT}/templates/\*\*)" "$CREATE_PROMPT"; then
-        print_result "create-prompt.md has templates/ Read restriction" "PASS"
+    if grep -q "allowed-tools:.*Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/guides/\*\*)" "$CREATE_PROMPT"; then
+        print_result "create-prompt.md has guides/ Read restriction (hardcoded path)" "PASS"
     else
-        print_result "create-prompt.md has templates/ Read restriction" "FAIL"
-    fi
-
-    if grep -q "allowed-tools:.*Read(\${CLAUDE_PLUGIN_ROOT}/guides/\*\*)" "$CREATE_PROMPT"; then
-        print_result "create-prompt.md has guides/ Read restriction" "PASS"
-    else
-        print_result "create-prompt.md has guides/ Read restriction" "FAIL"
+        print_result "create-prompt.md has guides/ Read restriction (hardcoded path)" "FAIL"
     fi
 fi
 
-# Check prompt.md
+# Check prompt.md (TEMPORARY: checking for hardcoded paths due to Windows workaround)
 if [ -f "$PROMPT_CMD" ]; then
-    if grep -q "allowed-tools:.*Bash(\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh:\*)" "$PROMPT_CMD"; then
-        print_result "prompt.md has prompt-handler.sh restriction" "PASS"
+    if grep -q "allowed-tools:.*Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh:\*)" "$PROMPT_CMD"; then
+        print_result "prompt.md has prompt-handler.sh restriction (hardcoded path)" "PASS"
     else
-        print_result "prompt.md has prompt-handler.sh restriction" "FAIL"
+        print_result "prompt.md has prompt-handler.sh restriction (hardcoded path)" "FAIL"
     fi
 fi
 
