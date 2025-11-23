@@ -17,63 +17,119 @@ sanitize_input() {
 RAW_TASK_DESCRIPTION="$1"
 RETURN_ONLY=false
 TEMPLATE=""
+TEMPLATE_FLAG_SEEN=false
 
 # Parse all flags from the beginning of the input
 # Continue parsing until we hit a non-flag argument
 while true; do
     case "$RAW_TASK_DESCRIPTION" in
         --code\ *|--code)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="code-refactoring"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--code}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --refactor\ *|--refactor)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="code-refactoring"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--refactor}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --review\ *|--review)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="code-review"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--review}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --test\ *|--test)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="test-generation"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--test}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --docs\ *|--docs)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="documentation-generator"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--docs}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --documentation\ *|--documentation)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="documentation-generator"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--documentation}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --extract\ *|--extract)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="data-extraction"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--extract}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --compare\ *|--compare)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="code-comparison"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--compare}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --comparison\ *|--comparison)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="code-comparison"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--comparison}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --function\ *|--function)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="function-calling"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--function}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
         --custom\ *|--custom)
+            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
+                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
+                exit 1
+            fi
             TEMPLATE="custom"
+            TEMPLATE_FLAG_SEEN=true
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--custom}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
@@ -88,6 +144,19 @@ while true; do
             ;;
     esac
 done
+
+# Validate template name if provided (whitelist approach for security)
+if [ -n "$TEMPLATE" ]; then
+    case "$TEMPLATE" in
+        code-refactoring|code-review|test-generation|documentation-generator|function-calling|data-extraction|code-comparison|custom)
+            # Valid template, continue
+            ;;
+        *)
+            echo "Error: Invalid template name: $TEMPLATE" >&2
+            exit 1
+            ;;
+    esac
+fi
 
 # Normalize whitespace
 RAW_TASK_DESCRIPTION=$(echo "$RAW_TASK_DESCRIPTION" | xargs)
