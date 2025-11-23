@@ -20,7 +20,7 @@ Execute the keyword-based template selector to determine the best template:
 ${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh "{$ARGUMENTS}"
 ```
 
-**Error Handling**: If the script fails or is not available, fall back to step to Step 2 directly.
+**Error Handling**: If the script fails or is not available, fall back to Step 2 directly.
 
 The script outputs: `<template-name> <confidence>` (e.g., `code-refactoring 75`)
 

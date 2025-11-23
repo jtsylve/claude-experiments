@@ -51,9 +51,9 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 
 - **Token Reduction:** 40-60% overall, 100% for orchestration
 - **Classification Accuracy:** 90%+ for template routing with LLM fallback for edge cases
-- **Performance:** <100ms deterministic overhead
+- **Performance:** <100ms for keyword routing (70%+ of tasks), +500ms-2s for LLM fallback (20% of tasks)
 - **Templates:** 7 pre-built templates optimized for software development
-- **Hybrid Routing:** Keyword-based classification with intelligent LLM fallback for borderline cases
+- **Hybrid Routing:** Keyword-based classification with intelligent LLM fallback for borderline cases (60-69% confidence)
 - **Security:** Input sanitization, whitelist-based permissions
 
 ---
@@ -70,6 +70,9 @@ tests/validate-templates.sh
 
 # Run integration tests
 tests/test-integration.sh
+
+# Test logging infrastructure
+tests/test-logging.sh
 
 # Debug template classification
 DEBUG=1 commands/scripts/template-selector.sh "your task"
@@ -101,7 +104,8 @@ meta-prompt/
 | Token reduction | 40-60% | ✓ Met |
 | Orchestration tokens | 0 | ✓ Met |
 | Classification accuracy | 90%+ | ✓ Met |
-| Deterministic overhead | <100ms | ✓ Met |
+| Keyword routing overhead | <100ms | ✓ Met (70%+ of tasks) |
+| Hybrid routing (w/ LLM fallback) | Variable | ~500ms-2s (20% of tasks) |
 
 ---
 
@@ -135,6 +139,16 @@ tests/test-integration.sh
 ```
 
 See [Infrastructure Guide](docs/infrastructure.md#environment-setup) for detailed setup instructions.
+
+---
+
+## Migration Guide
+
+Upgrading from a previous version? See [MIGRATION.md](MIGRATION.md) for:
+- Template changes and mappings
+- Removed template migration paths
+- Breaking changes summary
+- Rollback instructions
 
 ---
 

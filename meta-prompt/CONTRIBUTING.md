@@ -104,12 +104,15 @@ tests/validate-templates.sh
 # Run integration tests
 tests/test-integration.sh
 
+# Test logging infrastructure
+tests/test-logging.sh
+
 # Test manually with debug mode
 DEBUG=1 commands/scripts/template-selector.sh "test task"
 ```
 
 **Success criteria:**
-- All templates pass validation (10/10 or more)
+- All templates pass validation (7/7)
 - All integration tests pass (50/50 or more)
 - Manual testing confirms expected behavior
 
@@ -367,7 +370,8 @@ When reviewing PRs, check:
 
 #### Performance
 - [ ] No performance regressions
-- [ ] Script execution < 100ms (for deterministic scripts)
+- [ ] Keyword routing < 100ms (for deterministic scripts)
+- [ ] Hybrid routing with LLM fallback acceptable for borderline cases (60-69% confidence)
 - [ ] Token consumption not increased unnecessarily
 
 ### Approval Process
