@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Purpose: Classify tasks and route to appropriate templates
-# Inputs: $1=task_description
-# Outputs: template_name (or "custom")
+# Inputs: $@=task_description (all arguments joined with spaces)
+#         Note: Multi-word descriptions should be quoted or passed as multiple args
+#         Examples:
+#           ./template-selector.sh "Refactor the code"
+#           ./template-selector.sh Refactor the code  (equivalent to above)
+# Outputs: template_name confidence (e.g., "code-refactoring 75")
 # Accuracy target: 90%+
 
 set -euo pipefail
@@ -13,14 +17,26 @@ set -euo pipefail
 # - User feedback on mis-classifications
 # - Trade-off between keyword routing speed vs LLM fallback accuracy
 #
+# Routing thresholds (0-100)
 # CONFIDENCE_THRESHOLD (70%): Minimum confidence to use keyword-selected template directly
 # BORDERLINE_MIN (60%): Lower bound for hybrid routing - triggers LLM fallback for verification
-# BORDERLINE_MAX (69%): Upper bound for borderline range (60-69% = uncertain, use LLM)
+# BORDERLINE_MAX (69%): Upper bound for borderline range (used for validation only)
+#   Note: The actual borderline range is [BORDERLINE_MIN, CONFIDENCE_THRESHOLD), but we define
+#   BORDERLINE_MAX for documentation and to validate that CONFIDENCE_THRESHOLD = BORDERLINE_MAX + 1
 CONFIDENCE_THRESHOLD=70
 BORDERLINE_MIN=60
 BORDERLINE_MAX=69
 
+# Confidence calculation constants (0-100)
+# These values were empirically determined during development and tuned for accuracy
+STRONG_INDICATOR_BASE=75      # Base confidence when strong indicator found
+SUPPORTING_KEYWORD_BONUS=8    # Confidence added per supporting keyword (when strong indicator present)
+ONE_KEYWORD_CONFIDENCE=35     # Confidence with 1 supporting keyword (no strong indicator)
+TWO_KEYWORD_CONFIDENCE=60     # Confidence with 2 supporting keywords (no strong indicator)
+THREE_KEYWORD_CONFIDENCE=75   # Confidence with 3+ supporting keywords (no strong indicator)
+
 # Validate threshold relationships
+# These checks ensure the borderline range (60-69%) is correctly configured
 if [ $BORDERLINE_MIN -ge $BORDERLINE_MAX ]; then
     echo "Error: BORDERLINE_MIN ($BORDERLINE_MIN) must be less than BORDERLINE_MAX ($BORDERLINE_MAX)" >&2
     exit 1
@@ -37,6 +53,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Log directory and file
 LOG_DIR="${SCRIPT_DIR}/../../logs"
 LOG_FILE="${LOG_DIR}/template-selections.jsonl"
+LOG_WARNING_SHOWN=false
+
+# Privacy Notice:
+# Logs use deterministic SHA-256 hashing to anonymize task descriptions.
+# While this prevents direct recovery of task content, logs should still be
+# treated as sensitive data. Do not share logs publicly as:
+# - Common/guessable tasks could be reverse-engineered via dictionary attacks
+# - Hash values could reveal usage patterns over time
+# - Combined with other data, hashes might be correlatable to users
+# See docs/design-decisions.md (AD-007) for full privacy analysis.
 
 # Create log directory if it doesn't exist
 mkdir -p "${LOG_DIR}" 2>/dev/null || true
@@ -193,29 +219,27 @@ classify_task() {
     # Debug logging for keyword counts
     [ -n "${DEBUG:-}" ] && echo "Keyword counts: code=$code_count function=$function_count comparison=$comparison_count testgen=$testgen_count review=$review_count documentation=$documentation_count extraction=$extraction_count" >&2
 
-    # Calculate confidence scores
-    # Strong indicator alone = 75%, + supporting keywords increases confidence
+    # Calculate confidence scores using configured constants
     calculate_confidence() {
         local category=$1
         local supporting_count=$2
 
         # Check for strong indicator first (uses pre-computed results)
         if has_strong_indicator "$category"; then
-            # Strong indicator gives base 75%, each supporting keyword adds 8%
-            local confidence=$((75 + supporting_count * 8))
+            # Strong indicator gives base confidence, each supporting keyword adds bonus
+            local confidence=$((STRONG_INDICATOR_BASE + supporting_count * SUPPORTING_KEYWORD_BONUS))
             [ $confidence -gt 100 ] && confidence=100
             echo $confidence
         else
             # No strong indicator: supporting keywords only
-            # 1 = 35%, 2 = 60%, 3+ = 75%
             if [ $supporting_count -eq 0 ]; then
                 echo 0
             elif [ $supporting_count -eq 1 ]; then
-                echo 35
+                echo $ONE_KEYWORD_CONFIDENCE
             elif [ $supporting_count -eq 2 ]; then
-                echo 60
+                echo $TWO_KEYWORD_CONFIDENCE
             else
-                echo 75
+                echo $THREE_KEYWORD_CONFIDENCE
             fi
         fi
     }
@@ -298,9 +322,16 @@ classify_task() {
                 echo "$log_entry" >> "${LOG_FILE}" 2>/dev/null
             fi
         ) 200>>"${LOG_FILE}.lock" 2>/dev/null || {
-            # Only show warning in debug mode to avoid cluttering normal output
+            # Show one-time warning on first logging failure to alert users
+            if [ "$LOG_WARNING_SHOWN" = "false" ]; then
+                echo "Warning: Failed to write to log file ${LOG_FILE} (disk space, permissions, or file corruption)" >&2
+                echo "         Logging will continue to be attempted but errors will be silent" >&2
+                echo "         Set ENABLE_LOGGING=0 to disable logging" >&2
+                LOG_WARNING_SHOWN=true
+            fi
+            # In debug mode, show every failure
             if [ "${DEBUG:-0}" = "1" ]; then
-                echo "Warning: Failed to write to log file ${LOG_FILE}" >&2
+                echo "Debug: Log write failed for entry with confidence $max_confidence" >&2
             fi
         }
     fi
@@ -314,7 +345,15 @@ main() {
     if [ $# -lt 1 ]; then
         echo "Usage: $0 <task_description>" >&2
         echo "" >&2
-        echo "Example: $0 'Refactor the authentication module to use JWT tokens'" >&2
+        echo "The task description can be quoted or passed as multiple arguments." >&2
+        echo "Multiple arguments will be joined with spaces." >&2
+        echo "" >&2
+        echo "Examples:" >&2
+        echo "  $0 'Refactor the authentication module to use JWT tokens'" >&2
+        echo "  $0 Refactor the authentication module to use JWT tokens" >&2
+        echo "" >&2
+        echo "Output: <template-name> <confidence>" >&2
+        echo "  e.g., code-refactoring 75" >&2
         return 1
     fi
 

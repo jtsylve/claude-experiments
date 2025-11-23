@@ -542,8 +542,12 @@ Implement **privacy-preserving structured logging** with these principles:
 - Hash collision risk (SHA-256 first 16 chars: ~1 in 2^64, negligible for our scale)
 - Cannot audit specific user tasks from logs (intentional privacy feature)
 - Disk space consumed by logs (mitigated by JSONL format efficiency)
-- If task is guessable, hash could theoretically be reversed via brute force
-  - Mitigation: Tasks are typically unique/complex enough to resist dictionary attacks
+- **Deterministic hashing means logs should still be treated as sensitive:**
+  - Common/guessable tasks could be reverse-engineered via dictionary attacks
+  - Hash values could reveal usage patterns over time
+  - Combined with other metadata, hashes might be correlatable to specific users
+  - **Recommendation: Do not share log files publicly without sanitization**
+  - Mitigation: Most real-world tasks are unique/complex enough to resist dictionary attacks
 
 📊 **What We Can Learn:**
 - Template usage patterns (which templates are most/least used)
