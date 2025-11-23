@@ -2,7 +2,7 @@
 name: prompt
 description: Optimize a prompt and optionally execute it in a fresh context
 argument-hint: [--code|--refactor|--review|--test|--docs|--documentation|--extract|--compare|--comparison|--function|--custom] [--return-only] <task or prompt to optimize>
-allowed-tools: [Task, Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh:*)]
+allowed-tools: [Task, Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh:*)]
 ---
 
 You will use deterministic bash orchestration to handle this request efficiently.
@@ -18,7 +18,7 @@ This command has been optimized to eliminate LLM orchestration overhead through 
 ## Process
 
 1. Execute the orchestration script to generate instructions:
-   - Run: `${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh "{$TASK_DESCRIPTION}"`
+   - Run: `~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh "{$TASK_DESCRIPTION}"`
    - The script will parse arguments and determine execution mode
    - It will output precise instructions for you to follow
    - **Error Handling**: If the script fails or doesn't exist, fall back to using the Task tool with `subagent_type="meta-prompt:prompt-optimizer"` directly

@@ -467,16 +467,25 @@ Failed: 0
 
 **Purpose:** The `CLAUDE_PLUGIN_ROOT` environment variable is automatically set by Claude Code when running plugin commands and scripts. It contains the absolute path to the plugin's root directory.
 
-**Usage in Commands:**
+**⚠️ Temporary Workaround:** Due to a Windows path normalization issue in Claude Code (see [Troubleshooting](#issue-windows-compatibility---claude_plugin_root-path-normalization-claude-code-bug)), the current implementation uses hardcoded paths (`~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`) instead of `${CLAUDE_PLUGIN_ROOT}` in production scripts and command files. The examples below show the intended design that will be restored once the Claude Code issue is fixed.
+
+**Usage in Commands (Intended Design):**
 - Slash commands can reference scripts using `${CLAUDE_PLUGIN_ROOT}/commands/scripts/script-name.sh`
 - Read operations can access templates using `${CLAUDE_PLUGIN_ROOT}/templates/**`
 - Ensures portability across different installation locations
 
-**Example in Frontmatter:**
+**Example in Frontmatter (Intended Design):**
 ```yaml
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh:*)
   - Read(${CLAUDE_PLUGIN_ROOT}/templates/**)
+```
+
+**Current Implementation (Temporary):**
+```yaml
+allowed-tools:
+  - Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh:*)
+  - Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/**)
 ```
 
 **When Testing Scripts Manually:**
@@ -967,11 +976,23 @@ Neither format is compatible with bash path interpretation, which breaks bundled
 - Fix must be implemented in Claude Code itself
 - Status: Open, unassigned
 
-**Workaround:**
-Windows users should use WSL (Windows Subsystem for Linux) to run meta-prompt commands that rely on bundled scripts. WSL provides a proper Unix-like environment where path normalization works correctly.
+**Temporary Workaround (Implemented):**
+As of the current version, the plugin includes a temporary workaround for this Windows compatibility issue:
 
-**Solution:**
-No workaround available for native Windows environments. The fix requires Claude Code to normalize `CLAUDE_PLUGIN_ROOT` to provide bash-compatible paths regardless of the host shell or operating system.
+1. **Production Scripts:** Core scripts (`template-selector.sh`, `template-processor.sh`) and command files now use hardcoded paths (`~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`) instead of `${CLAUDE_PLUGIN_ROOT}`
+2. **Test Scripts:** Test files intelligently derive the plugin root from their own location, allowing local testing without environment variables
+3. **Revertible:** All workaround changes are marked with `TEMPORARY` comments for easy removal when Claude Code fixes the underlying issue
+
+**Limitations of Workaround:**
+- Assumes standard Claude Code plugin installation location
+- May not work if plugin is installed in a custom location
+- Code duplication of the hardcoded path across multiple files
+
+**Recommended Solution:**
+Use WSL (Windows Subsystem for Linux) for the best experience. WSL provides a proper Unix-like environment where the original `${CLAUDE_PLUGIN_ROOT}` approach works correctly without any workarounds.
+
+**Long-term Solution:**
+The proper fix requires Claude Code to normalize `CLAUDE_PLUGIN_ROOT` to provide bash-compatible paths regardless of the host shell or operating system. Once implemented, the temporary workaround can be easily reverted by searching for `TEMPORARY` comments in the codebase.
 
 ---
 

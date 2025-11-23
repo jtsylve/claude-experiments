@@ -31,6 +31,6 @@ When adding new guides:
 1. Extract large embedded content (>50 lines) from command files
 2. Place in this directory with descriptive filename
 3. Update this README with guide purpose and usage
-4. Reference from commands using: `cat ${CLAUDE_PLUGIN_ROOT}/guides/<guide-name>.md`
+4. Reference from commands using: `cat ~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/guides/<guide-name>.md`
 5. Add error handling/fallback behavior in the command
 6. Add tests to verify guide loading in `commands/scripts/test-integration.sh`

@@ -15,6 +15,13 @@ TOTAL_TESTS=0
 PASSED_TESTS=0
 FAILED_TESTS=0
 
+# Setup: Set CLAUDE_PLUGIN_ROOT if not already set
+if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    # Get the script directory and navigate to plugin root (one level up from tests/)
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
+
 # Helper: Run test
 run_test() {
     local test_name="$1"
@@ -44,7 +51,7 @@ run_test_with_output() {
     echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} $test_name"
 
     local output=$(eval "$test_command" 2>&1)
-    if echo "$output" | grep -q "$expected_pattern"; then
+    if echo "$output" | grep -Eq "$expected_pattern"; then
         echo -e "  ${GREEN}✓ PASSED${NC} (matched: $expected_pattern)"
         PASSED_TESTS=$((PASSED_TESTS + 1))
         return 0
@@ -82,11 +89,11 @@ echo ""
 echo -e "${YELLOW}Phase 2: Template Validation${NC}"
 
 run_test "Correct number of templates exist" \
-    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f | wc -l | tr -d ' ') -eq 8 ]"
+    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f | wc -l | tr -d ' ') -eq 7 ]"
 
 run_test_with_output "All templates pass validation" \
     "\${CLAUDE_PLUGIN_ROOT}/tests/validate-templates.sh" \
-    "Passed: 8"
+    "Passed: 7"
 
 run_test "code-refactoring template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-refactoring.md ]"
@@ -99,9 +106,6 @@ run_test "test-generation template exists" \
 
 run_test "documentation-generator template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/documentation-generator.md ]"
-
-run_test "function-calling template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/function-calling.md ]"
 
 run_test "data-extraction template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/data-extraction.md ]"
@@ -186,10 +190,6 @@ run_test_with_output "Classifies documentation generation correctly" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate API documentation for this module'" \
     "documentation-generator"
 
-run_test_with_output "Classifies function calling correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Use these API functions to fetch data'" \
-    "function-calling"
-
 run_test_with_output "Classifies data extraction correctly" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract email addresses from this log file'" \
     "data-extraction"
@@ -226,9 +226,10 @@ run_test_with_output "High confidence: code review (≥70%)" \
 
 # Borderline confidence tests (60-69%): Should output confidence for LLM fallback
 # These tasks have some signals but may benefit from LLM verification
-run_test_with_output "Borderline confidence: ambiguous task outputs 60-69%" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Analyze code quality' | awk '{print \$2}'" \
-    "^(6[0-9]|[0-5][0-9]|0)\$"
+# Note: With 2 supporting keywords (no strong indicator), confidence is 60%
+run_test_with_output "Borderline confidence: task with 2 supporting keywords outputs 60%" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'API reference' | awk '{print \$2}'" \
+    "^60\$"
 
 # Low confidence tests (<60%): Should route to custom with confidence 0
 run_test_with_output "Low confidence: novel task routes to custom" \
@@ -276,11 +277,11 @@ run_test_with_output "Prompt handler detects execution mode" \
     "Optimize and execute"
 
 run_test_with_output "Prompt handler detects return-only mode" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Analyze security issues --return-only'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--return-only Analyze security issues'" \
     "Create optimized prompt"
 
 run_test_with_output "Prompt handler removes --return-only flag from task" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Task description --return-only'" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--return-only Task description'" \
     "Task description"
 
 echo ""

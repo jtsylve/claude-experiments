@@ -15,6 +15,13 @@ TOTAL_TESTS=0
 PASSED_TESTS=0
 FAILED_TESTS=0
 
+# Setup: Set CLAUDE_PLUGIN_ROOT if not already set
+if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    # Get the script directory and navigate to plugin root (one level up from tests/)
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
+
 # Helper: Run test
 run_test() {
     local test_name="$1"
@@ -44,7 +51,7 @@ run_test_with_output() {
     echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} $test_name"
 
     local output=$(eval "$test_command" 2>&1)
-    if echo "$output" | grep -q "$expected_pattern"; then
+    if echo "$output" | grep -Eq "$expected_pattern"; then
         echo -e "  ${GREEN}✓ PASSED${NC}"
         PASSED_TESTS=$((PASSED_TESTS + 1))
         return 0
@@ -180,7 +187,7 @@ run_test "Task is hashed instead of logged plaintext" \
 ENABLE_LOGGING=1 ${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh $'Test task with\nnewline' > /dev/null 2>&1
 
 run_test_with_output "Newlines in task don't create multiple log entries" \
-    "wc -l < \${CLAUDE_PLUGIN_ROOT}/logs/template-selections.jsonl" \
+    "wc -l < \${CLAUDE_PLUGIN_ROOT}/logs/template-selections.jsonl | tr -d ' '" \
     "^[0-9]+\$"
 
 run_test "Last log entry is valid JSON despite newlines in input" \
@@ -219,12 +226,13 @@ run_test "Script continues if logging fails" \
     "ENABLE_LOGGING=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Test task' > /dev/null 2>&1"
 
 # Test DEBUG mode shows logging warnings
+# Make the log file read-only to trigger a logging failure
 run_test_with_output "DEBUG mode shows warning on logging failure" \
-    "chmod -w \${CLAUDE_PLUGIN_ROOT}/logs && DEBUG=1 ENABLE_LOGGING=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Test' 2>&1 || true" \
+    "touch \${CLAUDE_PLUGIN_ROOT}/logs/template-selections.jsonl && chmod -w \${CLAUDE_PLUGIN_ROOT}/logs/template-selections.jsonl && DEBUG=1 ENABLE_LOGGING=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Test' 2>&1 || true" \
     "Warning.*log|Failed.*log"
 
 # Restore permissions
-chmod +w ${CLAUDE_PLUGIN_ROOT}/logs 2>/dev/null || true
+chmod +w ${CLAUDE_PLUGIN_ROOT}/logs/template-selections.jsonl 2>/dev/null || true
 
 echo ""
 
