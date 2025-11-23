@@ -230,7 +230,7 @@ run_test_with_output "High confidence: code review (≥70%)" \
 # Using flexible range to account for keyword list changes
 run_test_with_output "Borderline confidence: task with 2 supporting keywords outputs 60-69%" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'API reference' | awk '{print \$2}'" \
-    "^(60|6[0-9])\$"
+    "^6[0-9]\$"
 
 # Low confidence tests (<60%): Should route to custom with confidence 0
 run_test_with_output "Low confidence: novel task routes to custom" \

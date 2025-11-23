@@ -385,12 +385,17 @@ main() {
     # TEMPORARY: For Windows compatibility, fallback to script-based location or hardcoded path
     if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
         # Try to derive from script location (commands/scripts/ -> 2 levels up)
-        if [ -d "$SCRIPT_DIR/../../templates" ]; then
+        if [ -d "$SCRIPT_DIR/../../templates" ] && [ -f "$SCRIPT_DIR/../../templates/custom.md" ]; then
             CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
         else
             # Fallback to hardcoded path for standard installation
             CLAUDE_PLUGIN_ROOT="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt"
         fi
+    fi
+
+    # Sanity check: Verify we have a valid plugin root with templates
+    if [ ! -f "${CLAUDE_PLUGIN_ROOT}/templates/custom.md" ]; then
+        [ "${DEBUG:-0}" = "1" ] && echo "Warning: custom.md not found at ${CLAUDE_PLUGIN_ROOT}/templates/" >&2
     fi
 
     # Validate template file exists (unless it's custom)
@@ -402,8 +407,8 @@ main() {
             echo "This may indicate an installation issue." >&2
             echo "" >&2
             echo "Troubleshooting steps:" >&2
-            echo "  1. Verify installation: ls -la \$CLAUDE_PLUGIN_ROOT/templates/" >&2
-            echo "  2. Run diagnostics: ~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/verify-installation.sh" >&2
+            echo "  1. Verify installation: ls -la ${CLAUDE_PLUGIN_ROOT}/templates/" >&2
+            echo "  2. Run diagnostics: ${CLAUDE_PLUGIN_ROOT}/commands/scripts/verify-installation.sh" >&2
             echo "  3. Check CLAUDE_PLUGIN_ROOT: ${CLAUDE_PLUGIN_ROOT}" >&2
             echo "  4. Reinstall plugin: /plugin install jtsylve/claude-experiments" >&2
             echo "" >&2
