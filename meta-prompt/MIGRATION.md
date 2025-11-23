@@ -102,10 +102,10 @@ After upgrading, test your common workflows:
 /create-prompt "your typical task description"
 
 # Enable debug mode to see routing decisions
-DEBUG=1 /Users/joe/src/claude-experiments/meta-prompt/commands/scripts/template-selector.sh "your task"
+DEBUG=1 ${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh "your task"
 
 # Check the logs to see confidence scores
-cat /Users/joe/src/claude-experiments/meta-prompt/logs/template-selections.jsonl | tail -10
+cat ${CLAUDE_PLUGIN_ROOT}/logs/template-selections.jsonl | tail -10
 ```
 
 ### Rollback Instructions
@@ -113,7 +113,7 @@ cat /Users/joe/src/claude-experiments/meta-prompt/logs/template-selections.jsonl
 If you need to rollback to the previous version:
 
 ```bash
-cd /Users/joe/src/claude-experiments/meta-prompt
+cd ${CLAUDE_PLUGIN_ROOT}
 git checkout v0.9.0  # or whatever the previous version tag is
 ```
 
