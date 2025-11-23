@@ -34,10 +34,8 @@ If the confidence score from Step 1 is between 60-69% (borderline confidence) or
 2. Consider the task description: `{$ARGUMENTS}`
 3. Available templates and their use cases:
    - `code-refactoring`: For modifying, updating, refactoring, fixing, building, creating, or implementing code changes (includes TodoWrite guidance for complex tasks)
-   - `document-qa`: For answering questions about documents with citations, quotes, or references
    - `function-calling`: For tasks that use provided functions, APIs, or tools to accomplish goals
-   - `interactive-dialogue`: For conversational agents, tutors, customer support, teaching, or guided interactions
-   - `simple-classification`: For comparing, classifying, checking similarity, or determining equivalence
+   - `code-comparison`: For comparing, classifying, checking similarity, or determining equivalence
    - `test-generation`: For creating tests, test cases, test suites, or validation scenarios (includes TodoWrite for test planning)
    - `code-review`: For reviewing code quality, security, maintainability, providing feedback or critique
    - `documentation-generator`: For creating documentation, README files, docstrings, guides, or technical writing
