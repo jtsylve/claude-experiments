@@ -6,6 +6,41 @@ This document provides examples showing how the meta-prompt optimization system 
 
 ---
 
+## Template Selection Methods
+
+You can select templates in two ways:
+
+1. **Automatic (shown in examples below):** The system analyzes your task and selects the best template
+2. **Explicit flags:** Use flags to bypass auto-detection
+
+### Available Template Flags
+
+- `--code` or `--refactor` → code-refactoring
+- `--review` → code-review
+- `--test` → test-generation
+- `--docs` or `--documentation` → documentation-generator
+- `--extract` → data-extraction
+- `--compare` or `--comparison` → code-comparison
+- `--function` → function-calling
+- `--custom` → custom template
+
+### Examples with Flags
+
+```bash
+# Instead of relying on auto-detection:
+/create-prompt "Are these two functions semantically equivalent?"
+
+# You can explicitly select the template:
+/prompt --compare "Are these two functions semantically equivalent?"
+
+# Combined with --return-only:
+/prompt --code --return-only "Refactor the authentication module"
+```
+
+All examples below show the auto-detection process, but you can use flags to skip directly to the desired template.
+
+---
+
 ## Table of Contents
 
 1. [Example 1: Comparing Code Snippets (code-comparison)](#example-1-comparing-code-snippets)

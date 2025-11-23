@@ -53,6 +53,16 @@ Let's start with a simple task using `/prompt`:
 
 **Token savings: ~1780 tokens (~93% reduction)**
 
+### Alternative: Explicit Template Selection
+
+You can also explicitly select a template using flags:
+
+```bash
+/prompt --compare "Compare Python and JavaScript for web development"
+```
+
+This bypasses the auto-detection logic entirely and uses the specified template directly. Available flags: `--code`, `--review`, `--test`, `--docs`, `--extract`, `--compare`, `--function`, `--custom`.
+
 ---
 
 ## Step 2: Understanding Token Savings (1 minute)
@@ -431,15 +441,31 @@ Want to improve the system? See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ### Commands
 ```bash
-# Execute optimized prompt
+# Execute optimized prompt (auto-detects template)
 /prompt "task description"
 
+# Execute with explicit template selection
+/prompt --code "task description"
+/prompt --review "task description"
+/prompt --test "task description"
+
 # Generate prompt without executing
-/prompt "task description" --return-only
+/prompt --return-only "task description"
+/prompt --code --return-only "task description"
 
 # Create optimized prompt
 /create-prompt "task description"
 ```
+
+### Available Template Flags
+- `--code` or `--refactor` → code-refactoring
+- `--review` → code-review
+- `--test` → test-generation
+- `--docs` or `--documentation` → documentation-generator
+- `--extract` → data-extraction
+- `--compare` or `--comparison` → code-comparison
+- `--function` → function-calling
+- `--custom` → custom template
 
 ### Validation
 ```bash

@@ -3,13 +3,14 @@ template_name: code-review
 category: analysis
 keywords: [review, feedback, check code, analyze code, quality, readability, maintainability, best practices, code smell, critique]
 complexity: complex
-variables: [CODE_TO_REVIEW, REVIEW_FOCUS, LANGUAGE_CONVENTIONS]
-version: 1.0
+variables: [CODE_TO_REVIEW]
+optional_variables: [REVIEW_FOCUS, LANGUAGE_CONVENTIONS]
+version: 1.1
 description: Perform comprehensive code review covering readability, maintainability, performance, security, and best practices
 variable_descriptions:
   CODE_TO_REVIEW: "The code to review (function, class, module, or entire file)"
-  REVIEW_FOCUS: "Specific areas to focus on (e.g., 'security and error handling', 'performance', 'all aspects')"
-  LANGUAGE_CONVENTIONS: "Language or framework conventions to apply (e.g., 'Node.js best practices', 'Python PEP 8', 'React patterns')"
+  REVIEW_FOCUS: "Specific areas to focus on (e.g., 'security and error handling', 'performance', 'all aspects') - defaults to comprehensive review"
+  LANGUAGE_CONVENTIONS: "Language or framework conventions to apply (e.g., 'Node.js best practices', 'Python PEP 8', 'React patterns') - defaults to inferred from code"
 ---
 
 You are a senior code reviewer providing comprehensive feedback on code quality.
@@ -19,11 +20,11 @@ You are a senior code reviewer providing comprehensive feedback on code quality.
 </code_to_review>
 
 <review_focus>
-{$REVIEW_FOCUS}
+{$REVIEW_FOCUS:all aspects - comprehensive review covering correctness, security, performance, readability, maintainability, error handling, testability, and language best practices}
 </review_focus>
 
 <language_conventions>
-{$LANGUAGE_CONVENTIONS}
+{$LANGUAGE_CONVENTIONS:inferred from the code being reviewed - apply idiomatic patterns and conventions appropriate to the language and framework detected in the code}
 </language_conventions>
 
 Perform a systematic code review following this framework:

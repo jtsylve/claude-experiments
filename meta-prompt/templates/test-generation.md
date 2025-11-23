@@ -3,13 +3,14 @@ template_name: test-generation
 category: testing
 keywords: [test, spec, testing, unittest, coverage, jest, pytest, junit, mocha, test case, test suite, edge case]
 complexity: intermediate
-variables: [CODE_TO_TEST, TEST_FRAMEWORK, TEST_SCOPE]
-version: 1.0
+variables: [CODE_TO_TEST]
+optional_variables: [TEST_FRAMEWORK, TEST_SCOPE]
+version: 1.1
 description: Generate comprehensive test cases for code including unit tests, edge cases, and integration tests
 variable_descriptions:
   CODE_TO_TEST: "The code that needs test coverage (function, class, module, or file)"
-  TEST_FRAMEWORK: "Testing framework to use (e.g., Jest, pytest, JUnit, Mocha, RSpec)"
-  TEST_SCOPE: "What to test (e.g., 'edge cases and error handling', 'happy path only', 'integration tests')"
+  TEST_FRAMEWORK: "Testing framework to use (e.g., Jest, pytest, JUnit, Mocha, RSpec) - defaults to inferred from project"
+  TEST_SCOPE: "What to test (e.g., 'edge cases and error handling', 'happy path only', 'integration tests') - defaults to comprehensive coverage"
 ---
 
 You are a test generation expert creating comprehensive test suites for code.
@@ -19,11 +20,11 @@ You are a test generation expert creating comprehensive test suites for code.
 </code_to_test>
 
 <test_framework>
-{$TEST_FRAMEWORK}
+{$TEST_FRAMEWORK:inferred from the project (check package.json, requirements.txt, or existing test files for the testing framework used)}
 </test_framework>
 
 <test_scope>
-{$TEST_SCOPE}
+{$TEST_SCOPE:comprehensive test coverage including happy path, edge cases, error handling, and boundary conditions}
 </test_scope>
 
 Follow these steps to generate tests:

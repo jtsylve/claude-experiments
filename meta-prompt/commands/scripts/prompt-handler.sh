@@ -16,16 +16,92 @@ sanitize_input() {
 # Parse arguments
 RAW_TASK_DESCRIPTION="$1"
 RETURN_ONLY=false
+TEMPLATE=""
 
-# Check for --return-only flag and remove it
-if [[ "$RAW_TASK_DESCRIPTION" =~ --return-only([[:space:]]|$) ]]; then
-    RETURN_ONLY=true
-    # Remove the flag from task description and normalize whitespace
-    RAW_TASK_DESCRIPTION=$(echo "$RAW_TASK_DESCRIPTION" | sed 's/--return-only[[:space:]]*//g' | xargs)
-fi
+# Parse all flags from the beginning of the input
+# Continue parsing until we hit a non-flag argument
+while true; do
+    case "$RAW_TASK_DESCRIPTION" in
+        --code\ *|--code)
+            TEMPLATE="code-refactoring"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--code}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --refactor\ *|--refactor)
+            TEMPLATE="code-refactoring"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--refactor}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --review\ *|--review)
+            TEMPLATE="code-review"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--review}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --test\ *|--test)
+            TEMPLATE="test-generation"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--test}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --docs\ *|--docs)
+            TEMPLATE="documentation-generator"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--docs}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --documentation\ *|--documentation)
+            TEMPLATE="documentation-generator"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--documentation}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --extract\ *|--extract)
+            TEMPLATE="data-extraction"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--extract}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --compare\ *|--compare)
+            TEMPLATE="code-comparison"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--compare}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --comparison\ *|--comparison)
+            TEMPLATE="code-comparison"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--comparison}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --function\ *|--function)
+            TEMPLATE="function-calling"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--function}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --custom\ *|--custom)
+            TEMPLATE="custom"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--custom}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        --return-only\ *|--return-only)
+            RETURN_ONLY=true
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--return-only}"
+            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
+            ;;
+        *)
+            # No more flags, break out of loop
+            break
+            ;;
+    esac
+done
+
+# Normalize whitespace
+RAW_TASK_DESCRIPTION=$(echo "$RAW_TASK_DESCRIPTION" | xargs)
 
 # Sanitize the task description after flag processing
 TASK_DESCRIPTION=$(sanitize_input "$RAW_TASK_DESCRIPTION")
+
+# Build template instruction based on whether a template flag was provided
+TEMPLATE_INSTRUCTION=""
+if [ -n "$TEMPLATE" ]; then
+    TEMPLATE_INSTRUCTION="
+
+IMPORTANT: The user has explicitly selected the '$TEMPLATE' template. Use this template directly - do NOT run template selection logic."
+fi
 
 # Generate instructions based on execution mode
 if [ "$RETURN_ONLY" = true ]; then
@@ -39,7 +115,7 @@ Use the Task tool with the following parameters:
 
 <user_task>
 $TASK_DESCRIPTION
-</user_task>
+</user_task>$TEMPLATE_INSTRUCTION
 
 Your mission:
 1. Use /create-prompt to craft an optimized prompt for this task
@@ -61,7 +137,7 @@ Use the Task tool with the following parameters:
 
 <user_task>
 $TASK_DESCRIPTION
-</user_task>
+</user_task>$TEMPLATE_INSTRUCTION
 
 Your mission:
 1. Use /create-prompt to craft an optimized prompt for this task
