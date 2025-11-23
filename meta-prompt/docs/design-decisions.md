@@ -473,6 +473,170 @@ Per borderline request:
 
 ---
 
+### AD-007: Privacy-Preserving Logging with Task Hashing
+
+**TL;DR:** Log template selection decisions for analytics while preserving user privacy by hashing task descriptions instead of storing them in plaintext
+
+**Status:** Accepted
+**Date:** 2025-11-22
+**Context:**
+
+To improve classification accuracy and validate the hybrid routing system, we need metrics on:
+- Which templates are selected most frequently
+- Confidence score distributions
+- Classification patterns over time
+- Accuracy validation through real-world usage
+
+However, logging user task descriptions raises significant privacy concerns:
+- Task descriptions may contain sensitive information (credentials, internal projects, PII)
+- Users expect their inputs to remain private
+- Storing plaintext tasks creates unnecessary data retention risk
+- Compliance requirements (GDPR, CCPA) require data minimization
+
+**Decision:**
+
+Implement **privacy-preserving structured logging** with these principles:
+
+1. **Hash Task Descriptions:** Use SHA-256 hashing to create anonymized task identifiers
+   - One-way function prevents reverse-engineering original task
+   - Consistent hashing allows tracking same task across time
+   - First 16 characters provide sufficient uniqueness for deduplication
+
+2. **Log Only Metadata:** Store decision metrics, not user data
+   - Template selected, confidence scores for all categories
+   - Timestamp for temporal analysis
+   - No task content, file paths, or user identifiers
+
+3. **Structured JSONL Format:** Machine-readable format for analysis
+   - One log entry per line for safe concurrent writes
+   - Valid JSON for easy parsing and aggregation
+   - Compatible with standard log analysis tools
+
+4. **Opt-Out via Environment Variable:** Respects user preference
+   - `ENABLE_LOGGING=0` disables all logging
+   - Default enabled for metrics collection
+   - No performance impact when disabled
+
+5. **Atomic Writes with flock:** Prevents log corruption from concurrent access
+   - File locking ensures log integrity
+   - Graceful fallback if flock unavailable
+   - Timeout prevents deadlocks
+
+**Rationale:**
+
+- **Privacy-First Design:** Hashing ensures tasks cannot be recovered from logs
+- **Minimal Data Collection:** Only store what's needed for classification improvement
+- **User Control:** Opt-out mechanism respects privacy preferences
+- **Safe Concurrency:** File locking prevents race conditions
+- **Analytics-Ready:** Structured format enables data analysis without exposing sensitive data
+
+**Privacy Trade-offs:**
+
+✅ **Protected:**
+- Task content is cryptographically hashed (irreversible)
+- No PII, credentials, or sensitive data stored
+- Same task generates same hash (deduplication without storing plaintext)
+- Logs can be safely shared for debugging without privacy risk
+
+⚠️ **Limitations:**
+- Hash collision risk (SHA-256 first 16 chars: ~1 in 2^64, negligible for our scale)
+- Cannot audit specific user tasks from logs (intentional privacy feature)
+- Disk space consumed by logs (mitigated by JSONL format efficiency)
+- If task is guessable, hash could theoretically be reversed via brute force
+  - Mitigation: Tasks are typically unique/complex enough to resist dictionary attacks
+
+📊 **What We Can Learn:**
+- Template usage patterns (which templates are most/least used)
+- Confidence score distributions (validation of thresholds)
+- Borderline case frequency (hybrid routing effectiveness)
+- Classification accuracy trends over time
+
+🚫 **What We Cannot Learn:**
+- What specific tasks users are working on
+- User identities or project details
+- Task content or sensitive information
+- Individual user behavior patterns
+
+**Alternatives Considered:**
+
+1. **No Logging**
+   - Pros: Maximum privacy, no storage cost
+   - Cons: No metrics for improvement, blind to classification quality
+   - Rejected: Inability to validate and improve system
+
+2. **Plaintext Logging**
+   - Pros: Full visibility for debugging
+   - Cons: Severe privacy violation, compliance risk, data breach exposure
+   - Rejected: Unacceptable privacy risk
+
+3. **Differential Privacy**
+   - Pros: Stronger privacy guarantees
+   - Cons: Complex implementation, noise reduces data utility
+   - Rejected: Over-engineering for current scale
+
+4. **Remote Analytics Service**
+   - Pros: Centralized metrics, professional infrastructure
+   - Cons: External dependency, data transmission, third-party trust
+   - Rejected: Adds complexity and external dependencies
+
+**Consequences:**
+
+- Positive:
+  - Enables data-driven classification improvements
+  - Validates hybrid routing effectiveness
+  - Safe to enable by default (privacy-preserving)
+  - Helps identify accuracy issues and edge cases
+  - Log file can be shared for debugging without privacy concerns
+
+- Negative:
+  - Cannot trace specific user issues from logs
+  - Small disk space overhead (~100 bytes per classification)
+  - Hash collisions possible (though extremely unlikely)
+  - Log file grows unbounded (requires eventual rotation)
+
+- Neutral:
+  - Logging is local-only (no external transmission)
+  - Users can disable via environment variable
+  - Hash makes logs harder to interpret for debugging
+
+**Implementation Notes:**
+
+Located in:
+- `commands/scripts/template-selector.sh:44-54` (hash function)
+- `commands/scripts/template-selector.sh:268-305` (logging implementation)
+- `commands/scripts/template-selector.sh:23` (opt-out via ENABLE_LOGGING)
+
+**Log Format Example:**
+```json
+{
+  "timestamp": "2025-11-22T01:23:45Z",
+  "task_hash": "a1b2c3d4e5f67890",
+  "selected_template": "code-refactoring",
+  "confidence": 83,
+  "confidences": {
+    "code": 83,
+    "function": 0,
+    "comparison": 0,
+    "test": 0,
+    "review": 0,
+    "documentation": 0,
+    "extraction": 0
+  }
+}
+```
+
+**Privacy Compliance:**
+- GDPR: Compliant (hashing = pseudonymization, no PII stored)
+- CCPA: Compliant (no personal information retained)
+- Data Minimization: Only essential metadata collected
+- Right to Erasure: Can delete logs without impacting functionality
+
+**References:**
+- `commands/scripts/template-selector.sh:44-54, 268-305`
+- `tests/test-concurrency.sh` (validates log integrity under concurrent access)
+
+---
+
 ### AD-005: Variable Substitution with Security Escaping
 
 **TL;DR:** Escape backslashes, $, backticks, and quotes to prevent command injection while using simple `{$VAR}` syntax for template variables
