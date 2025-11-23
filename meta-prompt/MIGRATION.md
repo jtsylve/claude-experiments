@@ -75,7 +75,6 @@ Three templates were removed in this version:
 | `document-qa` | `custom` | For complex document analysis |
 | `interactive-dialogue` | `custom` | All conversational tasks |
 | `code-refactoring` | `code-refactoring` | ✓ No change |
-| `function-calling` | `function-calling` | ✓ No change |
 | `test-generation` | `test-generation` | ✓ No change |
 | `code-review` | `code-review` | ✓ No change |
 | `documentation-generator` | `documentation-generator` | ✓ No change |

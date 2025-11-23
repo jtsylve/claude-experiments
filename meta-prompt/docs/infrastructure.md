@@ -27,7 +27,6 @@ meta-prompt/                                   # Plugin root
 │   ├── document-qa.md                         # Document Q&A template (39 lines)
 │   ├── code-refactoring.md                    # Code modification template (64 lines)
 │   ├── code-review.md                         # Code review template
-│   ├── function-calling.md                    # Function/API usage template (52 lines)
 │   ├── interactive-dialogue.md                # Conversational agent template (38 lines)
 │   ├── test-generation.md                     # Test generation template
 │   ├── documentation-generator.md             # Documentation generator template
@@ -63,7 +62,6 @@ meta-prompt/                                   # Plugin root
 │   │   ├── document-qa.md                     # Document Q&A template (39 lines)
 │   │   ├── code-refactoring.md                # Code modification template (64 lines)
 │   │   ├── code-review.md                     # Code review template
-│   │   ├── function-calling.md                # Function/API usage template (52 lines)
 │   │   ├── interactive-dialogue.md            # Conversational agent template (38 lines)
 │   │   ├── test-generation.md                 # Test generation template
 │   │   ├── documentation-generator.md         # Documentation generator template
@@ -123,7 +121,7 @@ meta-prompt/                                   # Plugin root
 #### `templates/`
 **Purpose:** Pre-built prompt templates
 **File Format:** Markdown with YAML frontmatter
-**Count:** 7 templates
+**Count:** 6 templates
 **Version:** Tracked in frontmatter (`version: 1.0`)
 **Validation:** Via `tests/validate-templates.sh`
 

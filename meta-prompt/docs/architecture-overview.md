@@ -193,7 +193,7 @@ Checks:  Frontmatter, required fields, variable consistency, XML tags, content
 
 **Location:** `templates/`
 
-Seven task-specific templates optimized for software development:
+Six task-specific templates optimized for software development:
 
 | Template | Category | Complexity | Variables | Use Cases |
 |----------|----------|------------|-----------|-----------|
@@ -201,7 +201,6 @@ Seven task-specific templates optimized for software development:
 | **code-review.md** | analysis | complex | 3 | Security audits, quality analysis, code feedback |
 | **test-generation.md** | testing | intermediate | 3 | Generate unit tests, test suites, edge cases, coverage |
 | **documentation-generator.md** | generation | intermediate | 3 | API docs, READMEs, docstrings, user guides |
-| **function-calling.md** | tool-use | complex | 2 | API usage, tool invocation, function orchestration |
 | **data-extraction.md** | analysis | simple | 3 | Extract data from logs, JSON, HTML, text files |
 | **code-comparison.md** | comparison | simple | 3 | Compare code, configs, check equivalence |
 | **custom.md** | fallback | variable | 1 | Novel tasks, edge cases, LLM fallback |
@@ -510,12 +509,11 @@ meta-prompt/                         # Plugin root
 │       ├── template-processor.sh
 │       ├── validate-templates.sh
 │       └── test-integration.sh
-├── templates/                       # Template library (7 templates)
+├── templates/                       # Template library (6 templates)
 │   ├── code-refactoring.md
 │   ├── code-review.md
 │   ├── test-generation.md
 │   ├── documentation-generator.md
-│   ├── function-calling.md
 │   ├── data-extraction.md
 │   ├── code-comparison.md
 │   └── custom.md
@@ -544,7 +542,7 @@ meta-prompt/                         # Plugin root
 
 ### Template Expansion
 
-**Current:** 7 templates covering 6 categories + 1 fallback
+**Current:** 6 templates covering 5 categories + 1 fallback
 **Scalability:** New templates can be added by:
 1. Creating new `.md` file in `/templates/`
 2. Adding keywords to `template-selector.sh`

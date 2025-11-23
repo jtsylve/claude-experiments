@@ -464,7 +464,6 @@ Want to improve the system? See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - `--docs` or `--documentation` → documentation-generator
 - `--extract` → data-extraction
 - `--compare` or `--comparison` → code-comparison
-- `--function` → function-calling
 - `--custom` → custom template
 
 ### Validation

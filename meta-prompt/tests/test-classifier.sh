@@ -90,10 +90,6 @@ run_test "Code comparison with strong indicator" \
     "Compare these two implementations to see if they're equivalent" \
     "code-comparison" 70
 
-run_test "Function calling with strong indicator" \
-    "What functions are available in the API?" \
-    "function-calling" 70
-
 # ===== PHASE 2: Borderline Confidence Tests (60-69%) =====
 echo -e "${YELLOW}Phase 2: Borderline Confidence Tests (60-69%)${NC}"
 
