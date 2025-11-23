@@ -6,10 +6,17 @@
 
 set -euo pipefail
 
-# Confidence threshold (0-100)
+# Confidence thresholds (0-100)
+# NOTE: These values were initially determined by Claude during development and may need
+# empirical tuning based on real-world usage patterns. Consider adjusting based on:
+# - Template selection accuracy metrics from logs/template-selections.jsonl
+# - User feedback on mis-classifications
+# - Trade-off between keyword routing speed vs LLM fallback accuracy
+#
+# CONFIDENCE_THRESHOLD (70%): Minimum confidence to use keyword-selected template directly
+# BORDERLINE_MIN (60%): Lower bound for hybrid routing - triggers LLM fallback for verification
+# BORDERLINE_MAX (69%): Upper bound for borderline range (60-69% = uncertain, use LLM)
 CONFIDENCE_THRESHOLD=70
-
-# Borderline confidence range for LLM fallback (60-69%)
 BORDERLINE_MIN=60
 BORDERLINE_MAX=69
 
@@ -22,6 +29,29 @@ LOG_FILE="${LOG_DIR}/template-selections.jsonl"
 
 # Create log directory if it doesn't exist
 mkdir -p "${LOG_DIR}" 2>/dev/null || true
+
+# Regex patterns for strong indicators (extracted for maintainability)
+# Each pattern matches whole words only using word boundary assertions
+PATTERN_CODE="refactor|codebase|implement|fix|update|modify|create|build|reorganize|improve|enhance|transform|optimize|rework|revamp|refine|polish|modernize|clean|streamline"
+PATTERN_FUNCTION="functions?|apis?|tools?"
+PATTERN_COMPARISON="compare|classify|check|same|different|verify|determine|match|matches|equivalent|equals?|similar|duplicate|identical"
+PATTERN_TEST="tests?|spec|testing|unittest"
+PATTERN_REVIEW="review|feedback|critique|analyze|assess|evaluate|examine|inspect|scrutinize|audit|scan|survey|vet|investigate|appraise"
+PATTERN_DOCUMENTATION="documentation|readme|docstring|docs|document|write.*(comment|docstring|documentation|guide|instruction)|author.*(documentation|instruction|guide)"
+PATTERN_EXTRACTION="extract|parse|pull|retrieve|mine|harvest|collect|scrape|distill|gather|isolate|obtain|sift|fish|pluck|glean|cull|unearth|dredge|winnow"
+
+# Portable hash function (supports both shasum and sha256sum)
+compute_hash() {
+    local input="$1"
+    if command -v shasum &>/dev/null; then
+        printf %s "$input" | shasum -a 256 | cut -d' ' -f1 | cut -c1-16
+    elif command -v sha256sum &>/dev/null; then
+        printf %s "$input" | sha256sum | cut -d' ' -f1 | cut -c1-16
+    else
+        # Fallback: use simple checksum if neither is available
+        printf %s "$input" | cksum | cut -d' ' -f1
+    fi
+}
 
 # Convert text to lowercase for case-insensitive matching
 to_lowercase() {
@@ -37,64 +67,85 @@ count_matches() {
     local IFS='|'
     local pattern="$*"
 
-    # Count matches using a single grep call
-    echo "$text" | grep -oiE "(^|[^a-z])($pattern)([^a-z]|$)" | wc -l | tr -d ' '
+    # Count matches using word boundaries (prevents boundary chars from being consumed)
+    echo "$text" | grep -oiE "\b($pattern)\b" | wc -l | tr -d ' '
+}
+
+# Pre-compute strong indicators for all categories in a single pass (optimized)
+# Sets global variables: HAS_STRONG_CODE, HAS_STRONG_FUNCTION, etc.
+compute_strong_indicators() {
+    local text="$1"
+
+    # Check all patterns and store results in variables (using word boundaries)
+    if echo "$text" | grep -qiE "\b($PATTERN_CODE)\b"; then
+        HAS_STRONG_CODE=1
+    else
+        HAS_STRONG_CODE=0
+    fi
+
+    if echo "$text" | grep -qiE "\b($PATTERN_FUNCTION)\b"; then
+        HAS_STRONG_FUNCTION=1
+    else
+        HAS_STRONG_FUNCTION=0
+    fi
+
+    if echo "$text" | grep -qiE "\b($PATTERN_COMPARISON)\b"; then
+        HAS_STRONG_COMPARISON=1
+    else
+        HAS_STRONG_COMPARISON=0
+    fi
+
+    if echo "$text" | grep -qiE "\b($PATTERN_TEST)\b"; then
+        HAS_STRONG_TEST=1
+    else
+        HAS_STRONG_TEST=0
+    fi
+
+    if echo "$text" | grep -qiE "\b($PATTERN_REVIEW)\b"; then
+        HAS_STRONG_REVIEW=1
+    else
+        HAS_STRONG_REVIEW=0
+    fi
+
+    if echo "$text" | grep -qiE "\b($PATTERN_DOCUMENTATION)\b"; then
+        HAS_STRONG_DOCUMENTATION=1
+    else
+        HAS_STRONG_DOCUMENTATION=0
+    fi
+
+    if echo "$text" | grep -qiE "\b($PATTERN_EXTRACTION)\b"; then
+        HAS_STRONG_EXTRACTION=1
+    else
+        HAS_STRONG_EXTRACTION=0
+    fi
 }
 
 # Check if task contains strong indicator keywords (worth 75% confidence alone)
+# Now uses pre-computed results from compute_strong_indicators()
 has_strong_indicator() {
-    local text="$1"
-    local category="$2"
+    local category="$1"
 
     case "$category" in
         "code")
-            if echo "$text" | grep -qiE "(^|[^a-z])(refactor|codebase|implement|fix|update|modify|create|build|reorganize|improve|enhance|transform|optimize|rework|revamp|refine|polish|modernize|clean|streamline)([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
+            return $((1 - HAS_STRONG_CODE))
             ;;
         "function")
-            if echo "$text" | grep -qiE "(^|[^a-z])(functions?|apis?|tools?)([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
+            return $((1 - HAS_STRONG_FUNCTION))
             ;;
         "comparison")
-            if echo "$text" | grep -qiE "(^|[^a-z])(compare|classify|check|same|different|verify|determine|match|matches|equivalent|equals?|similar|duplicate|identical)([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
+            return $((1 - HAS_STRONG_COMPARISON))
             ;;
         "test")
-            if echo "$text" | grep -qiE "(^|[^a-z])(tests?|spec|testing|unittest)([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
+            return $((1 - HAS_STRONG_TEST))
             ;;
         "review")
-            if echo "$text" | grep -qiE "(^|[^a-z])(review|feedback|critique|analyze|assess|evaluate|examine|inspect|scrutinize|audit|scan|survey|vet|investigate|appraise)([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
+            return $((1 - HAS_STRONG_REVIEW))
             ;;
         "documentation")
-            if echo "$text" | grep -qiE "(^|[^a-z])(documentation|readme|docstring|docs|document|write.*(comment|docstring|documentation|guide|instruction)|author.*(documentation|instruction|guide))([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
+            return $((1 - HAS_STRONG_DOCUMENTATION))
             ;;
         "extraction")
-            if echo "$text" | grep -qiE "(^|[^a-z])(extract|parse|pull|retrieve|mine|harvest|collect|scrape|distill|gather|isolate|obtain|sift|fish|pluck|glean|cull|unearth|dredge|winnow)([^a-z]|$)"; then
-                return 0
-            else
-                return 1
-            fi
+            return $((1 - HAS_STRONG_EXTRACTION))
             ;;
         *)
             return 1
@@ -106,6 +157,9 @@ has_strong_indicator() {
 classify_task() {
     local task_description="$1"
     local task_lower=$(to_lowercase "$task_description")
+
+    # Pre-compute strong indicators for all categories (optimization: single pass)
+    compute_strong_indicators "$task_lower"
 
     # Define keywords for each category (supporting keywords)
     local code_keywords=("code" "file" "class" "bug" "module" "system" "endpoint")
@@ -134,8 +188,8 @@ classify_task() {
         local category=$1
         local supporting_count=$2
 
-        # Check for strong indicator first
-        if has_strong_indicator "$task_lower" "$category"; then
+        # Check for strong indicator first (uses pre-computed results)
+        if has_strong_indicator "$category"; then
             # Strong indicator gives base 75%, each supporting keyword adds 8%
             local confidence=$((75 + supporting_count * 8))
             [ $confidence -gt 100 ] && confidence=100
@@ -202,30 +256,42 @@ classify_task() {
         selected_template="data-extraction"
     fi
 
-    # If confidence below threshold, use custom template
-    # Keep actual confidence for borderline detection (60-69%)
-    if [ $max_confidence -lt $CONFIDENCE_THRESHOLD ]; then
+    # Hybrid routing logic:
+    # - High confidence (70%+): Use selected template directly
+    # - Borderline (60-69%): Use selected template (caller triggers LLM verification)
+    # - Low confidence (<60%): Use custom template
+    if [ $max_confidence -lt $BORDERLINE_MIN ]; then
         selected_template="custom"
-        # Only set to 0 if truly low confidence (< 60%)
-        if [ $max_confidence -lt $BORDERLINE_MIN ]; then
-            max_confidence=0
-        fi
+        max_confidence=0
     fi
 
     # Log the selection decision
     if [ "${ENABLE_LOGGING:-1}" = "1" ]; then
-        # Create task hash for privacy
+        # Create task hash for privacy (handles newlines and special chars safely)
         local task_hash
-        task_hash=$(echo -n "$task_description" | shasum -a 256 | cut -d' ' -f1 | cut -c1-16)
+        task_hash=$(compute_hash "$task_description")
 
         # Create log entry with all confidence scores
+        # Note: Using single-line format to prevent log injection from newlines in task descriptions
         local log_entry
-        log_entry=$(cat <<EOF
-{"timestamp":"$(date -u +%Y-%m-%dT%H:%M:%SZ)","task_hash":"$task_hash","selected_template":"$selected_template","confidence":$max_confidence,"confidences":{"code":$code_confidence,"function":$function_confidence,"comparison":$comparison_confidence,"test":$test_confidence,"review":$review_confidence,"documentation":$documentation_confidence,"extraction":$extraction_confidence}}
-EOF
-)
-        # Append to log file
-        echo "$log_entry" >> "${LOG_FILE}" 2>/dev/null || true
+        log_entry="{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task_hash\":\"$task_hash\",\"selected_template\":\"$selected_template\",\"confidence\":$max_confidence,\"confidences\":{\"code\":$code_confidence,\"function\":$function_confidence,\"comparison\":$comparison_confidence,\"test\":$test_confidence,\"review\":$review_confidence,\"documentation\":$documentation_confidence,\"extraction\":$extraction_confidence}}"
+
+        # Append to log file with error handling and race condition protection
+        # Use flock for atomic writes to prevent corruption from concurrent instances
+        (
+            # Try to acquire exclusive lock (timeout after 1 second)
+            if command -v flock &>/dev/null && flock -w 1 200; then
+                echo "$log_entry" >> "${LOG_FILE}" 2>/dev/null
+            else
+                # Fallback: write without lock if flock unavailable or times out
+                echo "$log_entry" >> "${LOG_FILE}" 2>/dev/null
+            fi
+        ) 200>>"${LOG_FILE}.lock" 2>/dev/null || {
+            # Only show warning in debug mode to avoid cluttering normal output
+            if [ "${DEBUG:-0}" = "1" ]; then
+                echo "Warning: Failed to write to log file ${LOG_FILE}" >&2
+            fi
+        }
     fi
 
     # Output: template_name confidence

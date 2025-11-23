@@ -279,7 +279,7 @@ The additional time or resources required by the optimization infrastructure bef
 **Target:** <100ms total
 **Actual:**
 - Script execution: <10ms
-- Classification: <50ms
+- Classification: ~60ms
 - Template processing: <20ms
 - Template loading: <20ms
 

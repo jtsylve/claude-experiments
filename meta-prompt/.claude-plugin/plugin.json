@@ -1,6 +1,6 @@
 {
   "name": "meta-prompt",
-  "description": "Meta-prompt optimization infrastructure that reduces LLM token consumption by 40-60% through deterministic preprocessing and template-based routing. Includes /prompt and /create-prompt commands, 6 pre-built templates, and intelligent task classification.",
+  "description": "Meta-prompt optimization infrastructure that reduces LLM token consumption by 40-60% through deterministic preprocessing and template-based routing. Includes /prompt and /create-prompt commands, 7 pre-built templates, and intelligent task classification.",
   "version": "1.0.0",
   "author": {
     "name": "Joe T. Sylve, Ph.D.",

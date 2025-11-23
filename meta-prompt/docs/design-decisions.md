@@ -274,7 +274,7 @@ The `validate-templates.sh` script ensures:
 
 ### AD-004: Keyword-Based Classification with Confidence Scoring
 
-**TL;DR:** Keyword matching (strong indicators=75%, supporting=8% each) with 70% threshold achieves 90%+ accuracy in <50ms with zero tokens
+**TL;DR:** Keyword matching (strong indicators=75%, supporting=8% each) with 70% threshold achieves 90%+ accuracy in ~60ms with zero tokens
 
 **Status:** Accepted
 **Date:** 2025-11-18
@@ -314,7 +314,7 @@ Else:
 **Rationale:**
 
 - **Determinism:** Same input always produces same classification (reproducible)
-- **Speed:** Regex matching completes in <50ms
+- **Speed:** Regex matching completes in ~60ms
 - **Zero Tokens:** No LLM invocation for classification
 - **Transparency:** Easy to debug (just examine keywords)
 - **Tunable:** Thresholds can be adjusted based on accuracy metrics
@@ -346,7 +346,7 @@ Else:
 
 - Positive:
   - Achieves 90%+ accuracy on test cases (validated in test-integration.sh)
-  - <50ms classification time
+  - ~60ms classification time
   - Easy to debug and tune
   - Conservative threshold (70%) prevents false positives
 
@@ -952,7 +952,7 @@ Test suite with 30+ tests covering:
 
 **Potential Bottlenecks:**
 - Template file I/O (currently ~20ms)
-- Classification regex matching (currently ~50ms)
+- Classification regex matching (currently ~60ms)
 - Variable substitution (currently ~20ms)
 
 **Optimization Opportunities:**

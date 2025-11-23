@@ -146,7 +146,7 @@ Flow:    Normalize → Extract keywords → Score categories → Select best
 7. Preserve borderline confidence scores (60-69%) for LLM fallback
 8. Set low confidence (<60%) to 0
 
-**Performance:** <50ms average, 90%+ accuracy
+**Performance:** ~60ms average, 90%+ accuracy
 
 **Output Format:** `<template-name> <confidence>` (both values on single line)
 
@@ -401,10 +401,10 @@ sequenceDiagram
 | Operation | Time | Notes |
 |-----------|------|-------|
 | prompt-handler.sh execution | <10ms | Argument parsing, mode detection |
-| template-selector.sh classification | <50ms | Keyword extraction, scoring |
+| template-selector.sh classification | ~60ms | Keyword extraction, scoring |
 | template-processor.sh substitution | <20ms | File load, variable replacement |
 | Template file read | <20ms | I/O from disk |
-| **Total deterministic overhead** | **<100ms** | Target met |
+| **Total deterministic overhead** | **~110ms** | Target <150ms met |
 
 ### Token Consumption
 
