@@ -10,12 +10,17 @@ set -euo pipefail
 if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
     # Try to derive from script location (commands/scripts/ -> 2 levels up)
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [ -d "$SCRIPT_DIR/../../templates" ]; then
+    if [ -d "$SCRIPT_DIR/../../templates" ] && [ -f "$SCRIPT_DIR/../../templates/custom.md" ]; then
         CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
     else
         # Fallback to hardcoded path for standard installation
         CLAUDE_PLUGIN_ROOT="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt"
     fi
+fi
+
+# Sanity check: Verify we have a valid plugin root with templates
+if [ ! -f "${CLAUDE_PLUGIN_ROOT}/templates/custom.md" ]; then
+    echo "Warning: custom.md not found at ${CLAUDE_PLUGIN_ROOT}/templates/" >&2
 fi
 
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"

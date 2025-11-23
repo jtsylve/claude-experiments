@@ -99,7 +99,7 @@ git log -p commands/scripts/template-selector.sh
 **Status:** Production Ready
 
 **Includes:**
-- 6 templates (code-comparison, document-qa, code-refactoring, interactive-dialogue, test-generation, code-review, documentation-generator, data-extraction, custom)
+- 7 templates (code-comparison, code-refactoring, code-review, custom, data-extraction, documentation-generator, test-generation)
 - 6 bash scripts (prompt-handler, template-selector, template-processor, validate-templates, verify-documentation-counts, test-integration)
 - Classification system with 90%+ accuracy
 - Comprehensive documentation suite

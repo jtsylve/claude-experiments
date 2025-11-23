@@ -1,6 +1,6 @@
 # Examples and Use Cases
 
-This document provides examples showing how the meta-prompt optimization system works in practice, with 6 templates optimized for software development workflows.
+This document provides examples showing how the meta-prompt optimization system works in practice, with 7 templates optimized for software development workflows.
 
 > **Note:** Examples 2 (document-qa) and 4 (interactive-dialogue) use deprecated templates that have been removed in favor of the streamlined software development template set. These examples are retained below for reference and will route to the `custom` template in the current version.
 

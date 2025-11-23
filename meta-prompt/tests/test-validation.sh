@@ -313,7 +313,7 @@ if [ -f "$PROMPT_OPTIMIZER" ]; then
     fi
 fi
 
-# Check create-prompt.md (TEMPORARY: checking for hardcoded paths due to Windows workaround)
+# Check create-prompt.md (TEMPORARY: checking for hardcoded paths due to Windows workaround - see GitHub #11984)
 if [ -f "$CREATE_PROMPT" ]; then
     if grep -q "allowed-tools:.*Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/.*\.sh)" "$CREATE_PROMPT"; then
         print_result "create-prompt.md has script restrictions (hardcoded paths)" "PASS"
