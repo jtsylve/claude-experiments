@@ -398,8 +398,15 @@ main() {
         local template_file="${CLAUDE_PLUGIN_ROOT}/templates/${template_name}.md"
         if [ ! -f "$template_file" ]; then
             echo "ERROR: Template file not found at: $template_file" >&2
-            echo "This may indicate an installation issue. Expected location:" >&2
-            echo "  $CLAUDE_PLUGIN_ROOT/templates/" >&2
+            echo "" >&2
+            echo "This may indicate an installation issue." >&2
+            echo "" >&2
+            echo "Troubleshooting steps:" >&2
+            echo "  1. Verify installation: ls -la \$CLAUDE_PLUGIN_ROOT/templates/" >&2
+            echo "  2. Run diagnostics: ~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/verify-installation.sh" >&2
+            echo "  3. Check CLAUDE_PLUGIN_ROOT: ${CLAUDE_PLUGIN_ROOT}" >&2
+            echo "  4. Reinstall plugin: /plugin install jtsylve/claude-experiments" >&2
+            echo "" >&2
             [ "${DEBUG:-0}" = "1" ] && echo "Debug: Falling back to 'custom' template" >&2
             echo "custom 0"
             return 0
