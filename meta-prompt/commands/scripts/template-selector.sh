@@ -305,10 +305,30 @@ classify_task() {
         local task_hash
         task_hash=$(compute_hash "$task_description")
 
+        # Validate template name (defense-in-depth: ensure only expected values)
+        local valid_templates="custom|code-refactoring|function-calling|code-comparison|test-generation|code-review|documentation-generator|data-extraction"
+        if ! echo "$selected_template" | grep -qE "^($valid_templates)$"; then
+            [ "${DEBUG:-0}" = "1" ] && echo "Warning: Invalid template name '$selected_template', defaulting to 'custom'" >&2
+            selected_template="custom"
+        fi
+
+        # Validate all confidence values are integers (defense-in-depth)
+        local safe_max_confidence safe_code_confidence safe_function_confidence safe_comparison_confidence
+        local safe_test_confidence safe_review_confidence safe_documentation_confidence safe_extraction_confidence
+
+        if [[ "$max_confidence" =~ ^[0-9]+$ ]]; then safe_max_confidence="$max_confidence"; else safe_max_confidence=0; fi
+        if [[ "$code_confidence" =~ ^[0-9]+$ ]]; then safe_code_confidence="$code_confidence"; else safe_code_confidence=0; fi
+        if [[ "$function_confidence" =~ ^[0-9]+$ ]]; then safe_function_confidence="$function_confidence"; else safe_function_confidence=0; fi
+        if [[ "$comparison_confidence" =~ ^[0-9]+$ ]]; then safe_comparison_confidence="$comparison_confidence"; else safe_comparison_confidence=0; fi
+        if [[ "$test_confidence" =~ ^[0-9]+$ ]]; then safe_test_confidence="$test_confidence"; else safe_test_confidence=0; fi
+        if [[ "$review_confidence" =~ ^[0-9]+$ ]]; then safe_review_confidence="$review_confidence"; else safe_review_confidence=0; fi
+        if [[ "$documentation_confidence" =~ ^[0-9]+$ ]]; then safe_documentation_confidence="$documentation_confidence"; else safe_documentation_confidence=0; fi
+        if [[ "$extraction_confidence" =~ ^[0-9]+$ ]]; then safe_extraction_confidence="$extraction_confidence"; else safe_extraction_confidence=0; fi
+
         # Create log entry with all confidence scores
         # Note: Using single-line format to prevent log injection from newlines in task descriptions
         local log_entry
-        log_entry="{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task_hash\":\"$task_hash\",\"selected_template\":\"$selected_template\",\"confidence\":$max_confidence,\"confidences\":{\"code\":$code_confidence,\"function\":$function_confidence,\"comparison\":$comparison_confidence,\"test\":$test_confidence,\"review\":$review_confidence,\"documentation\":$documentation_confidence,\"extraction\":$extraction_confidence}}"
+        log_entry="{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task_hash\":\"$task_hash\",\"selected_template\":\"$selected_template\",\"confidence\":$safe_max_confidence,\"confidences\":{\"code\":$safe_code_confidence,\"function\":$safe_function_confidence,\"comparison\":$safe_comparison_confidence,\"test\":$safe_test_confidence,\"review\":$safe_review_confidence,\"documentation\":$safe_documentation_confidence,\"extraction\":$safe_extraction_confidence}}"
 
         # Append to log file with error handling and race condition protection
         # Use flock for atomic writes to prevent corruption from concurrent instances
