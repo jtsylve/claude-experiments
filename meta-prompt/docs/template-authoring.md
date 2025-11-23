@@ -39,7 +39,7 @@ Create a new template when:
 
 ### Current Template Capacity
 
-- **Current:** 7 templates
+- **Current:** 6 templates
 - **Recommended maximum:** 15-20 templates before classification complexity increases
 - **Sweet spot:** 8-12 templates for most projects
 

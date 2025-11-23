@@ -1,6 +1,6 @@
 # Examples and Use Cases
 
-This document provides examples showing how the meta-prompt optimization system works in practice, with 7 templates optimized for software development workflows.
+This document provides examples showing how the meta-prompt optimization system works in practice, with 6 templates optimized for software development workflows.
 
 > **Note:** Examples 2 (document-qa) and 5 (interactive-dialogue) have been removed as these templates were deprecated in favor of the streamlined software development template set.
 
@@ -21,7 +21,6 @@ You can select templates in two ways:
 - `--docs` or `--documentation` → documentation-generator
 - `--extract` → data-extraction
 - `--compare` or `--comparison` → code-comparison
-- `--function` → function-calling
 - `--custom` → custom template
 
 ### Examples with Flags
@@ -44,14 +43,15 @@ All examples below show the auto-detection process, but you can use flags to ski
 ## Table of Contents
 
 1. [Example 1: Comparing Code Snippets (code-comparison)](#example-1-comparing-code-snippets)
+2. [Example 2: Answering Questions from Documentation (document-qa)](#example-2-answering-questions-from-documentation)
 3. [Example 3: Refactoring a Module (code-refactoring)](#example-3-refactoring-a-module)
-4. [Example 4: Building an API Client (function-calling)](#example-4-building-an-api-client)
-6. [Example 6: Generating Unit Tests (test-generation)](#example-6-generating-unit-tests)
-7. [Example 7: Code Review for Security (code-review)](#example-7-code-review-for-security)
-8. [Example 8: Generating API Documentation (documentation-generator)](#example-8-generating-api-documentation)
-9. [Example 9: Extracting Data from Logs (data-extraction)](#example-9-extracting-data-from-logs)
-10. [Example 10: Novel Task Requiring Custom Template](#example-10-novel-task-requiring-custom-template)
-11. [Ambiguous Query Handling](#ambiguous-query-handling)
+4. [Example 4: Creating a Tutor Bot (interactive-dialogue)](#example-4-creating-a-tutor-bot)
+5. [Example 5: Generating Unit Tests (test-generation)](#example-5-generating-unit-tests)
+6. [Example 6: Code Review for Security (code-review)](#example-6-code-review-for-security)
+7. [Example 7: Generating API Documentation (documentation-generator)](#example-7-generating-api-documentation)
+8. [Example 8: Extracting Data from Logs (data-extraction)](#example-8-extracting-data-from-logs)
+9. [Example 9: Novel Task Requiring Custom Template](#example-9-novel-task-requiring-custom-template)
+10. [Ambiguous Query Handling](#ambiguous-query-handling)
 
 ---
 
@@ -317,107 +317,7 @@ The template ensures the LLM:
 
 ---
 
-## Example 4: Building an API Client
-
-### User Input
-
-```bash
-/create-prompt "Use the GitHub API to list all open issues in the anthropics/claude-code repository"
-```
-
-### Classification Process
-
-**Step 1: Template Selection**
-```
-function-calling
-Confidence: 83%
-```
-
-**Reasoning:**
-- "Use the ... API" is strong indicator (75%)
-- "GitHub API", "repository" are supporting keywords (+8%)
-- Total: 83%
-
-**Step 2: Variable Extraction**
-
-- `TASK_DESCRIPTION`: "List all open issues in the anthropics/claude-code repository"
-- `AVAILABLE_FUNCTIONS`: (system will identify available tools/APIs)
-
-### Token Consumption
-
-| Approach | Tokens | Breakdown |
-|----------|--------|-----------|
-| **Without Optimization** | ~1800 | 300 + 1500 |
-| **With Optimization** | ~25 | Template retrieval |
-| **Savings** | **1775 tokens** | **98.6% reduction** |
-
-### Final Prompt Generated
-
-```markdown
-You are a research assistant equipped with function(s) to help complete tasks.
-
-<available_functions>
-github_api(endpoint, method, params)
-  - endpoint: API endpoint path (e.g., "/repos/{owner}/{repo}/issues")
-  - method: HTTP method (GET, POST, PUT, DELETE)
-  - params: JSON object of query parameters
-</available_functions>
-
-<task>
-List all open issues in the anthropics/claude-code repository
-</task>
-
-Rules:
-- Do not modify or extend provided functions
-- Only use functions provided
-- Function arguments must be in listed order
-- Output function calls as: <function_call>specific function</function_call>
-- You'll receive: <function_result> in response
-
-Use <scratchpad> to think before making function calls.
-
-[... rest of template ...]
-```
-
-### Expected LLM Response
-
-```markdown
-<scratchpad>
-To list open issues in anthropics/claude-code:
-1. Call github_api with GET method on /repos/anthropics/claude-code/issues
-2. Filter for state=open
-3. Present the results
-</scratchpad>
-
-<function_call>
-github_api(
-  endpoint="/repos/anthropics/claude-code/issues",
-  method="GET",
-  params={"state": "open", "per_page": 100}
-)
-</function_call>
-
-<function_result>
-[
-  {"number": 42, "title": "Feature request: Add dark mode", ...},
-  {"number": 41, "title": "Bug: Template not found error", ...},
-  ...
-]
-</function_result>
-
-<answer>
-Found 2 open issues in the anthropics/claude-code repository:
-
-1. Issue #42: "Feature request: Add dark mode"
-2. Issue #41: "Bug: Template not found error"
-
-[... details ...]
-</answer>
-```
-
----
-
-## Example 5: Creating a Tutor Bot
+## Example 4: Creating a Tutor Bot
 
 ### User Input
 
@@ -512,7 +412,7 @@ Take a moment to think about it or write out the code if you'd like.
 
 ---
 
-## Example 6: Generating Unit Tests
+## Example 5: Generating Unit Tests
 
 ### User Input
 
@@ -543,7 +443,7 @@ Take a moment to think about it or write out the code if you'd like.
 
 ---
 
-## Example 7: Code Review for Security
+## Example 6: Code Review for Security
 
 ### User Input
 
@@ -574,7 +474,7 @@ Take a moment to think about it or write out the code if you'd like.
 
 ---
 
-## Example 8: Generating API Documentation
+## Example 7: Generating API Documentation
 
 ### User Input
 
@@ -605,7 +505,7 @@ Take a moment to think about it or write out the code if you'd like.
 
 ---
 
-## Example 9: Extracting Data from Logs
+## Example 8: Extracting Data from Logs
 
 ### User Input
 
@@ -636,7 +536,7 @@ Take a moment to think about it or write out the code if you'd like.
 
 ---
 
-## Example 10: Novel Task Requiring Custom Template
+## Example 9: Novel Task Requiring Custom Template
 
 ### User Input
 
@@ -875,15 +775,14 @@ If all templates score below 70% confidence, the system falls back to `custom`:
 | 1. Code comparison | code-comparison | 1800 | 20 | 1780 | 98.9% |
 | 2. Document Q&A | document-qa | 1800 | 20 | 1780 | 98.9% |
 | 3. Code refactoring | code-refactoring | 1800 | 25 | 1775 | 98.6% |
-| 4. API client | function-calling | 1800 | 25 | 1775 | 98.6% |
-| 5. Tutor bot | interactive-dialogue | 1800 | 20 | 1780 | 98.9% |
-| 6. Novel task | custom (LLM) | 1500 | 1500 | 0 | 0% |
-| **Average** | **-** | **1750** | **268** | **1482** | **84.7%** |
+| 4. Tutor bot | interactive-dialogue | 1800 | 20 | 1780 | 98.9% |
+| 5. Novel task | custom (LLM) | 1500 | 1500 | 0 | 0% |
+| **Average** | **-** | **1740** | **317** | **1423** | **81.8%** |
 
 **Notes:**
 - Assumes 90% template match rate (10% fall back to custom)
 - Actual savings depend on specific tasks and usage patterns
-- Example 6 shows graceful degradation for novel tasks
+- Example 5 shows graceful degradation for novel tasks
 
 ---
 

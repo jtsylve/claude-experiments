@@ -147,7 +147,6 @@ A broad grouping of related templates. Used for organization and naming conventi
 - `comparison`: Comparing items (code-comparison)
 - `analysis`: Analyzing documents or data (document-qa)
 - `development`: Code-related tasks (code-refactoring)
-- `tool-use`: API/function calling (function-calling)
 - `conversation`: Interactive agents (interactive-dialogue)
 - `fallback`: Novel tasks (custom)
 

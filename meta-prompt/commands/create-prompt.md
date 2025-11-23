@@ -42,7 +42,6 @@ Your job as an LLM is to interpret the confidence and route accordingly:
 - Consider the task description: `{$ARGUMENTS}`
 - Available templates and their use cases:
    - `code-refactoring`: For modifying, updating, refactoring, fixing, building, creating, or implementing code changes (includes TodoWrite guidance for complex tasks)
-   - `function-calling`: For tasks that use provided functions, APIs, or tools to accomplish goals
    - `code-comparison`: For comparing, classifying, checking similarity, or determining equivalence
    - `test-generation`: For creating tests, test cases, test suites, or validation scenarios (includes TodoWrite for test planning)
    - `code-review`: For reviewing code quality, security, maintainability, providing feedback or critique

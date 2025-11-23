@@ -1,7 +1,7 @@
 ---
 name: prompt
 description: Optimize a prompt and optionally execute it in a fresh context
-argument-hint: [--code|--refactor|--review|--test|--docs|--documentation|--extract|--compare|--comparison|--function|--custom] [--return-only] <task or prompt to optimize>
+argument-hint: [--code|--refactor|--review|--test|--docs|--documentation|--extract|--compare|--comparison|--custom] [--return-only] <task or prompt to optimize>
 allowed-tools: [Task, Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh:*)]
 ---
 
@@ -37,7 +37,6 @@ The user can explicitly select a template by using one of these flags at the beg
 - `--docs` or `--documentation` → documentation-generator template
 - `--extract` → data-extraction template
 - `--compare` or `--comparison` → code-comparison template
-- `--function` → function-calling template
 - `--custom` → custom template (LLM-based prompt generation)
 
 When a template flag is provided:

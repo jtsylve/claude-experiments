@@ -176,7 +176,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## Templates
 
-Seven templates optimized for software development workflows:
+Six templates optimized for software development workflows:
 
 | Template | Use Cases | Variables<br/>(Required/Total) | Flags |
 |----------|-----------|-------------------------------|-------|
@@ -184,7 +184,6 @@ Seven templates optimized for software development workflows:
 | code-review | Security audits, quality analysis, feedback | 1/3 | `--review` |
 | test-generation | Generate unit tests, test suites, edge cases | 1/3 | `--test` |
 | documentation-generator | API docs, READMEs, docstrings, user guides | 1/3 | `--docs`, `--documentation` |
-| function-calling | API usage, tool invocation | 2/2 | `--function` |
 | data-extraction | Extract data from logs, JSON, HTML, text | 2/3 | `--extract` |
 | code-comparison | Compare code, configs, check equivalence | 3/3 | `--compare`, `--comparison` |
 | custom | Novel tasks (LLM fallback) | 1/1 | `--custom` |

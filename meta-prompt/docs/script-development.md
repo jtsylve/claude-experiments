@@ -266,7 +266,7 @@ esac
 ```bash
 # Good: whitelist valid templates
 case "$template_name" in
-    code-refactoring|code-review|test-generation|documentation-generator|function-calling|data-extraction|code-comparison|custom)
+    code-refactoring|code-review|test-generation|documentation-generator|data-extraction|code-comparison|custom)
         template_path="$TEMPLATE_DIR/$template_name.md"
         ;;
     *)

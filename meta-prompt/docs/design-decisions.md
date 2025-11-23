@@ -757,7 +757,7 @@ Claude Code uses markdown files for configuration and instructions. The project 
 Use **Markdown** for:
 - Slash commands (`/prompt`, `/create-prompt`)
 - Agents (`meta-prompt:prompt-optimizer`)
-- Templates (all 7 templates)
+- Templates (all templates)
 - Documentation (this file and others)
 
 **Rationale:**
@@ -1029,7 +1029,7 @@ Test suite with 30+ tests covering:
 - More templates → Higher maintenance → Better coverage → More token savings
 
 **Why This Balance:**
-- 7 templates cover 90%+ of software development use cases
+- 6 templates cover 90%+ of software development use cases
 - Maintenance overhead is manageable (quarterly reviews)
 - Too many templates would complicate classification
 - Too few would miss token saving opportunities
