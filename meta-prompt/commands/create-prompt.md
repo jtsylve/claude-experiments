@@ -2,7 +2,7 @@
 name: create-prompt
 description: Create expert-level prompt templates for Claude Code with best practices, examples, and structured output
 argument-hint: <task description>
-allowed-tools: [Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh:*), Bash(${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh:*), Read(${CLAUDE_PLUGIN_ROOT}/templates/**), Read(${CLAUDE_PLUGIN_ROOT}/guides/**)]
+allowed-tools: [Bash, Read(${CLAUDE_PLUGIN_ROOT}/templates/**), Read(${CLAUDE_PLUGIN_ROOT}/guides/**)]
 ---
 
 You will create expert-level prompt templates using an intelligent template routing system.
@@ -65,6 +65,8 @@ If the previous step returns anything OTHER than `custom`:
 1. Read the selected template using the Read tool:
    - Use: Read tool with path `${CLAUDE_PLUGIN_ROOT}/templates/<template-name>.md`
 2. Examine the template's required variables (in the YAML frontmatter)
+   - Distinguish between `variables` (required) and `optional_variables` (optional with defaults)
+   - Only required variables MUST be extracted from the task description
 3. Extract appropriate values from the task description using these heuristics:
    - **ITEM1, ITEM2**: Look for nouns, quoted strings, or entities to compare
    - **CLASSIFICATION_CRITERIA**: Extract the comparison criteria or question
@@ -73,11 +75,19 @@ If the previous step returns anything OTHER than `custom`:
    - **CODE_LOCATION**: Identify file paths, class names, or function names
    - **TASK_REQUIREMENTS**: Extract what needs to be done (action verbs and objectives)
    - **TARGET_PATTERNS**: Identify patterns to find (functions, classes, regex, file types)
+   - **CODE_TO_REVIEW, CODE_TO_TEST, CODE_OR_CONTENT**: Identify code, files, or content to process
+   - For optional variables: only extract if clearly specified; omit otherwise to use defaults
 4. Use the template processor to substitute variables:
    ```bash
    ${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh <template-name> VAR1='value1' VAR2='value2' ...
    ```
-5. Return the processed template as the final prompt
+
+   **Error Handling**: If template-processor.sh fails:
+   - Check the error message to understand why (missing required variables, template not found, etc.)
+   - If required variables couldn't be extracted, fall back to the `custom` template path (go to Step 3 "If script returns custom")
+   - If it's a different error, report it and fall back to `custom` template
+
+5. If template processing succeeds, return the processed template as the final prompt
 6. DO NOT invoke any LLM processing - just return the template
 
 If the script returns `custom`:

@@ -9,17 +9,23 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 ## Quick Start
 
 ```bash
-# Optimize and execute a prompt
+# Optimize and execute a prompt (auto-detects template)
 /prompt "Analyze security vulnerabilities in the authentication module"
 
+# Explicitly select a template with flags
+/prompt --review "Check this authentication middleware for security issues"
+/prompt --code "Refactor user service to use dependency injection"
+/prompt --test "Generate pytest tests for the user registration function"
+
 # Create an optimized prompt without executing
-/prompt "Refactor user service to use dependency injection" --return-only
+/prompt --return-only "Refactor user service to use dependency injection"
+/prompt --code --return-only "Fix the authentication bug"
 
 # Generate a prompt template
 /create-prompt "Compare two code snippets for semantic equivalence"
 ```
 
-**How it works:** Your task is classified into a template category (zero tokens), variables are substituted (zero tokens), and the LLM executes only the actual work. For borderline cases, the agent intelligently selects the best template to maximize accuracy. Result: 40-60% token savings with improved template routing.
+**How it works:** Your task is classified into a template category (zero tokens), variables are substituted (zero tokens), and the LLM executes only the actual work. You can explicitly select templates using flags like `--code`, `--review`, `--test`, etc., or let the system auto-detect. Result: 40-60% token savings with improved template routing.
 
 ---
 
@@ -172,16 +178,25 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 Seven templates optimized for software development workflows:
 
-| Template | Use Cases | Variables |
-|----------|-----------|-----------|
-| code-refactoring | Modify code, fix bugs, add features | 2 |
-| code-review | Security audits, quality analysis, feedback | 3 |
-| test-generation | Generate unit tests, test suites, edge cases | 3 |
-| documentation-generator | API docs, READMEs, docstrings, user guides | 3 |
-| function-calling | API usage, tool invocation | 2 |
-| data-extraction | Extract data from logs, JSON, HTML, text | 3 |
-| code-comparison | Compare code, configs, check equivalence | 3 |
-| custom | Novel tasks (LLM fallback) | 1 |
+| Template | Use Cases | Variables | Flags |
+|----------|-----------|-----------|-------|
+| code-refactoring | Modify code, fix bugs, add features | 2 | `--code`, `--refactor` |
+| code-review | Security audits, quality analysis, feedback | 3 | `--review` |
+| test-generation | Generate unit tests, test suites, edge cases | 3 | `--test` |
+| documentation-generator | API docs, READMEs, docstrings, user guides | 3 | `--docs`, `--documentation` |
+| function-calling | API usage, tool invocation | 2 | `--function` |
+| data-extraction | Extract data from logs, JSON, HTML, text | 3 | `--extract` |
+| code-comparison | Compare code, configs, check equivalence | 3 | `--compare`, `--comparison` |
+| custom | Novel tasks (LLM fallback) | 1 | `--custom` |
+
+### Template Selection
+
+You can select templates in two ways:
+
+1. **Automatic (default):** The system analyzes your task and selects the best template
+2. **Explicit flags:** Use flags like `--code`, `--review`, `--test` to bypass auto-detection
+
+Example: `/prompt --review "Check this code for security issues"`
 
 See [Template Authoring Guide](docs/template-authoring.md) to create your own.
 

@@ -3,13 +3,14 @@ template_name: documentation-generator
 category: generation
 keywords: [document, documentation, docs, readme, api doc, docstring, comment, guide, reference, explain code]
 complexity: intermediate
-variables: [CODE_OR_CONTENT, DOC_TYPE, AUDIENCE]
-version: 1.0
+variables: [CODE_OR_CONTENT]
+optional_variables: [DOC_TYPE, AUDIENCE]
+version: 1.1
 description: Generate comprehensive documentation from code or technical content in various formats
 variable_descriptions:
   CODE_OR_CONTENT: "The code or technical content to document (functions, classes, APIs, modules, or systems)"
-  DOC_TYPE: "Type of documentation needed (e.g., 'API reference', 'README', 'inline comments', 'user guide', 'technical spec')"
-  AUDIENCE: "Target audience (e.g., 'external developers', 'internal team', 'end users', 'technical leads')"
+  DOC_TYPE: "Type of documentation needed (e.g., 'API reference', 'README', 'inline comments', 'user guide', 'technical spec') - defaults to appropriate format"
+  AUDIENCE: "Target audience (e.g., 'external developers', 'internal team', 'end users', 'technical leads') - defaults to developers"
 ---
 
 You are a technical documentation expert creating clear, comprehensive documentation.
@@ -19,11 +20,11 @@ You are a technical documentation expert creating clear, comprehensive documenta
 </code_or_content>
 
 <doc_type>
-{$DOC_TYPE}
+{$DOC_TYPE:comprehensive documentation in the most appropriate format for the content (README for projects, inline docs for code, API reference for endpoints)}
 </doc_type>
 
 <audience>
-{$AUDIENCE}
+{$AUDIENCE:developers who will use or maintain this code}
 </audience>
 
 Follow this process to create documentation:

@@ -3,13 +3,14 @@ template_name: data-extraction
 category: analysis
 keywords: [extract, parse, pull, grab, get data, scrape, find data, retrieve, data from, pull out]
 complexity: simple
-variables: [SOURCE_DATA, EXTRACTION_TARGETS, OUTPUT_FORMAT]
-version: 1.0
+variables: [SOURCE_DATA, EXTRACTION_TARGETS]
+optional_variables: [OUTPUT_FORMAT]
+version: 1.1
 description: Extract specific information from unstructured or semi-structured data
 variable_descriptions:
   SOURCE_DATA: "The source data to extract from (logs, text files, HTML, JSON, CSV, or any text content)"
   EXTRACTION_TARGETS: "What to extract (e.g., 'email addresses and timestamps', 'product names and prices', 'error messages')"
-  OUTPUT_FORMAT: "Desired output format (e.g., 'JSON', 'CSV', 'markdown table', 'plain list')"
+  OUTPUT_FORMAT: "Desired output format (e.g., 'JSON', 'CSV', 'markdown table', 'plain list') - defaults to appropriate format"
 ---
 
 You are a data extraction specialist pulling specific information from raw data.
@@ -23,7 +24,7 @@ You are a data extraction specialist pulling specific information from raw data.
 </extraction_targets>
 
 <output_format>
-{$OUTPUT_FORMAT}
+{$OUTPUT_FORMAT:the most appropriate structured format for the extracted data (JSON for structured data, markdown table for tabular data, plain list for simple items)}
 </output_format>
 
 Follow this process to extract data:

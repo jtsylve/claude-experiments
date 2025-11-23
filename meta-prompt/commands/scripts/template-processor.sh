@@ -70,11 +70,31 @@ substitute_variables() {
     echo "$template"
 }
 
+# Function: Process default values for optional variables
+process_defaults() {
+    local template="$1"
+
+    # Extract all variables with defaults and their values
+    # Then replace both {$VAR:default} and {$VAR} with the default value
+    while [[ "$template" =~ \{\$([A-Z_][A-Z0-9_]*):([^}]+)\} ]]; do
+        local var_name="${BASH_REMATCH[1]}"
+        local default_value="${BASH_REMATCH[2]}"
+
+        # Escape special characters in default value for sed
+        local escaped_default=$(printf '%s\n' "$default_value" | sed 's/[&/\]/\\&/g')
+
+        # Replace both {$VAR:default} and {$VAR} with the default value
+        template=$(echo "$template" | sed -E "s/\{\\\$${var_name}(:[^}]*)?\}/${escaped_default}/g")
+    done
+
+    echo "$template"
+}
+
 # Function: Validate template (check for unreplaced variables)
 validate_template() {
     local template="$1"
 
-    # Check for any remaining {$VARIABLE} patterns
+    # Check for any remaining {$VARIABLE} patterns (without defaults)
     local unreplaced=$(echo "$template" | grep -oE '\{\$[A-Z_][A-Z0-9_]*\}' || true)
 
     if [ -n "$unreplaced" ]; then
@@ -107,10 +127,11 @@ main() {
         template=$(substitute_variables "$template" "$@") || return 1
     fi
 
-    # Validate (optional - only if variables were provided)
-    if [ $# -gt 0 ]; then
-        validate_template "$template" || return 1
-    fi
+    # Process default values for any remaining optional variables
+    template=$(process_defaults "$template")
+
+    # Validate that all required variables have been replaced
+    validate_template "$template" || return 1
 
     # Output processed template
     echo "$template"

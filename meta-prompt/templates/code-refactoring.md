@@ -3,12 +3,13 @@ template_name: code-refactoring
 category: development
 keywords: [refactor, code, file, function, class, codebase, modify, update, change, fix, implement, create]
 complexity: complex
-variables: [TASK_REQUIREMENTS, TARGET_PATTERNS]
-version: 1.0
+variables: [TASK_REQUIREMENTS]
+optional_variables: [TARGET_PATTERNS]
+version: 1.1
 description: Refactor or modify code according to specific requirements
 variable_descriptions:
   TASK_REQUIREMENTS: "What to do - the action to perform (e.g., 'Refactor authentication to use JWT', 'Add error handling', 'Fix memory leak')"
-  TARGET_PATTERNS: "What code to find - patterns, files, functions, classes, or file types to locate (e.g., 'auth functions', '**/*.js', 'UserModel class', 'API endpoints'). Can be file globs, function/class names, or descriptive patterns."
+  TARGET_PATTERNS: "What code to find - patterns, files, functions, classes, or file types to locate (e.g., 'auth functions', '**/*.js', 'UserModel class', 'API endpoints'). Can be file globs, function/class names, or descriptive patterns. Defaults to analyzing the codebase."
 ---
 
 You are a code refactoring assistant helping modify code according to specific requirements.
@@ -18,7 +19,7 @@ You are a code refactoring assistant helping modify code according to specific r
 </requirements>
 
 <target_patterns>
-{$TARGET_PATTERNS}
+{$TARGET_PATTERNS:analyze the codebase to find all relevant files and code that needs modification based on the requirements}
 </target_patterns>
 
 Follow these steps:
