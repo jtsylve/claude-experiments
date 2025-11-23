@@ -71,14 +71,17 @@ substitute_variables() {
 }
 
 # Function: Process default values for optional variables
+# Note: Default values cannot contain closing braces. If a default value needs
+# to contain a closing brace, it should be escaped or documented as a limitation.
 process_defaults() {
     local template="$1"
     local iteration_count=0
     local max_iterations=100
 
     # Extract all variables with defaults and their values
-    # Then replace both {$VAR:default} and {$VAR} with the default value
-    while [[ "$template" =~ \{\$([A-Z_][A-Z0-9_]*):([^}]+)\} ]]; do
+    # Pattern matches {$VAR_NAME:default_value} where default_value cannot contain }
+    # This is a safe limitation as closing braces are rarely needed in defaults
+    while [[ "$template" =~ \{\$([A-Z_][A-Z0-9_]*):([^}]*)\} ]]; do
         # Prevent infinite loops
         iteration_count=$((iteration_count + 1))
         if [ $iteration_count -gt $max_iterations ]; then
@@ -90,8 +93,9 @@ process_defaults() {
         local default_value="${BASH_REMATCH[2]}"
 
         # Escape special characters in default value for sed replacement string
-        # Need to escape: & (replacement ref), / (delimiter), \ (escape char), and regex special chars
-        local escaped_default=$(printf '%s\n' "$default_value" | sed 's/[&/\()]/\\&/g')
+        # Must escape sed metacharacters: & (backreference), / (delimiter), \ (escape), ( and ) (grouping)
+        # and shell metacharacters: $ (variable), ` (command substitution), " (quoting) to prevent injection
+        local escaped_default=$(printf '%s\n' "$default_value" | sed 's/[\\&/()$`"]/\\&/g')
 
         # The sed pattern below matches {$VAR} and {$VAR:default}
         # We use single quotes and concatenate the variable name for clarity and portability
