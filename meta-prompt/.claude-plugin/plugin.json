@@ -1,7 +1,7 @@
 {
   "name": "meta-prompt",
   "version": "1.0.0",
-  "description": "State machine-based optimization infrastructure achieving 40-60% token reduction through deterministic preprocessing and template-based routing. Features zero-token orchestration, domain-specific templates, hybrid classification with high accuracy, and specialized LLM agents for template selection, prompt optimization, and task execution.",
+  "description": "State machine-based optimization infrastructure for token reduction through deterministic preprocessing. Features zero-token orchestration, hybrid classification, and specialized LLM agents for prompt optimization and task execution.",
   "author": {
     "name": "Joe T. Sylve, Ph.D.",
     "email": "joe.sylve@gmail.com"

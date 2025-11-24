@@ -203,6 +203,10 @@ run_test_with_output "prompt-optimizer-handler loads templates" \
     "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/prompt-optimizer-handler.sh '<prompt_optimizer_request><user_task>Fix bug</user_task><template>code-refactoring</template><execution_mode>direct</execution_mode></prompt_optimizer_request>'" \
     "Template: code-refactoring"
 
+run_test_with_output "template-executor-handler loads skills from new structure" \
+    "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-executor-handler.sh '<template_executor_request><skill>meta-prompt:code-review</skill><optimized_prompt>Test prompt</optimized_prompt><execution_mode>direct</execution_mode></template_executor_request>'" \
+    "Skill: meta-prompt:code-review"
+
 echo ""
 
 # ===== PHASE 7: Documentation =====
