@@ -977,7 +977,12 @@ Neither format is compatible with bash path interpretation, which breaks bundled
 **Temporary Workaround (Implemented):**
 As of the current version, the plugin includes a temporary workaround for this Windows compatibility issue:
 
-1. **Production Scripts:** Core scripts (`template-selector.sh`, `template-processor.sh`) and command files now use hardcoded paths (`~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`) instead of `${CLAUDE_PLUGIN_ROOT}`
+1. **Production Scripts:** The following files now use hardcoded paths (`~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`) instead of `${CLAUDE_PLUGIN_ROOT}`:
+   - `agents/prompt-optimizer.md` - Template and guide paths in allowed-tools
+   - `commands/create-prompt.md` - Script paths in allowed-tools
+   - `commands/prompt.md` - Script paths in allowed-tools
+   - `commands/scripts/template-selector.sh` - Template directory paths
+   - `commands/scripts/template-processor.sh` - Template directory paths
 2. **Test Scripts:** Test files intelligently derive the plugin root from their own location, allowing local testing without environment variables
 3. **Revertible:** All workaround changes are marked with `TEMPORARY` comments for easy removal when Claude Code fixes the underlying issue
 
