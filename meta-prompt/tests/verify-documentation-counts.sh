@@ -163,11 +163,6 @@ main() {
     local gs_tests=$(extract_test_count "$getting_started")
     check_count "getting-started.md test count" "$actual_tests" "$gs_tests" "$getting_started"
 
-    # Check migration.md
-    local migration="${DOCS_DIR}/migration.md"
-    local migration_tests=$(extract_test_count "$migration")
-    check_count "migration.md test count" "$actual_tests" "$migration_tests" "$migration"
-
     # Check infrastructure.md
     local infrastructure="${DOCS_DIR}/infrastructure.md"
     if [ -f "$infrastructure" ]; then

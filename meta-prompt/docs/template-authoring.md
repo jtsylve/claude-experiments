@@ -321,8 +321,10 @@ Choose a pattern that clearly indicates what type of input the template expects:
 
 - **`*_TO_*`** - For inputs describing transformation or analysis:
   - `CODE_TO_TEST` (code to generate tests for)
-  - `CODE_TO_REVIEW` (code to review)
   - `TEXT_TO_ANALYZE` (text to analyze)
+
+- **`PATHS`** - For file/directory references:
+  - `PATHS` (files or directories to process, defaults to relevant files if not specified)
 
 - **`INPUT_*`** - For generic or diverse inputs:
   - `DOCUMENT` (for document Q&A)
@@ -361,7 +363,7 @@ Specifies output format or additional context:
 | Template | Var 1 (Input) | Var 2 (Action) | Var 3 (Output/Context) | Additional |
 |----------|---------------|----------------|------------------------|------------|
 | test-generation | `CODE_TO_TEST` | `TEST_FRAMEWORK` | `TEST_SCOPE` | - |
-| code-review | `CODE_TO_REVIEW` | `REVIEW_FOCUS` | `LANGUAGE_CONVENTIONS` | - |
+| code-review | `PATHS` | `REVIEW_FOCUS` | `LANGUAGE_CONVENTIONS` | - |
 | documentation-generator | `CODE_OR_CONTENT` | `DOC_TYPE` | `AUDIENCE` | - |
 | data-extraction | `SOURCE_DATA` | `EXTRACTION_TARGETS` | `OUTPUT_FORMAT` | - |
 | simple-classification | `ITEM1` | `ITEM2` | `CLASSIFICATION_CRITERIA` | - |

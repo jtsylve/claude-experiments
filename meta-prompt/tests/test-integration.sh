@@ -275,11 +275,11 @@ echo -e "${YELLOW}Phase 5: Prompt Handler${NC}"
 
 run_test_with_output "Prompt handler detects execution mode" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Analyze security issues'" \
-    "Optimize and execute"
+    "Execute the task unless"
 
 run_test_with_output "Prompt handler detects return-only mode" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--return-only Analyze security issues'" \
-    "Create optimized prompt"
+    "Return the prompt only"
 
 run_test_with_output "Prompt handler removes --return-only flag from task" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--return-only Task description'" \

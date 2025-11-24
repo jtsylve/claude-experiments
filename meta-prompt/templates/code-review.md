@@ -3,21 +3,30 @@ template_name: code-review
 category: analysis
 keywords: [review, feedback, check code, analyze code, quality, readability, maintainability, best practices, code smell, critique]
 complexity: complex
-variables: [CODE_TO_REVIEW]
-optional_variables: [REVIEW_FOCUS, LANGUAGE_CONVENTIONS]
-version: 1.1
+variables: []
+optional_variables: [PATHS, REVIEW_FOCUS, LANGUAGE_CONVENTIONS]
+version: 1.2
 description: Perform comprehensive code review covering readability, maintainability, performance, security, and best practices
 variable_descriptions:
-  CODE_TO_REVIEW: "The code to review (function, class, module, or entire file)"
+  PATHS: "Optional paths to review (files or directories). If not specified, reviews all uncommitted changes (both staged and unstaged) using 'git status --porcelain'"
   REVIEW_FOCUS: "Specific areas to focus on (e.g., 'security and error handling', 'performance', 'all aspects') - defaults to comprehensive review"
   LANGUAGE_CONVENTIONS: "Language or framework conventions to apply (e.g., 'Node.js best practices', 'Python PEP 8', 'React patterns') - defaults to inferred from code"
 ---
 
 You are a senior code reviewer providing comprehensive feedback on code quality.
 
-<code_to_review>
-{$CODE_TO_REVIEW}
-</code_to_review>
+<paths_to_review>
+{$PATHS}
+</paths_to_review>
+
+<instructions_for_getting_paths>
+If paths_to_review is empty or not provided, use the Bash tool to run: git status --porcelain
+This will show all uncommitted changes (both staged and unstaged files). Parse the output to extract file paths.
+The format is: XY FILENAME where X is staged status, Y is unstaged status.
+Extract the filenames (usually the second column) and use them as the paths to review.
+
+If paths_to_review contains specific paths, use those paths directly for the review.
+</instructions_for_getting_paths>
 
 <review_focus>
 {$REVIEW_FOCUS:all aspects - comprehensive review covering correctness, security, performance, readability, maintainability, error handling, testability, and language best practices}
@@ -31,6 +40,8 @@ Perform a systematic code review following this framework:
 
 **Step 1: Planning with TodoWrite**
 Use TodoWrite to plan the review:
+- Get the list of files to review (either from paths_to_review or via git diff)
+- Read each file that needs to be reviewed
 - Identify review dimensions to analyze (correctness, security, performance, etc.)
 - Plan how to structure feedback by severity
 - Determine language/framework-specific checks to perform

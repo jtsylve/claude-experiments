@@ -661,7 +661,7 @@ fi
 
 **Checks:**
 - Template count in README.md, getting-started.md, CONTRIBUTING.md
-- Test count in getting-started.md, migration.md, infrastructure.md
+- Test count in getting-started.md, infrastructure.md
 - Actual template count (files in templates/)
 - Actual test count (run_test calls in test-integration.sh)
 
