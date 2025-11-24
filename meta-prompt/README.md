@@ -25,8 +25,8 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 /prompt --return-only "Refactor user service to use dependency injection"
 /prompt --code --return-only "Fix the authentication bug"
 
-# Generate a prompt template
-/create-prompt "Compare two code snippets for semantic equivalence"
+# Plan mode for complex multi-step tasks
+/prompt --plan "Refactor user service to use dependency injection"
 ```
 
 **How it works:** Your task is classified into a template category (zero tokens), variables are substituted (zero tokens), and the LLM executes only the actual work. You can explicitly select templates using flags like `--code`, `--review`, `--test`, etc., or let the system auto-detect. Result: 40-60% token savings with improved template routing.
@@ -97,10 +97,13 @@ meta-prompt/
 ├── .claude-plugin/    # Plugin manifest and configuration
 │   ├── plugin.json    # Plugin metadata
 │   └── settings.json  # Permissions and settings
-├── commands/          # /prompt and /create-prompt slash commands
-│   └── scripts/       # Deterministic processing (zero tokens)
-├── templates/         # 10 pre-built prompt templates
-├── agents/            # LLM agent for novel cases
+├── commands/          # /prompt slash command
+│   └── scripts/       # State machine handler
+├── agents/            # LLM agents and handler scripts
+│   ├── *.md           # Agent definitions
+│   └── scripts/       # Agent handler scripts
+├── skills/            # Domain-specific skills
+├── templates/         # 6 pre-built prompt templates
 ├── docs/              # Documentation suite
 ├── CONTRIBUTING.md    # Contribution guidelines
 └── README.md          # This file - start here
@@ -181,17 +184,14 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 Six templates optimized for software development workflows:
 
-| Template | Use Cases | Variables<br/>(Required/Total) | Flags |
-|----------|-----------|-------------------------------|-------|
-| code-refactoring | Modify code, fix bugs, add features | 1/2 | `--code`, `--refactor` |
-| code-review | Security audits, quality analysis, feedback | 1/3 | `--review` |
-| test-generation | Generate unit tests, test suites, edge cases | 1/3 | `--test` |
-| documentation-generator | API docs, READMEs, docstrings, user guides | 1/3 | `--docs`, `--documentation` |
-| data-extraction | Extract data from logs, JSON, HTML, text | 2/3 | `--extract` |
-| code-comparison | Compare code, configs, check equivalence | 3/3 | `--compare`, `--comparison` |
-| custom | Novel tasks (LLM fallback) | 1/1 | `--custom` |
-
-> **Note:** The "Variables" column shows the number of required variables followed by the total number of variables (including optional variables with defaults). For example, "1/3" means 1 required and 2 optional variables.
+| Template | Use Cases | Flags |
+|----------|-----------|-------|
+| code-refactoring | Modify code, fix bugs, add features | `--code`, `--refactor` |
+| code-review | Security audits, quality analysis, feedback | `--review` |
+| test-generation | Generate unit tests, test suites, edge cases | `--test` |
+| documentation-generator | API docs, READMEs, docstrings, user guides | `--docs`, `--documentation` |
+| data-extraction | Extract data from logs, JSON, HTML, text | `--extract` |
+| code-comparison | Compare code, configs, check equivalence | `--compare`, `--comparison` |
 
 ### Template Selection
 

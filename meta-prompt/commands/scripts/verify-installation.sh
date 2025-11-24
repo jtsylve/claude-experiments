@@ -76,8 +76,10 @@ echo ""
 # Check critical scripts
 SCRIPTS=(
     "commands/scripts/prompt-handler.sh"
-    "commands/scripts/template-selector.sh"
-    "commands/scripts/template-processor.sh"
+    "scripts/common.sh"
+    "agents/scripts/prompt-optimizer-handler.sh"
+    "agents/scripts/template-selector-handler.sh"
+    "agents/scripts/template-executor-handler.sh"
 )
 
 for script in "${SCRIPTS[@]}"; do
