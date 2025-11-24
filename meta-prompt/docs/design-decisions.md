@@ -832,6 +832,25 @@ Implement **aggressive prompt optimization** following these principles:
   - Skills still provide comprehensive guidance when loaded
   - May need periodic review as use patterns emerge
 
+**Post-Merge Monitoring Plan:**
+
+Track these metrics to detect quality regression:
+
+| Metric | Indicator | Action Threshold |
+|--------|-----------|------------------|
+| Template selection accuracy | Users overriding selected template | >10% override rate |
+| Variable extraction failures | AskUserQuestion calls in prompt-optimizer | >20% of tasks |
+| Task completion rate | template-executor failures | <90% success |
+| User clarification requests | AskUserQuestion in template-executor | Significant increase |
+
+**Monitoring actions:**
+1. Review failed tasks weekly for first month post-merge
+2. If regression detected, consider:
+   - Restoring verbose guidance to affected skill/template
+   - Adjusting model selection (e.g., Haiku → Sonnet)
+3. Collect user feedback on prompt quality
+4. Compare task completion times before/after optimization
+
 **References:**
 - `agents/prompt-optimizer.md` (model: sonnet)
 - `agents/template-selector.md` (model: haiku)
