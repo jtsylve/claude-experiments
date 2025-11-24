@@ -281,6 +281,53 @@ fi
 
 echo ""
 
+# ===== PHASE 6: Variable Description and Validation Tests =====
+echo -e "${YELLOW}Phase 6: Variable Descriptions and Validation Checklist${NC}"
+
+run_test "Includes variable descriptions when available" \
+    "Fix the auth bug" \
+    "code-refactoring" \
+    "Variable Descriptions"
+
+run_test "Includes validation checklist" \
+    "Fix bug" \
+    "code-refactoring" \
+    "Validation Checklist"
+
+run_test "Validation checklist includes placeholder check" \
+    "Review this code" \
+    "code-review" \
+    "No.*VARIABLE.*patterns remain"
+
+# Test with template that has variable descriptions
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Variable descriptions formatted correctly"
+xml_input=$(create_xml_input "Fix the bug" "code-refactoring")
+output=$("$HANDLER" "$xml_input" 2>&1)
+if check_output_contains "$output" "TASK_REQUIREMENTS" && check_output_contains "$output" "TARGET_PATTERNS"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Variable descriptions not formatted correctly"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
+# Test custom template (no variable descriptions)
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Handles template without variable descriptions gracefully"
+xml_input=$(create_xml_input "Do something novel" "custom")
+output=$("$HANDLER" "$xml_input" 2>&1)
+# Should NOT fail and should still have validation checklist
+if check_output_contains "$output" "Validation Checklist"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Should handle template without variable descriptions"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
+echo ""
+
 # ===== Summary =====
 echo -e "${YELLOW}=== Summary ===${NC}"
 echo -e "Total tests: $TOTAL_TESTS"

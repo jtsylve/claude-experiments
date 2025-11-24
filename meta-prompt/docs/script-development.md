@@ -538,16 +538,18 @@ fi
 
 ### prompt-optimizer-handler.sh
 
-**Purpose:** Load templates and prepare optimized prompts
+**Purpose:** Load templates, extract variable descriptions, and prepare validated optimized prompts
 
 **Input:** XML via stdin with template name and task
 
-**Output:** XML with optimized prompt and execution instructions
+**Output:** Agent instructions with template content, variable info, and validation checklist
 
 **Key Functions:**
 - Template loading and variable extraction
+- Variable descriptions extraction from YAML frontmatter
 - Skill mapping (template → skill)
 - Execution mode handling
+- Validation checklist generation (ensures no remaining placeholders)
 
 **Location:** `agents/scripts/prompt-optimizer-handler.sh`
 
