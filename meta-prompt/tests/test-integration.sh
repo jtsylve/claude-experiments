@@ -260,8 +260,48 @@ run_test_with_output "template-executor-handler rejects invalid skills" \
 
 echo ""
 
-# ===== PHASE 7: Documentation =====
-echo -e "${YELLOW}Phase 7: Documentation Files${NC}"
+# ===== PHASE 7: Complex Scenario Tests =====
+echo -e "${YELLOW}Phase 7: Complex Scenario Tests${NC}"
+
+# Test template-selector with ambiguous task (should handle gracefully)
+run_test_with_output "template-selector handles ambiguous task" \
+    "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-selector-handler.sh '<template_selector_request><user_task>Make the app better</user_task></template_selector_request>'" \
+    "CLASSIFICATION RESULT:"
+
+# Test template-selector with complex multi-intent task
+run_test_with_output "template-selector handles complex task with multiple keywords" \
+    "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-selector-handler.sh '<template_selector_request><user_task>Refactor the authentication module and add unit tests for security</user_task></template_selector_request>'" \
+    "code-refactoring|test-generation"
+
+# Test prompt-optimizer with complex variable extraction
+run_test_with_output "prompt-optimizer handles task with implicit variables" \
+    "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/prompt-optimizer-handler.sh '<prompt_optimizer_request><user_task>Review the payment processing code in src/payments for security vulnerabilities</user_task><template>code-review</template><execution_mode>direct</execution_mode></prompt_optimizer_request>'" \
+    "Template: code-review"
+
+# Test skills have sufficient content (tables, sections, examples)
+run_test "code-refactoring skill has workflow section" \
+    "grep -q '## Workflow' \${CLAUDE_PLUGIN_ROOT}/skills/code-refactoring/SKILL.md"
+
+run_test "code-review skill has severity levels" \
+    "grep -q 'CRITICAL\|HIGH\|MEDIUM' \${CLAUDE_PLUGIN_ROOT}/skills/code-review/SKILL.md"
+
+run_test "test-generation skill has framework reference" \
+    "grep -q 'Jest\|pytest\|JUnit' \${CLAUDE_PLUGIN_ROOT}/skills/test-generation/SKILL.md"
+
+# Test model selection is correctly configured
+run_test "template-selector uses haiku model" \
+    "grep -q '^model: haiku' \${CLAUDE_PLUGIN_ROOT}/agents/template-selector.md"
+
+run_test "prompt-optimizer uses sonnet model" \
+    "grep -q '^model: sonnet' \${CLAUDE_PLUGIN_ROOT}/agents/prompt-optimizer.md"
+
+run_test "template-executor uses sonnet model" \
+    "grep -q '^model: sonnet' \${CLAUDE_PLUGIN_ROOT}/agents/template-executor.md"
+
+echo ""
+
+# ===== PHASE 8: Documentation =====
+echo -e "${YELLOW}Phase 8: Documentation Files${NC}"
 
 run_test "README.md exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/README.md ]"
