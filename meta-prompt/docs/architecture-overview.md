@@ -286,19 +286,21 @@ description: <description>
 
 **Location:** `agents/`
 
+Each agent uses a model optimized for its complexity level:
+
 #### template-selector
 - **Purpose:** Auto-detect appropriate template for task
 - **Type:** Claude Code agent
 - **Handler:** `agents/scripts/template-selector-handler.sh`
-- **Model:** Sonnet
-- **Tools:** Bash (handler script)
+- **Model:** Haiku (lightweight classification task)
+- **Tools:** Bash (handler script), Read (templates)
 - **Output:** Template name via XML
 
 #### prompt-optimizer
 - **Purpose:** Generate optimized prompts from templates
 - **Type:** Claude Code agent
 - **Handler:** `agents/scripts/prompt-optimizer-handler.sh`
-- **Model:** Sonnet
+- **Model:** Haiku (simple variable extraction)
 - **Tools:** Bash (handler script), Read (templates)
 - **Output:** Optimized prompt via XML
 
@@ -306,9 +308,16 @@ description: <description>
 - **Purpose:** Execute tasks using domain-specific skills
 - **Type:** Claude Code agent
 - **Handler:** `agents/scripts/template-executor-handler.sh`
-- **Model:** Sonnet
+- **Model:** Sonnet (complex reasoning for task execution)
 - **Tools:** Skill (domain expertise), TodoWrite, Read/Edit/Write
 - **Output:** Task results via XML
+
+**Model Selection Rationale:**
+| Agent | Model | Rationale |
+|-------|-------|-----------|
+| template-selector | Haiku | Simple classification, keyword-guided |
+| prompt-optimizer | Haiku | Deterministic variable extraction |
+| template-executor | Sonnet | Complex reasoning, multi-step execution |
 
 ### 5. Skills Layer
 
@@ -702,5 +711,5 @@ meta-prompt/                         # Plugin root
 ---
 
 **Document Status:** Complete
-**Review Date:** 2025-11-18
-**Next Review:** 2026-02-18 (Quarterly)
+**Review Date:** 2025-11-24
+**Next Review:** 2026-02-24 (Quarterly)
