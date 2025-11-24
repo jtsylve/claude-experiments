@@ -1,7 +1,7 @@
 ---
 name: prompt-optimizer
 description: Processes templates and extracts variables to create optimized prompts
-allowed-tools: [Bash, Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/**), Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/guides/**), AskUserQuestion, Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/agents/scripts/prompt-optimizer-handler.sh)]
+allowed-tools: [Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/**), AskUserQuestion, Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/agents/scripts/prompt-optimizer-handler.sh:*)]
 model: sonnet
 ---
 
@@ -24,6 +24,7 @@ Extract variables from user task, substitute into template, validate result, ret
 4. **Validate result** - scan your output for remaining `{$...}` patterns:
    - If any remain, re-analyze user task or infer appropriate values
    - Use default values for optional variables you missed
+   - If you cannot determine a **required** variable value and cannot reasonably infer it, use AskUserQuestion to request clarification from the user
    - **Output MUST have ZERO remaining placeholders**
 
 5. **Return XML**:

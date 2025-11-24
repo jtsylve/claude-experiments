@@ -326,6 +326,43 @@ else
     FAILED_TESTS=$((FAILED_TESTS + 1))
 fi
 
+# Test that variable descriptions containing colons are handled correctly
+# The code-review template has descriptions like "Default: uncommitted changes via git status"
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Variable descriptions with colons parsed correctly"
+xml_input=$(create_xml_input "Review the authentication module" "code-review")
+output=$("$HANDLER" "$xml_input" 2>&1)
+# Check that the full description is present, not truncated at first colon
+# The description contains "Default:" so we verify that part after the colon is included
+if check_output_contains "$output" "PATHS" && check_output_contains "$output" "Default:"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Variable descriptions with colons may be truncated"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
+# Test multi-line user task handling
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Handles multi-line user task"
+# Create XML with multiline task using heredoc
+xml_input="<prompt_optimizer_request>
+<user_task>Fix these issues:
+- Authentication bug
+- Performance problem</user_task>
+<template>code-refactoring</template>
+<execution_mode>direct</execution_mode>
+</prompt_optimizer_request>"
+output=$("$HANDLER" "$xml_input" 2>&1)
+# Verify template loads successfully with multiline input
+if check_output_contains "$output" "Template: code-refactoring" && check_output_contains "$output" "Authentication"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Multi-line user task not handled correctly"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
 echo ""
 
 # ===== Summary =====

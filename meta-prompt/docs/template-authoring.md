@@ -269,7 +269,14 @@ variable_descriptions:
   MODIFICATION_GOAL: "What to change (e.g., 'improve performance', 'add error handling')"
 ```
 
-This helps users understand what to provide for each variable.
+Variable descriptions serve two purposes:
+1. **Documentation**: Help users understand what to provide for each variable
+2. **Agent guidance**: The prompt-optimizer agent uses these descriptions to accurately extract values from user tasks
+
+**Best practices for descriptions:**
+- Be specific about expected content (e.g., "function, class, or file" not just "code")
+- Include examples where helpful (e.g., "'security', 'performance'")
+- Note defaults for optional variables (e.g., "Default: uncommitted changes")
 
 ### Variable Naming Patterns
 
