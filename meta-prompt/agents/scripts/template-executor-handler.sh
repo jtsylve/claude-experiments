@@ -26,14 +26,14 @@ validate_skill() {
 
     # Remove "meta-prompt:" prefix if present
     local skill_name="${skill#meta-prompt:}"
-    local skill_file="${SKILL_DIR}/${skill_name}.md"
+    local skill_file="${SKILL_DIR}/${skill_name}/SKILL.md"
 
     if [ ! -f "$skill_file" ]; then
         echo "Warning: Skill file not found: $skill_file" >&2
         echo "" >&2
         echo "Available skills in $SKILL_DIR:" >&2
         if [ -d "$SKILL_DIR" ]; then
-            ls -1 "$SKILL_DIR"/*.md 2>/dev/null | sed 's/.*\//  - meta-prompt:/' | sed 's/\.md$//' >&2 || echo "  (none found)" >&2
+            find "$SKILL_DIR" -name "SKILL.md" -type f 2>/dev/null | sed "s|$SKILL_DIR/||" | sed 's|/SKILL.md$||' | sed 's/^/  - meta-prompt:/' >&2 || echo "  (none found)" >&2
         else
             echo "  Error: Skill directory does not exist: $SKILL_DIR" >&2
         fi

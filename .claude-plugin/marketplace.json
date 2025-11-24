@@ -9,7 +9,7 @@
     {
       "name": "meta-prompt",
       "source": "./meta-prompt",
-      "description": "State machine-based optimization infrastructure achieving 40-60% token reduction through deterministic preprocessing, template-based routing, and specialized LLM agents. Features 7 pre-built templates, intelligent hybrid classification (90%+ accuracy), and zero-token orchestration with domain-specific skills layer."
+      "description": "State machine-based prompt optimization through specialized agents, template routing, and hybrid classification with deterministic preprocessing"
     }
   ]
 }
