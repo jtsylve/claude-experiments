@@ -122,7 +122,7 @@ For tasks that don't match existing templates, the system automatically routes t
 
 ## Step 5: Explore Available Templates (1 minute)
 
-Seven templates cover software development workflows:
+Six specialized templates plus one custom fallback cover software development workflows:
 
 ### 1. Code Comparison
 **Use for:** Comparing code, configurations, or technical artifacts
@@ -417,7 +417,7 @@ tests/test-integration.sh
 ```
 commands/prompt.md              # /prompt command
 commands/scripts/               # Processing scripts
-templates/                      # Template library (7 templates)
+templates/                      # Template library (6 specialized templates + 1 custom fallback)
 docs/                           # Documentation
 ```
 

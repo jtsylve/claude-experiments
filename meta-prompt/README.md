@@ -206,7 +206,7 @@ See [Template Authoring Guide](docs/template-authoring.md) to create your own.
 **Troubleshooting:**
 - See [Infrastructure Guide - Troubleshooting](docs/infrastructure.md#troubleshooting)
   - Note: Windows users should review the [hardcoded paths workaround](docs/infrastructure.md#issue-windows-compatibility---claude_plugin_root-path-normalization-claude-code-bug)
-- Use `DEBUG=1` with scripts for verbose output
+- Use `bash -x script.sh` for verbose debugging output
 - Run validation and tests to diagnose issues
 
 ---

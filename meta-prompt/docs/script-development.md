@@ -328,44 +328,14 @@ test_sanitize() {
 
 **Test full script workflows:**
 
-```bash
-# Test classification accuracy
-test_classification() {
-    local result=$(./template-selector.sh "Compare Python and JavaScript")
-    if [[ "$result" == "code-comparison" ]]; then
-        echo "PASS: Classification"
-    else
-        echo "FAIL: Expected code-comparison, got $result"
-        exit 1
-    fi
-}
-```
-
 See `tests/test-integration.sh` for complete test suite.
 
 ### 3. Edge Case Testing
 
-```bash
-# Test empty input
-test_empty_input() {
-    ./template-selector.sh ""
-    if [[ $? -ne 0 ]]; then
-        echo "PASS: Empty input rejected"
-    else
-        echo "FAIL: Empty input should be rejected"
-        exit 1
-    fi
-}
-
-# Test special characters
-test_special_chars() {
-    ./template-processor.sh code-comparison \
-        ITEM1='test$var' \
-        ITEM2='back`tick`' \
-        CLASSIFICATION_CRITERIA='quote"test'
-    # Should not execute commands, should escape properly
-}
-```
+See the handler test files in `tests/` for examples of edge case testing including:
+- Empty input handling
+- Special character escaping
+- Invalid argument rejection
 
 ---
 
@@ -378,7 +348,7 @@ test_special_chars() {
 set -x
 
 # Or run script with debug
-bash -x ./template-selector.sh "test task"
+bash -x ./script.sh "test task"
 
 # Disable debug
 set +x
@@ -390,27 +360,7 @@ set +x
 + grep -E 'compare|classify' <<< 'test task'
 ```
 
-### 2. DEBUG Environment Variable
-
-**Add debug logging to scripts:**
-
-```bash
-debug_log() {
-    if [[ "${DEBUG:-0}" == "1" ]]; then
-        echo "DEBUG: $*" >&2
-    fi
-}
-
-# Usage
-debug_log "Template: $template_name, Confidence: $confidence%"
-```
-
-**Enable:**
-```bash
-DEBUG=1 ./template-selector.sh "test task"
-```
-
-### 3. Echo Statements
+### 2. Echo Statements
 
 **Temporary debugging:**
 
@@ -447,7 +397,7 @@ sudo apt-get install shellcheck
 
 **Run linter:**
 ```bash
-shellcheck ./template-selector.sh
+shellcheck ./script.sh
 
 # Fix common issues:
 # - Unquoted variables
@@ -558,61 +508,58 @@ fi
 
 ### prompt-handler.sh
 
-**Purpose:** Orchestrates `/prompt` command workflow
+**Purpose:** Orchestrates `/prompt` command workflow via state machine
 
-**Input:**
-- `$1`: Task description (required)
-- `$2`: Flags like `--return-only` (optional)
+**Input:** XML via stdin with task description and state information
 
-**Output:** Instructions for Claude Code (stdout)
+**Output:** XML instructions for next action (spawn agent, return result, etc.)
 
 **Key Functions:**
 - `sanitize_input()`: Escapes dangerous characters
-- Detects execution mode vs return-only mode
-- Generates instructions for meta-prompt:prompt-optimizer agent
+- State machine for workflow orchestration
+- Flag parsing (--return-only, --plan, --code, etc.)
 
 **Location:** `commands/scripts/prompt-handler.sh`
 
-### template-selector.sh
+### template-selector-handler.sh
 
 **Purpose:** Classify tasks and route to appropriate templates
 
-**Input:**
-- `$1`: Task description (required)
+**Input:** XML via stdin with task description
 
-**Output:** Template name + confidence (if DEBUG=1)
+**Output:** XML with selected template name and confidence
 
 **Key Functions:**
 - `score_category()`: Calculate confidence for each template category
 - Keyword matching with regex
-- Confidence threshold comparison (70%)
+- Confidence threshold comparison
 
-**Algorithm:**
-1. Convert task to lowercase
-2. Check for strong indicators (75% base confidence)
-3. Count supporting keywords (8% each)
-4. Select highest confidence ≥ 70%
-5. Return template name or "custom"
+**Location:** `agents/scripts/template-selector-handler.sh`
 
-**Location:** `commands/scripts/template-selector.sh`
+### prompt-optimizer-handler.sh
 
-### template-processor.sh
+**Purpose:** Load templates and prepare optimized prompts
 
-**Purpose:** Load templates and substitute variables
+**Input:** XML via stdin with template name and task
 
-**Input:**
-- `$1`: Template name (required)
-- `$2+`: VAR=value pairs (required)
-
-**Output:** Processed template with substituted variables
+**Output:** XML with optimized prompt and execution instructions
 
 **Key Functions:**
-- `escape_value()`: Security escaping for variable values
-- Variable extraction from arguments
-- Substitution with `sed`
-- Validation of unreplaced variables
+- Template loading and variable extraction
+- Skill mapping (template → skill)
+- Execution mode handling
 
-**Location:** `commands/scripts/template-processor.sh`
+**Location:** `agents/scripts/prompt-optimizer-handler.sh`
+
+### template-executor-handler.sh
+
+**Purpose:** Execute optimized prompts with appropriate skills
+
+**Input:** XML via stdin with skill name and optimized prompt
+
+**Output:** Skill invocation instructions
+
+**Location:** `agents/scripts/template-executor-handler.sh`
 
 ### validate-templates.sh
 
@@ -685,8 +632,9 @@ CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt tests/verify-documentation-counts.sh
 ### 1. Keep Scripts Focused
 
 Each script should have a single responsibility:
-- ✓ template-selector.sh: Classification only
-- ✓ template-processor.sh: Substitution only
+- ✓ template-selector-handler.sh: Classification only
+- ✓ prompt-optimizer-handler.sh: Template processing only
+- ✓ prompt-handler.sh: State machine orchestration only
 - ✗ Don't combine multiple responsibilities
 
 ### 2. Use Functions for Reusability
@@ -760,7 +708,7 @@ echo "The template is $template_name with confidence $confidence%"
 **When modifying scripts:**
 1. Read existing scripts for patterns
 2. Run shellcheck for linting
-3. Test with DEBUG=1 for verbose output
+3. Use `bash -x` for verbose debugging output
 4. Run validation and integration tests
 5. See [CONTRIBUTING.md](CONTRIBUTING.md) for support
 

@@ -14,6 +14,11 @@ FALLBACK MODE: This task requires custom prompt engineering.
 {$TASK_DESCRIPTION}
 </task>
 
-Use the /create-prompt command to generate an optimized prompt for this task. The /create-prompt command has comprehensive prompt engineering guidance and will create a tailored solution.
+This task doesn't match a specialized template. Generate an optimized prompt using prompt engineering best practices:
 
-After generating the prompt with /create-prompt, return it to the user.
+1. Understand the task requirements
+2. Structure the prompt with clear instructions
+3. Include relevant context and constraints
+4. Define expected output format
+
+Return the optimized prompt to the user.

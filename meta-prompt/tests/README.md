@@ -89,31 +89,18 @@ export CLAUDE_PLUGIN_ROOT=/path/to/meta-prompt
 
 The new test suite matches the new agent-based architecture:
 
-### Old Architecture (Deleted)
-```
-Direct CLI testing:
-- template-selector.sh "task" → result
-- template-processor.sh template VAR=value → processed template
-```
-
-**Old Test Files (Removed):**
-- `test-classifier.sh` - Tested template-selector.sh directly
-- `test-logging.sh` - Tested logging functionality
-- `test-concurrency.sh` - Tested concurrent execution
-- `test-benchmarks.sh` - Tested performance
-
-### New Architecture
+### Architecture
 ```
 Handler scripts called by agents:
 - XML input → handler.sh → instructions output
 - Handlers are implementation details, tested via bash
 ```
 
-**New Test Files:**
+**Test Files:**
 - `test-template-selector-handler.sh` - Tests classification handler
 - `test-prompt-optimizer-handler.sh` - Tests optimizer handler
 - `test-prompt-handler.sh` - Tests state machine handler
-- `test-integration.sh` - Simplified integration tests
+- `test-integration.sh` - Integration tests
 
 ## Test Coverage
 
@@ -193,14 +180,6 @@ chmod +x agents/scripts/*.sh
 chmod +x tests/*.sh
 ```
 
-## Migration Notes
-
-If you have custom tests for the old architecture:
-
-| Old Script | New Handler | New Test File |
-|------------|-------------|---------------|
-| template-selector.sh | template-selector-handler.sh | test-template-selector-handler.sh |
-| template-processor.sh | prompt-optimizer-handler.sh | test-prompt-optimizer-handler.sh |
-| N/A | prompt-handler.sh | test-prompt-handler.sh |
+## Handler Testing
 
 The handlers expect XML input via stdin, not command-line arguments. See existing test files for examples of how to test them.
