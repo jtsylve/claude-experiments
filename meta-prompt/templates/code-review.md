@@ -21,7 +21,7 @@ Review code for quality, security, and maintainability.
 
 ## Process
 
-1. **Get code:** If paths empty, run `git status --porcelain` and `git diff` to get uncommitted changes
+1. **Get code:** If `PATHS` is empty, use Bash to run `git status --porcelain` to list changed files, then `git diff` to view the changes
 
 2. **Analyze** across dimensions: correctness, security, performance, readability, error handling, testability
 
