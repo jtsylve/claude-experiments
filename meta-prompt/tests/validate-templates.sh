@@ -5,10 +5,11 @@
 
 set -euo pipefail
 
-# Validate required environment variables
+# Setup: Set CLAUDE_PLUGIN_ROOT if not already set
 if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-    echo "ERROR: CLAUDE_PLUGIN_ROOT environment variable is not set" >&2
-    exit 1
+    # Get the script directory and navigate to plugin root (one level up from tests/)
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 fi
 
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"

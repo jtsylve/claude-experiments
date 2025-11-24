@@ -178,98 +178,6 @@ This ensures:
 - `o pipefail` - Fail if any pipeline command fails
 ---
 
-### AD-002a: Agent Invocation via Task Tool Pattern
-
-**TL;DR:** Bash scripts output structured text starting with `@agent-` prefix; the orchestrating Claude instance parses this and invokes the specified agent using the Task tool
-
-**Status:** Accepted
-**Date:** 2025-11-23
-**Context:**
-
-The `/prompt` command uses bash scripts for deterministic routing (AD-001). These scripts need to signal which agent should handle the request and provide the context for execution. The invocation must:
-- Be parseable by Claude Code's orchestrating instance
-- Clearly separate agent identification from task context
-- Support both execution and return-only modes
-- Maintain zero-token overhead for routing logic
-
-**Decision:**
-
-Bash scripts output structured text with an **@agent-prefix convention**:
-1. Script outputs text starting with `@agent-{plugin}:{agent-name}`
-2. Followed by the complete task context and instructions for that agent
-3. The orchestrating Claude instance sees this output and invokes the agent via Task tool
-4. The agent name after `@agent-` maps to `subagent_type` parameter in Task tool
-
-**Example:**
-```bash
-# Script outputs:
-@agent-meta-prompt:prompt-optimizer
-
-The user needs help with this task:
-<user_task>Fix the authentication bug</user_task>
-...
-```
-
-```
-# Orchestrator translates to:
-Task(subagent_type="meta-prompt:prompt-optimizer", prompt="The user needs help...")
-```
-
-**Rationale:**
-
-- **Clear Separation:** The `@agent-` prefix makes it immediately obvious this is an agent invocation
-- **Human Readable:** Easy to understand and debug script output
-- **Zero Tokens:** The bash script does the routing; Claude only does the invocation
-- **Flexible:** Scripts can include full context and instructions in the output
-- **Convention-Based:** Simple pattern that doesn't require complex parsing
-
-**Alternatives Considered:**
-
-1. **Direct Task Tool Invocation from Bash**
-   - Pros: More explicit
-   - Cons: Bash scripts can't invoke Claude Code tools; only Claude instances can
-   - Rejected: Technical impossibility
-
-2. **JSON Output Format**
-   - Pros: Structured, machine-parseable
-   - Cons: More verbose, requires JSON parsing, harder to read/debug
-   - Rejected: Unnecessary complexity for simple routing
-
-3. **Return Subagent Type Only**
-   - Pros: Minimal output
-   - Cons: Orchestrator would need to reconstruct full prompt, duplicating logic
-   - Rejected: Violates zero-token routing goal
-
-**Consequences:**
-
-- Positive:
-  - Clear, debuggable output from bash scripts
-  - Orchestrator role is minimal (parse prefix, invoke agent)
-  - All task context stays in bash output (single source of truth)
-  - Easy to test bash scripts (just check output format)
-
-- Negative:
-  - Requires orchestrator to recognize `@agent-` convention
-  - Not a standard Claude Code feature (project-specific pattern)
-  - Could be confused with actual tool invocation syntax
-
-- Neutral:
-  - Adds documentation requirement to explain convention
-  - Scripts and documentation must stay synchronized
-
-**Implementation Notes:**
-
-The `@agent-` prefix is a **documentation convention**, not a Claude Code API feature. It signals to the orchestrating Claude instance that:
-1. The following text should be passed to an agent
-2. The agent name is specified after `@agent-`
-3. The orchestrator should use Task tool with appropriate `subagent_type`
-
-This pattern appears in:
-- `commands/scripts/prompt-handler.sh` (outputs `@agent-meta-prompt:prompt-optimizer`)
-- `commands/prompt.md` (documents the convention)
-- `docs/architecture-overview.md` (explains runtime behavior)
----
-
 ### AD-003: Template Library with YAML Frontmatter
 
 **TL;DR:** Markdown files with YAML frontmatter provide human-readable templates that are Git-friendly, easy to parse with awk/sed, and consistent with Claude Code conventions
@@ -1027,7 +935,7 @@ Implement **graceful degradation** pattern:
 **Examples:**
 
 - **Classification:** If confidence < 70%, use custom template → LLM
-- **Script Failure:** If prompt-handler.sh fails, invoke @agent-meta-prompt:prompt-optimizer directly
+- **Script Failure:** If prompt-handler.sh fails, use Task tool with subagent_type="meta-prompt:prompt-optimizer"
 - **Template Processing:** If variable missing, return error (no silent fallback)
 
 **Rationale:**

@@ -176,9 +176,11 @@ fi
 if [ "$RETURN_ONLY" = true ]; then
     # Return-only mode: just create and return the optimized prompt
     cat <<EOF
-@agent-meta-prompt:prompt-optimizer
+Use the Task tool with the following parameters:
 
-The user needs an optimized prompt for this task:
+- subagent_type: "meta-prompt:prompt-optimizer"
+- description: "Create optimized prompt"
+- prompt: "The user needs an optimized prompt for this task:
 
 <user_task>
 $TASK_DESCRIPTION
@@ -189,14 +191,18 @@ Your mission:
 2. Present the optimized prompt to me for review
 3. DO NOT execute - just return the prompt
 
-Return the prompt only, do not execute.
+Return the prompt only, do not execute."
+
+After the agent completes, present the optimized prompt to the user.
 EOF
 else
     # Execution mode: create prompt and execute it
     cat <<EOF
-@agent-meta-prompt:prompt-optimizer
+Use the Task tool with the following parameters:
 
-The user needs help with this task:
+- subagent_type: "meta-prompt:prompt-optimizer"
+- description: "Optimize and execute task"
+- prompt: "The user needs help with this task:
 
 <user_task>
 $TASK_DESCRIPTION
@@ -205,9 +211,11 @@ $TASK_DESCRIPTION
 Your mission:
 1. Use /create-prompt to craft an optimized prompt for this task
 2. Review the prompt with me before execution
-3. Once approved, execute the prompt in a NEW agent context (Use the Task tool with subagent_type=\"general-purpose\")
+3. Once approved, execute the prompt in a NEW agent context (use Task tool with subagent_type=\"general-purpose\")
 4. Return the execution results
 
-Execute the task unless the user explicitly asks to review first.
+Execute the task unless the user explicitly asks to review first."
+
+After the agent completes, present the task results to the user.
 EOF
 fi
