@@ -369,6 +369,107 @@ Classification logic is now handled by the template-selector agent with its hand
 
 ---
 
+### AD-005: Variable Substitution with Security Escaping
+
+**TL;DR:** Escape backslashes, $, backticks, and quotes to prevent command injection while using simple `{$VAR}` syntax for template variables
+
+**Status:** Accepted
+**Date:** 2025-11-18
+**Context:**
+
+Templates must support dynamic variable substitution where user input is inserted into template placeholders. Security risks include:
+- Command injection via backticks
+- Variable expansion via `$`
+- Path traversal via backslashes
+- Quote escaping attacks
+
+**Decision:**
+
+Implement **variable substitution with comprehensive escaping** in template-processor.sh:
+
+1. **Variable Syntax:** `{$VARIABLE_NAME}` in templates
+2. **Input Format:** `VAR_NAME=value` as command-line arguments
+3. **Escaping:** Escape backslashes, dollar signs, backticks, quotes
+4. **Validation:** Check for unreplaced variables after substitution
+
+**Rationale:**
+
+- **Security:** Prevents command injection and variable expansion attacks
+- **Clarity:** `{$VAR}` syntax is distinct and easy to search
+- **Validation:** Unreplaced variables indicate missing inputs
+- **Simplicity:** String replacement in bash is straightforward
+
+**Alternatives Considered:**
+
+1. **Environment Variables**
+   - Pros: Native bash support
+   - Cons: Global namespace pollution, harder to isolate
+   - Rejected: Security concerns with global variables
+
+2. **Mustache/Handlebars-style `{{VAR}}`**
+   - Pros: Familiar to web developers
+   - Cons: Conflicts with some markdown/code examples
+   - Rejected: `{$VAR}` is more distinct
+
+3. **Jinja2-style `{{ VAR }}`**
+   - Pros: Widely used in templates
+   - Cons: Requires external templating engine
+   - Rejected: Adds dependency
+
+4. **No Escaping (Trust User Input)**
+   - Pros: Simpler implementation
+   - Cons: Critical security vulnerability
+   - Rejected: Unacceptable security risk
+
+**Security Implementation:**
+
+Located in `commands/scripts/template-processor.sh:37-41`:
+
+```bash
+escape_value() {
+    local value="$1"
+    # Escape backslashes first, then dollar signs, backticks, and double quotes
+    printf '%s\n' "$value" | sed 's/\\/\\\\/g; s/\$/\\$/g; s/`/\\`/g; s/"/\\"/g'
+}
+```
+
+**Escaping Order:**
+1. Backslashes (`\`) - Must be first to avoid double-escaping
+2. Dollar signs (`$`) - Prevents variable expansion
+3. Backticks (`` ` ``) - Prevents command substitution
+4. Double quotes (`"`) - Prevents quote escaping
+
+**Consequences:**
+
+- Positive:
+  - Prevents command injection attacks
+  - Validates all variables are provided
+  - Clear error messages for missing variables
+  - Simple syntax for template authors
+
+- Negative:
+  - Cannot use variables for dynamic code execution (by design)
+  - Escaping may interfere with intentional special characters (rare)
+
+- Neutral:
+  - Template authors must use `{$VAR}` syntax consistently
+  - Variable names must be UPPER_SNAKE_CASE
+
+**Test Coverage:**
+
+Located in `tests/test-integration.sh:130-132`:
+
+```bash
+run_test_with_output "Template processor handles special characters in values" \
+    "commands/scripts/template-processor.sh code-comparison ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
+    "test"
+```
+
+**References:**
+- `commands/scripts/template-processor.sh:37-66`
+
+---
+
 ### AD-006: LLM Fallback for Borderline Classification
 
 **TL;DR:** For borderline confidence (60-69%), use agent-based LLM template selection instead of keyword routing to improve accuracy while maintaining token efficiency
@@ -695,7 +796,7 @@ Implement **aggressive prompt optimization** following these principles:
 | Agent | Before | After | Rationale |
 |-------|--------|-------|-----------|
 | template-selector | Sonnet | Haiku | Keyword-guided classification |
-| prompt-optimizer | Sonnet | Haiku | Deterministic variable extraction |
+| prompt-optimizer | Sonnet | Sonnet | Variable extraction may require nuanced reasoning |
 | template-executor | Sonnet | Sonnet | Complex multi-step execution |
 
 **Alternatives Considered:**
@@ -720,7 +821,7 @@ Implement **aggressive prompt optimization** following these principles:
 - Positive:
   - 51% token reduction across all prompts
   - Faster agent processing
-  - Lower API costs (Haiku for 2/3 agents)
+  - Lower API costs (Haiku for template-selector)
   - Easier to maintain concise prompts
 
 - Negative:
@@ -732,110 +833,9 @@ Implement **aggressive prompt optimization** following these principles:
   - May need periodic review as use patterns emerge
 
 **References:**
-- `agents/prompt-optimizer.md` (model: haiku)
+- `agents/prompt-optimizer.md` (model: sonnet)
 - `agents/template-selector.md` (model: haiku)
 - `agents/template-executor.md` (model: sonnet)
-
----
-
-### AD-005: Variable Substitution with Security Escaping
-
-**TL;DR:** Escape backslashes, $, backticks, and quotes to prevent command injection while using simple `{$VAR}` syntax for template variables
-
-**Status:** Accepted
-**Date:** 2025-11-18
-**Context:**
-
-Templates must support dynamic variable substitution where user input is inserted into template placeholders. Security risks include:
-- Command injection via backticks
-- Variable expansion via `$`
-- Path traversal via backslashes
-- Quote escaping attacks
-
-**Decision:**
-
-Implement **variable substitution with comprehensive escaping** in template-processor.sh:
-
-1. **Variable Syntax:** `{$VARIABLE_NAME}` in templates
-2. **Input Format:** `VAR_NAME=value` as command-line arguments
-3. **Escaping:** Escape backslashes, dollar signs, backticks, quotes
-4. **Validation:** Check for unreplaced variables after substitution
-
-**Rationale:**
-
-- **Security:** Prevents command injection and variable expansion attacks
-- **Clarity:** `{$VAR}` syntax is distinct and easy to search
-- **Validation:** Unreplaced variables indicate missing inputs
-- **Simplicity:** String replacement in bash is straightforward
-
-**Alternatives Considered:**
-
-1. **Environment Variables**
-   - Pros: Native bash support
-   - Cons: Global namespace pollution, harder to isolate
-   - Rejected: Security concerns with global variables
-
-2. **Mustache/Handlebars-style `{{VAR}}`**
-   - Pros: Familiar to web developers
-   - Cons: Conflicts with some markdown/code examples
-   - Rejected: `{$VAR}` is more distinct
-
-3. **Jinja2-style `{{ VAR }}`**
-   - Pros: Widely used in templates
-   - Cons: Requires external templating engine
-   - Rejected: Adds dependency
-
-4. **No Escaping (Trust User Input)**
-   - Pros: Simpler implementation
-   - Cons: Critical security vulnerability
-   - Rejected: Unacceptable security risk
-
-**Security Implementation:**
-
-Located in `commands/scripts/template-processor.sh:37-41`:
-
-```bash
-escape_value() {
-    local value="$1"
-    # Escape backslashes first, then dollar signs, backticks, and double quotes
-    printf '%s\n' "$value" | sed 's/\\/\\\\/g; s/\$/\\$/g; s/`/\\`/g; s/"/\\"/g'
-}
-```
-
-**Escaping Order:**
-1. Backslashes (`\`) - Must be first to avoid double-escaping
-2. Dollar signs (`$`) - Prevents variable expansion
-3. Backticks (`` ` ``) - Prevents command substitution
-4. Double quotes (`"`) - Prevents quote escaping
-
-**Consequences:**
-
-- Positive:
-  - Prevents command injection attacks
-  - Validates all variables are provided
-  - Clear error messages for missing variables
-  - Simple syntax for template authors
-
-- Negative:
-  - Cannot use variables for dynamic code execution (by design)
-  - Escaping may interfere with intentional special characters (rare)
-
-- Neutral:
-  - Template authors must use `{$VAR}` syntax consistently
-  - Variable names must be UPPER_SNAKE_CASE
-
-**Test Coverage:**
-
-Located in `tests/test-integration.sh:130-132`:
-
-```bash
-run_test_with_output "Template processor handles special characters in values" \
-    "commands/scripts/template-processor.sh code-comparison ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
-    "test"
-```
-
-**References:**
-- `commands/scripts/template-processor.sh:37-66`
 
 ---
 

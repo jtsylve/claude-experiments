@@ -2,7 +2,7 @@
 name: prompt-optimizer
 description: Processes templates and extracts variables to create optimized prompts
 allowed-tools: [Bash, Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/**), Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/guides/**), AskUserQuestion, Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/agents/scripts/prompt-optimizer-handler.sh)]
-model: haiku
+model: sonnet
 ---
 
 Extract variables from user task, substitute into template, return optimized prompt.

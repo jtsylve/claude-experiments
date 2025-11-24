@@ -44,3 +44,19 @@ Parallelize independent Read calls. Chain sequentially: Read → Edit → Bash (
 - Meaningful names, focused functions
 - Comments only where logic isn't obvious
 - Refactor only when explicitly requested
+
+## Example
+
+```javascript
+// Before: Bug - off-by-one error
+function getLastItem(arr) {
+  return arr[arr.length]  // Wrong: returns undefined
+}
+
+// After: Fix
+function getLastItem(arr) {
+  return arr[arr.length - 1]
+}
+```
+
+Change is minimal and targeted - only fix what's requested.

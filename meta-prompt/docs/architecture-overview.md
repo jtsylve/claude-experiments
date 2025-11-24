@@ -300,7 +300,7 @@ Each agent uses a model optimized for its complexity level:
 - **Purpose:** Generate optimized prompts from templates
 - **Type:** Claude Code agent
 - **Handler:** `agents/scripts/prompt-optimizer-handler.sh`
-- **Model:** Haiku (simple variable extraction)
+- **Model:** Sonnet (variable extraction may require nuanced reasoning)
 - **Tools:** Bash (handler script), Read (templates)
 - **Output:** Optimized prompt via XML
 
@@ -316,7 +316,7 @@ Each agent uses a model optimized for its complexity level:
 | Agent | Model | Rationale |
 |-------|-------|-----------|
 | template-selector | Haiku | Simple classification, keyword-guided |
-| prompt-optimizer | Haiku | Deterministic variable extraction |
+| prompt-optimizer | Sonnet | Variable extraction may require nuanced reasoning |
 | template-executor | Sonnet | Complex reasoning, multi-step execution |
 
 ### 5. Skills Layer
