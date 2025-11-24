@@ -35,7 +35,7 @@ These tests validate that the tool restrictions work correctly within Claude Cod
 **Steps:**
 1. Run: `/meta-prompt:prompt "refactor my code" --return-only`
 2. Verify the command executes without permission errors
-3. Verify output includes instructions to use the Task tool
+3. Verify output includes agent invocation using @agent-meta-prompt:prompt-optimizer
 4. Verify the prompt is optimized but NOT executed (--return-only flag)
 
 **Expected Behavior:**
@@ -74,7 +74,7 @@ These tests validate that the tool restrictions work correctly within Claude Cod
 **Steps:**
 1. Launch the prompt-optimizer agent:
    ```
-   Use Task tool with subagent_type="meta-prompt:prompt-optimizer"
+   @agent-meta-prompt:prompt-optimizer
    ```
 2. In the agent, request: "Create a prompt for data extraction"
 3. Verify the agent successfully calls `/meta-prompt:create-prompt`

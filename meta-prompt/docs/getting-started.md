@@ -192,7 +192,7 @@ This template creates runnable test code following framework-specific convention
 This template performs systematic code review across seven dimensions: correctness, security (XSS, SQL injection, CSRF, etc.), performance, readability, error handling, testability, and language conventions. It categorizes issues by severity (Critical/High/Medium/Low) and provides specific, actionable feedback with code examples.
 
 **Variables:**
-- `CODE_TO_REVIEW`: The code to analyze
+- `PATHS`: File paths or directories to review (defaults to uncommitted changes if not specified)
 - `REVIEW_FOCUS`: Specific areas (security, performance, all aspects)
 - `LANGUAGE_CONVENTIONS`: Language/framework standards (PEP 8, Node.js patterns)
 
@@ -304,7 +304,6 @@ Verifying template counts in documentation...
 
 Verifying test counts in documentation...
   ✓ getting-started.md test count: 53
-  ✓ migration.md test count: 53
   ✓ infrastructure.md test count: 53
 
 === Summary ===

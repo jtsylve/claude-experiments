@@ -511,7 +511,6 @@ key: value
 - Architecture changes → architecture-overview.md
 - New patterns → examples.md, template-authoring.md
 - Process changes → CONTRIBUTING.md
-- Breaking changes → migration.md
 
 ---
 

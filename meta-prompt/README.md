@@ -4,6 +4,10 @@
 
 This project implements a meta-prompt optimization infrastructure for Claude Code that replaces LLM-based orchestration with shell scripts and pre-built templates, invoking the LLM only for actual creative and analytical work.
 
+> **⚠️ PRE-RELEASE SOFTWARE - NOT STABLE**
+>
+> This project is currently in active development and **should not be considered stable until the v1.0.0 release**. Breaking changes may occur at any time without prior notification or migration instructions. Use in production environments at your own risk.
+
 ---
 
 ## Quick Start
@@ -48,7 +52,6 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 | [Template Authoring](docs/template-authoring.md) | Creating custom templates |
 | [Script Development](docs/script-development.md) | Modifying bash scripts |
 | [Glossary](docs/glossary.md) | Key terminology reference |
-| [Migration Guide](docs/migration.md) | Upgrading between versions |
 | [Contributing](CONTRIBUTING.md) | Contribution workflow |
 
 ---
@@ -155,16 +158,6 @@ See [Infrastructure Guide](docs/infrastructure.md#environment-setup) for detaile
 
 ---
 
-## Migration Guide
-
-Upgrading from a previous version? See [MIGRATION.md](MIGRATION.md) for:
-- Template changes and mappings
-- Removed template migration paths
-- Breaking changes summary
-- Rollback instructions
-
----
-
 ## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
@@ -226,11 +219,9 @@ See [Template Authoring Guide](docs/template-authoring.md) to create your own.
 
 ## Version
 
-**Current Version:** 1.0
-**Status:** Production Ready
-**Last Updated:** 2025-11-18
-
-See [Migration Guide](docs/migration.md) for upgrade instructions between versions.
+**Current Version:** Pre-release (targeting v1.0.0)
+**Status:** Work in Progress - Not Stable
+**Last Updated:** 2025-11-23
 
 ---
 
