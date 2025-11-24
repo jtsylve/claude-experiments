@@ -22,10 +22,38 @@ if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
     export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 fi
 
+# ============================================================================
+# Test Helper Functions
+# ============================================================================
+#
+# SECURITY NOTE: Test Command Construction
+# ----------------------------------------
+# All test commands MUST be hardcoded strings defined in this file.
+# NEVER construct test commands from user input or external sources.
+#
+# Safe patterns:
+#   ✓ Hardcoded commands with variables from this script's environment
+#   ✓ Commands using ${CLAUDE_PLUGIN_ROOT} for path construction
+#   ✓ String literals for test data
+#
+# Unsafe patterns:
+#   ✗ Commands built from user input or external files
+#   ✗ Dynamic command construction from untrusted sources
+#   ✗ Interpolation of unvalidated variables
+#
+# The bash -c execution method is safer than eval, but both require
+# careful input validation. By restricting all commands to hardcoded
+# strings in this test file, we eliminate injection risks entirely.
+# ============================================================================
+
 # Helper: Run test
 # Executes test command using bash -c for safer execution than eval.
 # All test commands are hardcoded in this file (no user input).
 # Safe patterns: file existence checks, grep patterns, etc.
+#
+# Note on variable expansion: bash -c properly expands ${VARIABLES} because
+# when we pass "$test_command" in double quotes, bash performs variable
+# expansion before passing the string to bash -c, which then executes it.
 run_test() {
     local test_name="$1"
     local test_command="$2"
@@ -48,6 +76,10 @@ run_test() {
 # Helper: Run test with output check
 # Executes test command using bash -c for safer execution than eval.
 # All test commands are hardcoded in this file (no user input).
+#
+# Note on variable expansion: bash -c properly expands ${VARIABLES} because
+# when we pass "$test_command" in double quotes, bash performs variable
+# expansion before passing the string to bash -c, which then executes it.
 run_test_with_output() {
     local test_name="$1"
     local test_command="$2"
@@ -129,26 +161,12 @@ run_test_with_output "All templates pass validation" \
     "\${CLAUDE_PLUGIN_ROOT}/tests/validate-templates.sh" \
     "Passed: ${EXPECTED_COUNT}"
 
-run_test "code-refactoring template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-refactoring.md ]"
-
-run_test "code-review template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-review.md ]"
-
-run_test "test-generation template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/test-generation.md ]"
-
-run_test "documentation-generator template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/documentation-generator.md ]"
-
-run_test "data-extraction template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/data-extraction.md ]"
-
-run_test "code-comparison template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-comparison.md ]"
-
-run_test "custom template exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/custom.md ]"
+# Auto-generate template existence tests from EXPECTED_TEMPLATES array
+# This eliminates redundancy and ensures tests stay in sync with the array
+for template in "${EXPECTED_TEMPLATES[@]}"; do
+    run_test "$template template exists" \
+        "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/$template.md ]"
+done
 
 echo ""
 
@@ -230,11 +248,15 @@ run_test_with_output "template-selector-handler classifies tasks" \
 
 run_test_with_output "prompt-optimizer-handler loads templates" \
     "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/prompt-optimizer-handler.sh '<prompt_optimizer_request><user_task>Fix bug</user_task><template>code-refactoring</template><execution_mode>direct</execution_mode></prompt_optimizer_request>'" \
-    "^Template: code-refactoring"
+    "^Template: code-refactoring( \\(already selected\\))?$"
 
 run_test_with_output "template-executor-handler loads skills from new structure" \
     "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-executor-handler.sh '<template_executor_request><skill>meta-prompt:code-review</skill><optimized_prompt>Test prompt</optimized_prompt><execution_mode>direct</execution_mode></template_executor_request>'" \
     "^Skill: meta-prompt:code-review$"
+
+run_test_with_output "template-executor-handler rejects invalid skills" \
+    "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-executor-handler.sh '<template_executor_request><skill>meta-prompt:nonexistent-skill</skill><optimized_prompt>Test prompt</optimized_prompt><execution_mode>direct</execution_mode></template_executor_request>'" \
+    "Error: Required skill.*not found"
 
 echo ""
 

@@ -240,13 +240,13 @@ setup_plugin_root() {
         local potential_root=""
         if [[ "$calling_script_dir" == */agents/scripts ]]; then
             # Called from agents/scripts/ -> go up 2 levels
-            potential_root="$(cd "$calling_script_dir/../.." 2>/dev/null && pwd)" || potential_root=""
+            potential_root="$(cd "$calling_script_dir/../.." 2>/dev/null && pwd || echo "")"
         elif [[ "$calling_script_dir" == */commands/scripts ]]; then
             # Called from commands/scripts/ -> go up 2 levels
-            potential_root="$(cd "$calling_script_dir/../.." 2>/dev/null && pwd)" || potential_root=""
+            potential_root="$(cd "$calling_script_dir/../.." 2>/dev/null && pwd || echo "")"
         elif [[ "$calling_script_dir" == */tests ]]; then
             # Called from tests/ -> go up 1 level
-            potential_root="$(cd "$calling_script_dir/.." 2>/dev/null && pwd)" || potential_root=""
+            potential_root="$(cd "$calling_script_dir/.." 2>/dev/null && pwd || echo "")"
         fi
 
         # Validate the potential root has required structure

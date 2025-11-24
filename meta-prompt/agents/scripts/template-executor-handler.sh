@@ -43,6 +43,13 @@ validate_skill() {
         return 1
     fi
 
+    # Verify skill file is readable
+    if [ ! -r "$skill_file" ]; then
+        echo "Warning: Skill file exists but is not readable: $skill_file" >&2
+        echo "Check file permissions." >&2
+        return 1
+    fi
+
     return 0
 }
 
@@ -65,11 +72,10 @@ read_xml_input() {
     skill=$(optional_xml_field "$xml_input" "skill" "none")
 
     # Validate skill file exists and fail if required skill is missing
+    # Note: If skill is "none", validate_skill returns 0, so we never enter this block
     if ! validate_skill "$skill"; then
-        if [ "$skill" != "none" ]; then
-            echo "Error: Required skill '$skill' not found. Cannot continue." >&2
-            exit 1
-        fi
+        echo "Error: Required skill '$skill' not found. Cannot continue." >&2
+        exit 1
     fi
 
     # Export for use by other functions
