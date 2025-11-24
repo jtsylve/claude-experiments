@@ -81,6 +81,92 @@ graph TD
 - Green (Deterministic): No LLM tokens consumed (bash handlers)
 - Pink (LLM): Token consumption occurs here (agents)
 
+### State Machine Detailed View
+
+The `/prompt` command implements a state machine in `prompt-handler.sh` that orchestrates the workflow. This state machine determines the next action based on the current state and input.
+
+```mermaid
+stateDiagram-v2
+    [*] --> initial: User invokes /prompt
+
+    initial --> spawn_template_selector: No template flag
+    initial --> spawn_optimizer: Has template flag (--code, --review, etc.)
+
+    spawn_template_selector --> post_template_selector: Selector returns template
+
+    post_template_selector --> spawn_optimizer: Process template choice
+
+    spawn_optimizer --> return_only: Has --return-only flag
+    spawn_optimizer --> post_optimizer: No --return-only flag
+
+    return_only --> [*]: Return optimized prompt to user
+
+    post_optimizer --> spawn_plan_agent: Has --plan flag
+    post_optimizer --> spawn_template_executor: No --plan flag (direct execution)
+
+    spawn_plan_agent --> post_plan: Plan agent returns
+
+    post_plan --> spawn_template_executor: Execute with plan
+
+    spawn_template_executor --> final: Executor completes
+
+    final --> [*]: Return results to user
+
+    note right of initial
+        State: initial
+        Input: Command-line args
+        Actions: Parse flags,
+        detect template
+    end note
+
+    note right of post_template_selector
+        State: post_template_selector
+        Input: XML with template name
+        Actions: Route to optimizer
+    end note
+
+    note right of post_optimizer
+        State: post_optimizer
+        Input: XML with optimized prompt
+        Actions: Check execution mode
+    end note
+
+    note right of post_plan
+        State: post_plan
+        Input: XML from Plan agent
+        Actions: Route to executor
+    end note
+
+    note right of final
+        State: final
+        Input: XML with results
+        Actions: Return to user
+    end note
+```
+
+**State Descriptions:**
+
+| State | Input Format | Output Action | Next State(s) |
+|-------|-------------|---------------|---------------|
+| `initial` | Command-line args | Spawn template-selector OR spawn optimizer | post_template_selector, post_optimizer, return_only |
+| `post_template_selector` | XML: `<template_selector_result>` | Spawn optimizer with selected template | post_optimizer, return_only |
+| `post_optimizer` | XML: `<prompt_optimizer_result>` | Spawn Plan agent OR spawn executor | post_plan, spawn_template_executor |
+| `post_plan` | XML: `<plan_result>` | Spawn executor with plan | final |
+| `final` | XML: `<template_executor_result>` | Return results to user | (end) |
+
+**State Transitions:**
+
+- **Deterministic transitions:** Based on flags (`--plan`, `--return-only`, template flags)
+- **Data-driven transitions:** Based on XML input from agents
+- **Error handling:** Invalid XML or missing fields cause early exit with error message
+
+**State Persistence:**
+
+States are tracked across agent invocations by:
+1. Initial state determined from command-line arguments
+2. Subsequent states detected from XML input structure (e.g., presence of `<prompt_optimizer_result>`)
+3. Original flags preserved and passed through XML to maintain mode (plan/direct, return-only)
+
 ---
 
 ## Component Relationships

@@ -225,6 +225,23 @@ run_test_initial "Handles apostrophes" \
 
 echo ""
 
+# ===== PHASE 9: Error Handling & Negative Tests =====
+echo -e "${YELLOW}Phase 9: Error Handling & Negative Tests${NC}"
+
+# Test multiple template flags (should error)
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Rejects multiple template flags"
+output=$("$HANDLER" "--code --review test task" 2>&1) || true
+if echo "$output" | grep -qi "Error.*template"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Should reject multiple template flags"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
+echo ""
+
 # ===== Summary =====
 echo -e "${YELLOW}=== Summary ===${NC}"
 echo -e "Total tests: $TOTAL_TESTS"

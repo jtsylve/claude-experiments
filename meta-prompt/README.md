@@ -186,12 +186,12 @@ Six templates optimized for software development workflows:
 
 | Template | Use Cases | Flags |
 |----------|-----------|-------|
-| code-refactoring | Modify code, fix bugs, add features | `--code`, `--refactor` |
+| code-refactoring | Modify code, fix bugs, add features | `--code` \| `--refactor` |
 | code-review | Security audits, quality analysis, feedback | `--review` |
 | test-generation | Generate unit tests, test suites, edge cases | `--test` |
-| documentation-generator | API docs, READMEs, docstrings, user guides | `--docs`, `--documentation` |
+| documentation-generator | API docs, READMEs, docstrings, user guides | `--docs` \| `--documentation` |
 | data-extraction | Extract data from logs, JSON, HTML, text | `--extract` |
-| code-comparison | Compare code, configs, check equivalence | `--compare`, `--comparison` |
+| code-comparison | Compare code, configs, check equivalence | `--compare` \| `--comparison` |
 
 ### Template Selection
 

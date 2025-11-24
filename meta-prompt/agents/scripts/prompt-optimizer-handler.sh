@@ -15,7 +15,7 @@ setup_plugin_root
 
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 
-# Parse XML input from command-line argument (BSD/macOS compatible)
+# Parse XML input from command-line argument (supports multiline content)
 read_xml_input() {
     local xml_input="$1"
 
@@ -25,24 +25,19 @@ read_xml_input() {
         exit 1
     fi
 
-    # Extract values using sed (BSD-compatible)
-    local user_task=$(echo "$xml_input" | sed -n 's/.*<user_task>\(.*\)<\/user_task>.*/\1/p')
-    local template=$(echo "$xml_input" | sed -n 's/.*<template>\(.*\)<\/template>.*/\1/p')
-    local execution_mode=$(echo "$xml_input" | sed -n 's/.*<execution_mode>\(.*\)<\/execution_mode>.*/\1/p')
+    # Extract required fields using common functions
+    local user_task
+    user_task=$(require_xml_field "$xml_input" "user_task" "auto") || exit 1
 
-    # Validate required fields
-    if [ -z "$user_task" ]; then
-        echo "Error: Missing required field: user_task" >&2
+    local template
+    template=$(require_xml_field "$xml_input" "template") || {
+        echo "Error: Template selection must be done before calling prompt-optimizer." >&2
         exit 1
-    fi
+    }
 
-    if [ -z "$template" ]; then
-        echo "Error: Missing required field: template. Template selection must be done before calling prompt-optimizer." >&2
-        exit 1
-    fi
-
-    # Set defaults
-    execution_mode="${execution_mode:-direct}"
+    # Extract optional field with default
+    local execution_mode
+    execution_mode=$(optional_xml_field "$xml_input" "execution_mode" "direct")
 
     # Validate execution_mode
     if [ "$execution_mode" != "plan" ] && [ "$execution_mode" != "direct" ]; then
@@ -50,7 +45,7 @@ read_xml_input() {
         exit 1
     fi
 
-    # Export for use by other functions
+    # Export safely (without sanitization for USER_TASK to preserve content, but sanitize for output)
     export USER_TASK="$user_task"
     export TEMPLATE="$template"
     export EXECUTION_MODE="$execution_mode"
@@ -88,13 +83,37 @@ get_skill_for_template() {
     esac
 }
 
-# Load template file
+# Load template file with improved error messages
 load_template() {
     local template_name="$1"
     local template_path="$TEMPLATE_DIR/${template_name}.md"
 
+    # Check if file exists
     if [ ! -f "$template_path" ]; then
-        echo "ERROR: Template not found: $template_path" >&2
+        echo "ERROR: Template file not found: $template_path" >&2
+        echo "" >&2
+        echo "Available templates in $TEMPLATE_DIR:" >&2
+        if [ -d "$TEMPLATE_DIR" ]; then
+            ls -1 "$TEMPLATE_DIR"/*.md 2>/dev/null | sed 's/.*\//  - /' | sed 's/\.md$//' >&2 || echo "  (none found)" >&2
+        else
+            echo "  ERROR: Template directory does not exist: $TEMPLATE_DIR" >&2
+        fi
+        echo "" >&2
+        echo "Requested template: $template_name" >&2
+        return 1
+    fi
+
+    # Check if file is readable
+    if [ ! -r "$template_path" ]; then
+        echo "ERROR: Template file not readable: $template_path" >&2
+        echo "Check file permissions." >&2
+        return 1
+    fi
+
+    # Check if file is non-empty
+    if [ ! -s "$template_path" ]; then
+        echo "ERROR: Template file is empty: $template_path" >&2
+        echo "Template files must contain prompt content." >&2
         return 1
     fi
 
@@ -147,7 +166,7 @@ generate_instructions() {
         if [[ "$var" == *:* ]]; then
             # Variable has default value (optional)
             local var_name="${var%%:*}"
-            local default_value="${var#*:}"
+            # Note: default value is preserved in template, not extracted here
             if [ -n "$optional_vars" ]; then
                 optional_vars="$optional_vars, $var_name"
             else

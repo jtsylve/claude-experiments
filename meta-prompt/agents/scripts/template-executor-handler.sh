@@ -10,7 +10,43 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$SCRIPT_DIR/../../scripts/common.sh"
 
-# Parse XML input from command-line argument
+# Setup plugin root
+setup_plugin_root
+
+SKILL_DIR="${CLAUDE_PLUGIN_ROOT}/skills"
+
+# Validate skill file exists
+validate_skill() {
+    local skill="$1"
+
+    # "none" is always valid (no skill needed)
+    if [ "$skill" = "none" ]; then
+        return 0
+    fi
+
+    # Remove "meta-prompt:" prefix if present
+    local skill_name="${skill#meta-prompt:}"
+    local skill_file="${SKILL_DIR}/${skill_name}.md"
+
+    if [ ! -f "$skill_file" ]; then
+        echo "WARNING: Skill file not found: $skill_file" >&2
+        echo "" >&2
+        echo "Available skills in $SKILL_DIR:" >&2
+        if [ -d "$SKILL_DIR" ]; then
+            ls -1 "$SKILL_DIR"/*.md 2>/dev/null | sed 's/.*\//  - meta-prompt:/' | sed 's/\.md$//' >&2 || echo "  (none found)" >&2
+        else
+            echo "  ERROR: Skill directory does not exist: $SKILL_DIR" >&2
+        fi
+        echo "" >&2
+        echo "Requested skill: $skill" >&2
+        echo "Continuing without skill..." >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# Parse XML input from command-line argument (supports multiline content)
 read_xml_input() {
     local xml_input="$1"
 
@@ -20,20 +56,16 @@ read_xml_input() {
         exit 1
     fi
 
-    # Extract values using sed (handles multiline content)
-    local skill=$(echo "$xml_input" | sed -n 's/.*<skill>\(.*\)<\/skill>.*/\1/p')
+    # Extract required field using common function
+    local optimized_prompt
+    optimized_prompt=$(require_xml_field "$xml_input" "optimized_prompt" "auto") || exit 1
 
-    # Extract optimized_prompt (can be multiline)
-    local optimized_prompt=$(echo "$xml_input" | sed -n '/<optimized_prompt>/,/<\/optimized_prompt>/p' | sed '1d;$d')
+    # Extract optional field with default
+    local skill
+    skill=$(optional_xml_field "$xml_input" "skill" "none")
 
-    # Validate required fields
-    if [ -z "$optimized_prompt" ]; then
-        echo "Error: Missing required field: optimized_prompt" >&2
-        exit 1
-    fi
-
-    # Set defaults
-    skill="${skill:-none}"
+    # Validate skill file exists (warns but doesn't fail)
+    validate_skill "$skill" || true
 
     # Export for use by other functions
     export SKILL="$skill"

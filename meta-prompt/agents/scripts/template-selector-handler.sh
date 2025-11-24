@@ -15,8 +15,37 @@ setup_plugin_root
 
 TEMPLATE_DIR="${CLAUDE_PLUGIN_ROOT}/templates"
 
-# Confidence thresholds and calculation constants
-CONFIDENCE_THRESHOLD=70
+# ============================================================================
+# Confidence Threshold Configuration
+# ============================================================================
+#
+# These values control template classification confidence scoring:
+#
+# BORDERLINE_MIN (60%):
+#   - Minimum confidence for accepting keyword-based classification
+#   - Below this: routes to LLM for borderline case review
+#   - Rationale: Ensures 90%+ accuracy by letting LLM handle uncertain cases
+#
+# STRONG_INDICATOR_BASE (75%):
+#   - Base confidence when a strong indicator keyword is found
+#   - Examples: "refactor", "compare", "test", "review"
+#   - Rationale: Strong indicators reliably predict template choice
+#
+# SUPPORTING_KEYWORD_BONUS (8% per keyword):
+#   - Additional confidence for each supporting keyword (max 100%)
+#   - Examples: "code", "module", "security", etc.
+#   - Rationale: Multiple related keywords increase confidence
+#
+# Confidence levels for supporting keywords only (no strong indicator):
+# - ONE_KEYWORD_CONFIDENCE (35%): One supporting keyword found
+# - TWO_KEYWORD_CONFIDENCE (60%): Two supporting keywords found
+# - THREE_KEYWORD_CONFIDENCE (75%): Three+ supporting keywords found
+#
+# Example scoring:
+#   "Refactor the authentication module" = 75% (strong) + 8% (code keyword) = 83%
+#   "Check security of code" = 60% (two keywords: security, code)
+# ============================================================================
+
 BORDERLINE_MIN=60
 STRONG_INDICATOR_BASE=75
 SUPPORTING_KEYWORD_BONUS=8
@@ -32,7 +61,7 @@ PATTERN_REVIEW="review|feedback|critique|analyze|assess|evaluate|examine|inspect
 PATTERN_DOCUMENTATION="documentation|readme|docstring|docs|document|write.*(comment|docstring|documentation|guide|instruction)|author.*(documentation|instruction|guide)"
 PATTERN_EXTRACTION="extract|parse|pull|retrieve|mine|harvest|collect|scrape|distill|gather|isolate|obtain|sift|fish|pluck|glean|cull|unearth|dredge|winnow"
 
-# Parse XML input from command-line argument (BSD/macOS compatible)
+# Parse XML input from command-line argument (supports multiline content)
 read_xml_input() {
     local xml_input="$1"
 
@@ -42,20 +71,16 @@ read_xml_input() {
         exit 1
     fi
 
-    # Extract values using sed (BSD-compatible)
-    local user_task=$(echo "$xml_input" | sed -n 's/.*<user_task>\(.*\)<\/user_task>.*/\1/p')
-    local suggested_template=$(echo "$xml_input" | sed -n 's/.*<suggested_template>\(.*\)<\/suggested_template>.*/\1/p')
-    local confidence=$(echo "$xml_input" | sed -n 's/.*<confidence>\(.*\)<\/confidence>.*/\1/p')
+    # Extract required field using common function
+    local user_task
+    user_task=$(require_xml_field "$xml_input" "user_task" "auto") || exit 1
 
-    # Validate required fields
-    if [ -z "$user_task" ]; then
-        echo "Error: Missing required field: user_task" >&2
-        exit 1
-    fi
+    # Extract optional fields with defaults
+    local suggested_template
+    suggested_template=$(optional_xml_field "$xml_input" "suggested_template" "")
 
-    # Set defaults for optional fields
-    suggested_template="${suggested_template:-}"
-    confidence="${confidence:-}"
+    local confidence
+    confidence=$(optional_xml_field "$xml_input" "confidence" "")
 
     # Validate confidence is a number if provided
     if [ -n "$confidence" ] && ! [[ "$confidence" =~ ^[0-9]+$ ]]; then
@@ -66,7 +91,7 @@ read_xml_input() {
     # Export for use by other functions
     export USER_TASK="$user_task"
     export SUGGESTED_TEMPLATE="$suggested_template"
-    export SUGGESTED_CONFIDENCE="${confidence:-}"
+    export SUGGESTED_CONFIDENCE="$confidence"
 }
 
 # Convert text to lowercase
@@ -162,17 +187,17 @@ calculate_confidence() {
 
     if has_strong_indicator "$category"; then
         local confidence=$((STRONG_INDICATOR_BASE + supporting_count * SUPPORTING_KEYWORD_BONUS))
-        [ $confidence -gt 100 ] && confidence=100
-        echo $confidence
+        [ "$confidence" -gt 100 ] && confidence=100
+        echo "$confidence"
     else
-        if [ $supporting_count -eq 0 ]; then
+        if [ "$supporting_count" -eq 0 ]; then
             echo 0
-        elif [ $supporting_count -eq 1 ]; then
-            echo $ONE_KEYWORD_CONFIDENCE
-        elif [ $supporting_count -eq 2 ]; then
-            echo $TWO_KEYWORD_CONFIDENCE
+        elif [ "$supporting_count" -eq 1 ]; then
+            echo "$ONE_KEYWORD_CONFIDENCE"
+        elif [ "$supporting_count" -eq 2 ]; then
+            echo "$TWO_KEYWORD_CONFIDENCE"
         else
-            echo $THREE_KEYWORD_CONFIDENCE
+            echo "$THREE_KEYWORD_CONFIDENCE"
         fi
     fi
 }
@@ -213,38 +238,38 @@ classify_task() {
     local max_confidence=0
     local selected_template="custom"
 
-    if [ $code_confidence -gt $max_confidence ]; then
+    if [ "$code_confidence" -gt "$max_confidence" ]; then
         max_confidence=$code_confidence
         selected_template="code-refactoring"
     fi
 
-    if [ $comparison_confidence -gt $max_confidence ]; then
+    if [ "$comparison_confidence" -gt "$max_confidence" ]; then
         max_confidence=$comparison_confidence
         selected_template="code-comparison"
     fi
 
-    if [ $test_confidence -gt $max_confidence ]; then
+    if [ "$test_confidence" -gt "$max_confidence" ]; then
         max_confidence=$test_confidence
         selected_template="test-generation"
     fi
 
-    if [ $review_confidence -gt $max_confidence ]; then
+    if [ "$review_confidence" -gt "$max_confidence" ]; then
         max_confidence=$review_confidence
         selected_template="code-review"
     fi
 
-    if [ $documentation_confidence -gt $max_confidence ]; then
+    if [ "$documentation_confidence" -gt "$max_confidence" ]; then
         max_confidence=$documentation_confidence
         selected_template="documentation-generator"
     fi
 
-    if [ $extraction_confidence -gt $max_confidence ]; then
+    if [ "$extraction_confidence" -gt "$max_confidence" ]; then
         max_confidence=$extraction_confidence
         selected_template="data-extraction"
     fi
 
     # Set to custom if below borderline threshold
-    if [ $max_confidence -lt $BORDERLINE_MIN ]; then
+    if [ "$max_confidence" -lt "$BORDERLINE_MIN" ]; then
         selected_template="custom"
         max_confidence=0
     fi
