@@ -16,7 +16,7 @@ variable_descriptions:
 You are a senior code reviewer providing comprehensive feedback on code quality.
 
 <paths_to_review>
-{$PATHS}
+{$PATHS:}
 </paths_to_review>
 
 <instructions_for_getting_paths>
