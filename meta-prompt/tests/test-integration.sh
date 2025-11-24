@@ -23,12 +23,16 @@ if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
 fi
 
 # Helper: Run test
+# Note: Uses eval for test command execution with CONTROLLED inputs only.
+# All test commands are hardcoded in this file (no user input).
+# Safe patterns: file existence checks, grep patterns, etc.
 run_test() {
     local test_name="$1"
     local test_command="$2"
 
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
+    # shellcheck disable=SC2086
     if eval "$test_command" > /dev/null 2>&1; then
         echo -e "${GREEN}✓${NC} $test_name"
         PASSED_TESTS=$((PASSED_TESTS + 1))
@@ -41,6 +45,8 @@ run_test() {
 }
 
 # Helper: Run test with output check
+# Note: Uses eval for test command execution with CONTROLLED inputs only.
+# All test commands are hardcoded in this file (no user input).
 run_test_with_output() {
     local test_name="$1"
     local test_command="$2"
@@ -48,6 +54,7 @@ run_test_with_output() {
 
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
+    # shellcheck disable=SC2086
     local output=$(eval "$test_command" 2>&1 || true)
 
     if echo "$output" | grep -qE "$expected_pattern"; then
@@ -99,7 +106,7 @@ echo ""
 echo -e "${YELLOW}Phase 2: Template Files${NC}"
 
 run_test "Correct number of templates exist (7)" \
-    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f | wc -l | tr -d ' ') -eq 7 ]"
+    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f ! -name 'README.md' | wc -l | tr -d ' ') -eq 7 ]"
 
 run_test_with_output "All templates pass validation" \
     "\${CLAUDE_PLUGIN_ROOT}/tests/validate-templates.sh" \

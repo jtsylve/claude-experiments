@@ -1,7 +1,7 @@
 ---
 name: prompt
 description: Optimize a prompt using templates and execute with specialized skills
-argument-hint: [--template=<name>] [--code|--refactor|--review|--test|--docs|--extract|--compare|--custom] [--plan] [--return-only] <task description>
+argument-hint: [--template=<name>] [--code|--refactor|--review|--test|--docs|--documentation|--extract|--compare|--comparison|--custom] [--plan] [--return-only] <task description>
 allowed-tools: [Task, Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh:*)]
 ---
 
@@ -37,8 +37,15 @@ Execute the handler script with the user's task:
 The handler will parse flags and return instructions for spawning the appropriate subagent.
 
 **Supported Flags:**
-- `--template=<name>` - Explicit template selection
-- `--code`, `--refactor`, `--review`, `--test`, `--docs`, `--extract`, `--compare`, `--custom` - Template shortcuts
+- `--template=<name>` - Explicit template selection (bypasses auto-detection)
+- Template shortcuts (aliases shown with |):
+  - `--code` | `--refactor` → code-refactoring template
+  - `--review` → code-review template
+  - `--test` → test-generation template
+  - `--docs` | `--documentation` → documentation-generator template
+  - `--extract` → data-extraction template
+  - `--compare` | `--comparison` → code-comparison template
+  - `--custom` → custom template (for novel tasks)
 - `--plan` - Create plan before executing (uses Plan subagent)
 - `--return-only` - Return optimized prompt without executing
 

@@ -198,6 +198,63 @@ run_test "Strong indicator + supporting keywords" \
 
 echo ""
 
+# ===== PHASE 6: Error Handling & Negative Tests =====
+echo -e "${YELLOW}Phase 6: Error Handling & Negative Tests${NC}"
+
+# Test empty task
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Rejects empty task input"
+xml_input="<template_selector_request><user_task></user_task></template_selector_request>"
+output=$("$HANDLER" "$xml_input" 2>&1) || test_passed=$?
+if [ "${test_passed:-0}" -ne 0 ] || echo "$output" | grep -qi "Error.*empty\|Error.*required\|Error.*Missing"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Should reject empty task"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
+# Test missing user_task field
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Rejects missing user_task field"
+xml_input="<template_selector_request><suggested_template>code-refactoring</suggested_template></template_selector_request>"
+output=$("$HANDLER" "$xml_input" 2>&1) || test_passed=$?
+if [ "${test_passed:-0}" -ne 0 ] || echo "$output" | grep -qi "Error.*user_task\|Error.*required\|Error.*Missing"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Should reject missing user_task"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
+# Test invalid confidence value
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Rejects non-numeric confidence"
+xml_input="<template_selector_request><user_task>test</user_task><confidence>not-a-number</confidence></template_selector_request>"
+output=$("$HANDLER" "$xml_input" 2>&1) || test_passed=$?
+if [ "${test_passed:-0}" -ne 0 ] || echo "$output" | grep -qi "Error.*confidence\|Error.*invalid\|Error.*integer"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Should reject non-numeric confidence"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
+# Test malformed XML
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} Handles malformed XML"
+xml_input="<broken>unclosed tag"
+output=$("$HANDLER" "$xml_input" 2>&1) || test_passed=$?
+if [ "${test_passed:-0}" -ne 0 ] || echo "$output" | grep -qi "Error"; then
+    echo -e "  ${GREEN}✓ PASSED${NC}"
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+    echo -e "  ${RED}✗ FAILED${NC} - Should handle malformed XML"
+    FAILED_TESTS=$((FAILED_TESTS + 1))
+fi
+
+echo ""
+
 # ===== Summary =====
 echo -e "${YELLOW}=== Summary ===${NC}"
 echo -e "Total tests: $TOTAL_TESTS"

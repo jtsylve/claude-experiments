@@ -58,6 +58,8 @@ parse_initial_flags() {
             --code\ *|--code)
                 if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
                     echo "Error: Multiple template flags specified." >&2
+                    echo "Already set: $TEMPLATE" >&2
+                    echo "Cannot use multiple template flags in one command." >&2
                     exit 1
                 fi
                 TEMPLATE="code-refactoring"
@@ -371,7 +373,6 @@ handle_post_optimizer_state() {
     local optimizer_output="$1"
 
     # Extract values from XML using sed (BSD-compatible)
-    local template=$(echo "$optimizer_output" | sed -n 's/.*<template>\(.*\)<\/template>.*/\1/p')
     local skill=$(echo "$optimizer_output" | sed -n 's/.*<skill>\(.*\)<\/skill>.*/\1/p')
     local execution_mode=$(echo "$optimizer_output" | sed -n 's/.*<execution_mode>\(.*\)<\/execution_mode>.*/\1/p')
     local optimized_prompt=$(echo "$optimizer_output" | sed -n 's/.*<optimized_prompt>\(.*\)<\/optimized_prompt>.*/\1/p')
