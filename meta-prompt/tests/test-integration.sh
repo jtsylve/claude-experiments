@@ -23,7 +23,7 @@ if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
 fi
 
 # Helper: Run test
-# Note: Uses eval for test command execution with CONTROLLED inputs only.
+# Executes test command using bash -c for safer execution than eval.
 # All test commands are hardcoded in this file (no user input).
 # Safe patterns: file existence checks, grep patterns, etc.
 run_test() {
@@ -32,8 +32,9 @@ run_test() {
 
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
+    # Use bash -c instead of eval for safer command execution
     # shellcheck disable=SC2086
-    if eval "$test_command" > /dev/null 2>&1; then
+    if bash -c "$test_command" > /dev/null 2>&1; then
         echo -e "${GREEN}✓${NC} $test_name"
         PASSED_TESTS=$((PASSED_TESTS + 1))
         return 0
@@ -45,7 +46,7 @@ run_test() {
 }
 
 # Helper: Run test with output check
-# Note: Uses eval for test command execution with CONTROLLED inputs only.
+# Executes test command using bash -c for safer execution than eval.
 # All test commands are hardcoded in this file (no user input).
 run_test_with_output() {
     local test_name="$1"
@@ -54,10 +55,12 @@ run_test_with_output() {
 
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
+    # Use bash -c instead of eval for safer command execution
+    # Capture both stdout and stderr for pattern matching
     # shellcheck disable=SC2086
-    local output=$(eval "$test_command" 2>&1 || true)
+    local command_output=$(bash -c "$test_command" 2>&1 || true)
 
-    if echo "$output" | grep -qE "$expected_pattern"; then
+    if echo "$command_output" | grep -qE "$expected_pattern"; then
         echo -e "${GREEN}✓${NC} $test_name"
         PASSED_TESTS=$((PASSED_TESTS + 1))
         return 0
@@ -105,12 +108,26 @@ echo ""
 # ===== PHASE 2: Template Validation =====
 echo -e "${YELLOW}Phase 2: Template Files${NC}"
 
-run_test "Correct number of templates exist (7)" \
-    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f ! -name 'README.md' | wc -l | tr -d ' ') -eq 7 ]"
+# Dynamically count expected templates and verify they match validation count
+# This makes the test maintainable when templates are added/removed
+# EXPECTED_TEMPLATES: Update this list when adding/removing templates
+EXPECTED_TEMPLATES=(
+    "code-refactoring"
+    "code-review"
+    "test-generation"
+    "documentation-generator"
+    "data-extraction"
+    "code-comparison"
+    "custom"
+)
+EXPECTED_COUNT="${#EXPECTED_TEMPLATES[@]}"
+
+run_test "Correct number of templates exist (${EXPECTED_COUNT})" \
+    "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f ! -name 'README.md' | wc -l | tr -d ' ') -eq ${EXPECTED_COUNT} ]"
 
 run_test_with_output "All templates pass validation" \
     "\${CLAUDE_PLUGIN_ROOT}/tests/validate-templates.sh" \
-    "Passed: 7"
+    "Passed: ${EXPECTED_COUNT}"
 
 run_test "code-refactoring template exists" \
     "[ -f \${CLAUDE_PLUGIN_ROOT}/templates/code-refactoring.md ]"
@@ -185,27 +202,39 @@ echo -e "${YELLOW}Phase 6: Handler Basic Functionality${NC}"
 
 run_test_with_output "prompt-handler handles no template (spawns selector)" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix the bug'" \
-    "spawn_template_selector"
+    "^NEXT_ACTION: spawn_template_selector$"
 
 run_test_with_output "prompt-handler handles --code flag" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--code Fix bug'" \
-    "code-refactoring"
+    "<template>code-refactoring</template>"
 
-run_test_with_output "prompt-handler handles special characters" \
+run_test_with_output "prompt-handler handles special characters (dollar/backtick)" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix \\\$var and \`cmd\`'" \
-    "user_task"
+    "<user_task>.*Fix.*var.*cmd.*</user_task>"
+
+run_test_with_output "prompt-handler handles quotes and apostrophes" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix \"quoted\" and '\"'\"'single'\"'\"' text'" \
+    "<user_task>.*quoted.*single.*</user_task>"
+
+run_test_with_output "prompt-handler handles XML special chars" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix < and > and & symbols'" \
+    "<user_task>.*</user_task>"
+
+run_test_with_output "prompt-handler handles parentheses and brackets" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix (bug) [in] {code}'" \
+    "<user_task>.*bug.*in.*code.*</user_task>"
 
 run_test_with_output "template-selector-handler classifies tasks" \
     "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-selector-handler.sh '<template_selector_request><user_task>Refactor the code</user_task></template_selector_request>'" \
-    "code-refactoring"
+    "<selected_template>code-refactoring</selected_template>"
 
 run_test_with_output "prompt-optimizer-handler loads templates" \
     "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/prompt-optimizer-handler.sh '<prompt_optimizer_request><user_task>Fix bug</user_task><template>code-refactoring</template><execution_mode>direct</execution_mode></prompt_optimizer_request>'" \
-    "Template: code-refactoring"
+    "^Template: code-refactoring"
 
 run_test_with_output "template-executor-handler loads skills from new structure" \
     "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-executor-handler.sh '<template_executor_request><skill>meta-prompt:code-review</skill><optimized_prompt>Test prompt</optimized_prompt><execution_mode>direct</execution_mode></template_executor_request>'" \
-    "Skill: meta-prompt:code-review"
+    "^Skill: meta-prompt:code-review$"
 
 echo ""
 

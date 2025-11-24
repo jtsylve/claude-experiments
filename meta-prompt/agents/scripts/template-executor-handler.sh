@@ -64,8 +64,13 @@ read_xml_input() {
     local skill
     skill=$(optional_xml_field "$xml_input" "skill" "none")
 
-    # Validate skill file exists (warns but doesn't fail)
-    validate_skill "$skill" || true
+    # Validate skill file exists and fail if required skill is missing
+    if ! validate_skill "$skill"; then
+        if [ "$skill" != "none" ]; then
+            echo "Error: Required skill '$skill' not found. Cannot continue." >&2
+            exit 1
+        fi
+    fi
 
     # Export for use by other functions
     export SKILL="$skill"

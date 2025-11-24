@@ -69,6 +69,8 @@ escape_xml() {
 # Extract a simple XML element value (single-line content only)
 # Usage: extract_xml_value "<xml>content</xml>" "xml"
 # Returns: "content"
+# Note: Uses sed capture group to extract content between tags
+#       Pattern: .*<tag>\(.*\)</tag>.*  where \(...\) captures the content
 extract_xml_value() {
     local xml="$1"
     local element="$2"
@@ -78,6 +80,9 @@ extract_xml_value() {
 # Extract multiline XML element content
 # Usage: extract_xml_multiline "<root><el>line1\nline2</el></root>" "el"
 # Returns: "line1\nline2"
+# Note: Two-step process:
+#       1. sed -n '/<tag>/,/<\/tag>/p' prints lines from opening to closing tag
+#       2. sed '1d;$d' deletes first and last line (the tag lines themselves)
 extract_xml_multiline() {
     local xml="$1"
     local element="$2"
@@ -118,12 +123,17 @@ validate_xml_tag() {
 # Usage: parse_xml_tag "<xml>content</xml>" "xml" [multiline|auto]
 # Returns: tag content, or empty string if not found
 # Mode: multiline (force multiline), auto (detect, default)
+#
+# Auto-detection logic:
+#   - Searches for pattern: <tag>content</tag> (all on one line)
+#   - If found: treats as single-line and uses simple extraction
+#   - If not found: treats as multiline and preserves internal formatting
 parse_xml_tag() {
     local xml_input="$1"
     local tag_name="$2"
     local mode="${3:-auto}"
 
-    # Validate XML structure first
+    # Validate XML structure first (ensures balanced tags)
     if ! validate_xml_tag "$xml_input" "$tag_name" 2>/dev/null; then
         return 1
     fi
@@ -209,24 +219,37 @@ safe_export() {
 # Setup CLAUDE_PLUGIN_ROOT if not already set
 # Tries script location first, then falls back to standard installation path
 # This function should be called from handler scripts
+#
+# Resolution order:
+#   1. Use existing CLAUDE_PLUGIN_ROOT env var if set
+#   2. Detect from calling script location (works for dev and installed contexts)
+#   3. Fall back to standard installation path: ~/.claude/plugins/...
+#
+# Validates that the resolved path contains required plugin structure
 setup_plugin_root() {
     if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-        # Get the calling script's directory
+        # Get the calling script's directory with error handling
         local calling_script_dir
-        calling_script_dir="$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)"
+        if ! calling_script_dir="$(cd "$(dirname "${BASH_SOURCE[1]}")" 2>/dev/null && pwd)"; then
+            echo "Error: Unable to determine calling script directory" >&2
+            return 1
+        fi
 
         # Determine path to plugin root based on calling script location
-        # Could be from agents/scripts/ or commands/scripts/
+        # Could be from agents/scripts/ or commands/scripts/ or tests/
         local potential_root=""
         if [[ "$calling_script_dir" == */agents/scripts ]]; then
             # Called from agents/scripts/ -> go up 2 levels
-            potential_root="$(cd "$calling_script_dir/../.." && pwd)"
+            potential_root="$(cd "$calling_script_dir/../.." 2>/dev/null && pwd)" || potential_root=""
         elif [[ "$calling_script_dir" == */commands/scripts ]]; then
             # Called from commands/scripts/ -> go up 2 levels
-            potential_root="$(cd "$calling_script_dir/../.." && pwd)"
+            potential_root="$(cd "$calling_script_dir/../.." 2>/dev/null && pwd)" || potential_root=""
+        elif [[ "$calling_script_dir" == */tests ]]; then
+            # Called from tests/ -> go up 1 level
+            potential_root="$(cd "$calling_script_dir/.." 2>/dev/null && pwd)" || potential_root=""
         fi
 
-        # Validate the potential root has templates
+        # Validate the potential root has required structure
         if [ -n "$potential_root" ] && [ -d "$potential_root/templates" ] && [ -f "$potential_root/templates/custom.md" ]; then
             CLAUDE_PLUGIN_ROOT="$potential_root"
         else
@@ -240,6 +263,10 @@ setup_plugin_root() {
     if [ ! -d "$CLAUDE_PLUGIN_ROOT" ]; then
         echo "Error: CLAUDE_PLUGIN_ROOT directory does not exist: $CLAUDE_PLUGIN_ROOT" >&2
         echo "Please ensure the meta-prompt plugin is properly installed." >&2
+        echo "" >&2
+        echo "To fix:" >&2
+        echo "  - Set CLAUDE_PLUGIN_ROOT environment variable to the correct path" >&2
+        echo "  - Or reinstall the plugin to: ~/.claude/plugins/marketplaces/claude-experiments/meta-prompt" >&2
         return 1
     fi
 
@@ -254,4 +281,6 @@ setup_plugin_root() {
         echo "Plugin directory structure may be corrupted. Please reinstall the plugin." >&2
         return 1
     fi
+
+    return 0
 }
