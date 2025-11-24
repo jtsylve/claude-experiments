@@ -111,40 +111,46 @@ count_matches() {
 }
 
 # Pre-compute strong indicators
+# Optimized to run grep once and check all patterns
 compute_strong_indicators() {
     local text="$1"
 
-    if echo "$text" | grep -qiE "\b($PATTERN_CODE)\b"; then
+    # Combine all patterns into a single grep call
+    local all_matches
+    all_matches=$(echo "$text" | grep -oiE "\b($PATTERN_CODE|$PATTERN_COMPARISON|$PATTERN_TEST|$PATTERN_REVIEW|$PATTERN_DOCUMENTATION|$PATTERN_EXTRACTION)\b" | tr '[:upper:]' '[:lower:]') || true
+
+    # Check which patterns matched
+    if echo "$all_matches" | grep -qiE "\b($PATTERN_CODE)\b"; then
         HAS_STRONG_CODE=1
     else
         HAS_STRONG_CODE=0
     fi
 
-    if echo "$text" | grep -qiE "\b($PATTERN_COMPARISON)\b"; then
+    if echo "$all_matches" | grep -qiE "\b($PATTERN_COMPARISON)\b"; then
         HAS_STRONG_COMPARISON=1
     else
         HAS_STRONG_COMPARISON=0
     fi
 
-    if echo "$text" | grep -qiE "\b($PATTERN_TEST)\b"; then
+    if echo "$all_matches" | grep -qiE "\b($PATTERN_TEST)\b"; then
         HAS_STRONG_TEST=1
     else
         HAS_STRONG_TEST=0
     fi
 
-    if echo "$text" | grep -qiE "\b($PATTERN_REVIEW)\b"; then
+    if echo "$all_matches" | grep -qiE "\b($PATTERN_REVIEW)\b"; then
         HAS_STRONG_REVIEW=1
     else
         HAS_STRONG_REVIEW=0
     fi
 
-    if echo "$text" | grep -qiE "\b($PATTERN_DOCUMENTATION)\b"; then
+    if echo "$all_matches" | grep -qiE "\b($PATTERN_DOCUMENTATION)\b"; then
         HAS_STRONG_DOCUMENTATION=1
     else
         HAS_STRONG_DOCUMENTATION=0
     fi
 
-    if echo "$text" | grep -qiE "\b($PATTERN_EXTRACTION)\b"; then
+    if echo "$all_matches" | grep -qiE "\b($PATTERN_EXTRACTION)\b"; then
         HAS_STRONG_EXTRACTION=1
     else
         HAS_STRONG_EXTRACTION=0

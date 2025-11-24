@@ -31,6 +31,13 @@ sanitize_input() {
     printf '%s\n' "$input" | sed 's/\\/\\\\/g; s/\$/\\$/g; s/`/\\`/g'
 }
 
+# Escape XML special characters
+# Escapes <, >, &, ", and ' for safe XML output
+escape_xml() {
+    local input="$1"
+    printf '%s\n' "$input" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'\''/\&apos;/g'
+}
+
 # ============================================================================
 # XML Parsing Functions
 # ============================================================================
@@ -77,6 +84,36 @@ extract_xml_multiline() {
     echo "$xml" | sed -n "/<$element>/,/<\/$element>/p" | sed '1d;$d'
 }
 
+# Validate basic XML well-formedness for a specific tag
+# Usage: validate_xml_tag "<xml>content</xml>" "xml"
+# Returns: 0 if valid, 1 if malformed
+validate_xml_tag() {
+    local xml_input="$1"
+    local tag_name="$2"
+
+    # Check if opening tag exists
+    if ! echo "$xml_input" | grep -q "<$tag_name>"; then
+        return 1
+    fi
+
+    # Check if closing tag exists
+    if ! echo "$xml_input" | grep -q "</$tag_name>"; then
+        echo "Error: Malformed XML - missing closing tag: </$tag_name>" >&2
+        return 1
+    fi
+
+    # Count opening and closing tags (basic check for balance)
+    local open_count=$(echo "$xml_input" | grep -o "<$tag_name>" | wc -l | tr -d ' ')
+    local close_count=$(echo "$xml_input" | grep -o "</$tag_name>" | wc -l | tr -d ' ')
+
+    if [ "$open_count" -ne "$close_count" ]; then
+        echo "Error: Malformed XML - unbalanced tags for: $tag_name (open=$open_count, close=$close_count)" >&2
+        return 1
+    fi
+
+    return 0
+}
+
 # Parse XML tag with automatic detection of single-line vs multiline content
 # Usage: parse_xml_tag "<xml>content</xml>" "xml" [multiline|auto]
 # Returns: tag content, or empty string if not found
@@ -86,8 +123,8 @@ parse_xml_tag() {
     local tag_name="$2"
     local mode="${3:-auto}"
 
-    # Check if tag exists
-    if ! echo "$xml_input" | grep -q "<$tag_name>"; then
+    # Validate XML structure first
+    if ! validate_xml_tag "$xml_input" "$tag_name" 2>/dev/null; then
         return 1
     fi
 
@@ -197,5 +234,24 @@ setup_plugin_root() {
             CLAUDE_PLUGIN_ROOT="$HOME/.claude/plugins/marketplaces/claude-experiments/meta-prompt"
         fi
         export CLAUDE_PLUGIN_ROOT
+    fi
+
+    # Validate CLAUDE_PLUGIN_ROOT directory structure
+    if [ ! -d "$CLAUDE_PLUGIN_ROOT" ]; then
+        echo "Error: CLAUDE_PLUGIN_ROOT directory does not exist: $CLAUDE_PLUGIN_ROOT" >&2
+        echo "Please ensure the meta-prompt plugin is properly installed." >&2
+        return 1
+    fi
+
+    if [ ! -d "$CLAUDE_PLUGIN_ROOT/templates" ]; then
+        echo "Error: Templates directory not found: $CLAUDE_PLUGIN_ROOT/templates" >&2
+        echo "Plugin directory structure may be corrupted. Please reinstall the plugin." >&2
+        return 1
+    fi
+
+    if [ ! -f "$CLAUDE_PLUGIN_ROOT/templates/custom.md" ]; then
+        echo "Error: Required template file not found: $CLAUDE_PLUGIN_ROOT/templates/custom.md" >&2
+        echo "Plugin directory structure may be corrupted. Please reinstall the plugin." >&2
+        return 1
     fi
 }

@@ -41,7 +41,7 @@ ISSUES_FOUND=0
 
 # Check if plugin root exists
 if [ ! -d "$CLAUDE_PLUGIN_ROOT" ]; then
-    echo -e "${RED}✗ ERROR: Plugin directory not found at: $CLAUDE_PLUGIN_ROOT${NC}"
+    echo -e "${RED}✗ Error: Plugin directory not found at: $CLAUDE_PLUGIN_ROOT${NC}"
     echo ""
     echo "Expected installation locations:"
     echo "  - Standard: ~/.claude/plugins/marketplaces/claude-experiments/meta-prompt"
