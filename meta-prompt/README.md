@@ -225,7 +225,7 @@ See [Template Authoring Guide](docs/template-authoring.md) to create your own.
 
 **Current Version:** Pre-release (targeting v1.0.0)
 **Status:** Work in Progress - Not Stable
-**Last Updated:** 2025-11-23
+**Last Updated:** 2025-11-24
 
 ---
 

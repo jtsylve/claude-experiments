@@ -636,6 +636,108 @@ Located in:
 
 ---
 
+### AD-008: Prompt Optimization and Model Selection
+
+**TL;DR:** Aggressive prompt optimization (51% token reduction) combined with model-appropriate agent selection (Haiku for simple tasks, Sonnet for complex execution)
+
+**Status:** Accepted
+**Date:** 2025-11-24
+**Context:**
+
+Analysis of agent, skill, and template prompts revealed significant optimization opportunities:
+- Command prompts contained redundant state machine documentation (handler provides this)
+- Agent prompts included unnecessary explanations and meta-instructions
+- Skills had verbose examples and repetitive guidance
+- Templates duplicated content already covered by skills
+- All agents defaulted to the same model regardless of task complexity
+
+**Decision:**
+
+Implement **aggressive prompt optimization** following these principles:
+
+1. **Prompt Engineering Best Practices:**
+   - Use imperative voice (direct commands, not explanations)
+   - Remove redundancy (don't repeat what skills cover)
+   - Structured over prose (tables vs. paragraphs)
+   - Trust the model (remove obvious guidance)
+   - Remove meta-instructions ("remember to", "make sure")
+   - No explicit `<thinking>` blocks (models reason naturally)
+
+2. **Model Selection by Task Complexity:**
+   - **Haiku** for simple tasks: template-selector (classification), prompt-optimizer (variable extraction)
+   - **Sonnet** for complex tasks: template-executor (multi-step reasoning, tool usage)
+
+3. **Separation of Concerns:**
+   - Templates: Action-focused workflow instructions
+   - Skills: Domain expertise (loaded on demand)
+   - Avoid duplication between them
+
+**Rationale:**
+
+- **Token Efficiency:** 51% overall reduction (30,700 → 15,030 tokens)
+- **Cost Reduction:** Haiku is significantly cheaper than Sonnet for simple tasks
+- **Performance:** Smaller prompts = faster processing
+- **Clarity:** Concise prompts are easier to maintain and debug
+- **Quality:** Well-structured prompts often produce better results than verbose ones
+
+**Results:**
+
+| Category | Before | After | Reduction |
+|----------|--------|-------|-----------|
+| Command | 1,500 | 600 | 60% |
+| Agents | 1,150 | 930 | 19% |
+| Skills | 22,300 | 10,700 | 52% |
+| Templates | 5,750 | 2,800 | 51% |
+| **Total** | **30,700** | **15,030** | **51%** |
+
+**Model Selection Impact:**
+
+| Agent | Before | After | Rationale |
+|-------|--------|-------|-----------|
+| template-selector | Sonnet | Haiku | Keyword-guided classification |
+| prompt-optimizer | Sonnet | Haiku | Deterministic variable extraction |
+| template-executor | Sonnet | Sonnet | Complex multi-step execution |
+
+**Alternatives Considered:**
+
+1. **Keep Verbose Prompts**
+   - Pros: Maximum guidance for edge cases
+   - Cons: Token waste, slower processing, harder to maintain
+   - Rejected: Modern models don't need hand-holding
+
+2. **All Haiku**
+   - Pros: Maximum cost savings
+   - Cons: Complex execution tasks may fail
+   - Rejected: template-executor needs reasoning capability
+
+3. **Moderate Optimization (25% reduction)**
+   - Pros: Safer, preserves more guidance
+   - Cons: Misses significant savings opportunity
+   - Rejected: Aggressive optimization tested successfully
+
+**Consequences:**
+
+- Positive:
+  - 51% token reduction across all prompts
+  - Faster agent processing
+  - Lower API costs (Haiku for 2/3 agents)
+  - Easier to maintain concise prompts
+
+- Negative:
+  - Less hand-holding for edge cases (mitigated by skills)
+  - Requires re-testing after optimization (completed: 101/101 tests pass)
+
+- Neutral:
+  - Skills still provide comprehensive guidance when loaded
+  - May need periodic review as use patterns emerge
+
+**References:**
+- `agents/prompt-optimizer.md` (model: haiku)
+- `agents/template-selector.md` (model: haiku)
+- `agents/template-executor.md` (model: sonnet)
+
+---
+
 ### AD-005: Variable Substitution with Security Escaping
 
 **TL;DR:** Escape backslashes, $, backticks, and quotes to prevent command injection while using simple `{$VAR}` syntax for template variables
@@ -1198,5 +1300,5 @@ Test suite with 30+ tests covering:
 ---
 
 **Document Status:** Complete
-**Review Date:** 2025-11-18
-**Next Review:** 2026-02-18 (Quarterly)
+**Review Date:** 2025-11-24
+**Next Review:** 2026-02-24 (Quarterly)

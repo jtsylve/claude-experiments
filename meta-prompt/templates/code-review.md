@@ -5,167 +5,49 @@ keywords: [review, feedback, check code, analyze code, quality, readability, mai
 complexity: complex
 variables: []
 optional_variables: [PATHS, REVIEW_FOCUS, LANGUAGE_CONVENTIONS]
-version: 1.2
-description: Perform comprehensive code review covering readability, maintainability, performance, security, and best practices
+version: 1.3
+description: Perform comprehensive code review
 variable_descriptions:
-  PATHS: "Optional paths to review (files or directories). If not specified, reviews all uncommitted changes (both staged and unstaged) using 'git status --porcelain'"
-  REVIEW_FOCUS: "Specific areas to focus on (e.g., 'security and error handling', 'performance', 'all aspects') - defaults to comprehensive review"
-  LANGUAGE_CONVENTIONS: "Language or framework conventions to apply (e.g., 'Node.js best practices', 'Python PEP 8', 'React patterns') - defaults to inferred from code"
+  PATHS: "Paths to review (files/directories). Default: uncommitted changes via git status"
+  REVIEW_FOCUS: "Areas to focus on (e.g., 'security', 'performance'). Default: comprehensive"
+  LANGUAGE_CONVENTIONS: "Language/framework conventions to apply. Default: inferred"
 ---
 
-You are a senior code reviewer providing comprehensive feedback on code quality.
+Review code for quality, security, and maintainability.
 
-<paths_to_review>
-{$PATHS:}
-</paths_to_review>
+<paths>{$PATHS:}</paths>
+<focus>{$REVIEW_FOCUS:comprehensive}</focus>
+<conventions>{$LANGUAGE_CONVENTIONS:inferred from code}</conventions>
 
-<instructions_for_getting_paths>
-If paths_to_review is empty or not provided, use the Bash tool to run: git status --porcelain
-This will show all uncommitted changes (both staged and unstaged files). Parse the output to extract file paths.
-The format is: XY FILENAME where X is staged status, Y is unstaged status.
-Extract the filenames (usually the second column) and use them as the paths to review.
+## Process
 
-If paths_to_review contains specific paths, use those paths directly for the review.
-</instructions_for_getting_paths>
+1. **Get code:** If paths empty, run `git status --porcelain` and `git diff` to get uncommitted changes
 
-<review_focus>
-{$REVIEW_FOCUS:all aspects - comprehensive review covering correctness, security, performance, readability, maintainability, error handling, testability, and language best practices}
-</review_focus>
+2. **Analyze** across dimensions: correctness, security, performance, readability, error handling, testability
 
-<language_conventions>
-{$LANGUAGE_CONVENTIONS:inferred from the code being reviewed - apply idiomatic patterns and conventions appropriate to the language and framework detected in the code}
-</language_conventions>
+3. **Categorize** by severity:
+   - **CRITICAL**: Security vulnerabilities, data loss, crashes
+   - **HIGH**: Bugs, performance issues, major maintainability
+   - **MEDIUM**: Code smells, refactoring opportunities
+   - **LOW**: Style, alternatives
 
-Perform a systematic code review following this framework:
+## Output
 
-**Step 1: Planning with TodoWrite**
-Use TodoWrite to plan the review:
-- Get the list of files to review (either from paths_to_review or via git status --porcelain)
-- Read each file that needs to be reviewed
-- Identify review dimensions to analyze (correctness, security, performance, etc.)
-- Plan how to structure feedback by severity
-- Determine language/framework-specific checks to perform
-
-**Step 2: Initial Assessment**
-<thinking>
-Before detailed review, understand:
-- What is the code trying to accomplish?
-- What is the context and usage pattern?
-- What are the critical concerns (security, performance, correctness)?
-- What language/framework conventions apply?
-</thinking>
-
-**Step 3: Multi-Dimensional Analysis**
-
-Review across these dimensions:
-
-**1. Correctness & Logic**
-- Does the code work as intended?
-- Are there logical errors or edge cases not handled?
-- Are assumptions valid?
-- Could any inputs cause unexpected behavior?
-
-**2. Security**
-- Input validation and sanitization
-- SQL injection, XSS, command injection risks
-- Authentication and authorization checks
-- Sensitive data exposure
-- Cryptography usage (proper algorithms, key management)
-- Error messages revealing system information
-- CORS misconfigurations (overly permissive origins)
-- Insecure deserialization (untrusted data)
-- Missing security headers (CSP, X-Frame-Options, HSTS, etc.)
-- Path traversal vulnerabilities
-- Server-side request forgery (SSRF)
-- Timing attacks in authentication/comparison
-
-**3. Performance**
-- Algorithm efficiency (time complexity)
-- Memory usage concerns
-- Unnecessary computations or loops
-- Database query optimization
-- Caching opportunities
-- Resource cleanup (file handles, connections)
-
-**4. Readability & Maintainability**
-- Clear variable and function names
-- Appropriate code organization
-- Consistent formatting
-- Comments where needed (not obvious code)
-- Magic numbers replaced with named constants
-- Code duplication (DRY principle)
-
-**5. Error Handling**
-- Appropriate error catching and handling
-- Meaningful error messages
-- Graceful degradation
-- Resource cleanup in error paths
-- Logging for debugging
-
-**6. Testing & Testability**
-- Is the code testable?
-- Are dependencies mockable?
-- Clear separation of concerns
-- Side effects minimized
-
-**7. Language/Framework Best Practices**
-- Idiomatic code for the language
-- Framework conventions followed
-- Modern language features used appropriately
-- Deprecated patterns avoided
-
-**Step 4: Prioritize Feedback**
-
-Update TodoWrite to mark analysis complete and track feedback categorization.
-
-Categorize issues by severity:
-
-**CRITICAL** - Must fix (security vulnerabilities, data loss, crashes)
-**HIGH** - Should fix (bugs, performance issues, major maintainability problems)
-**MEDIUM** - Nice to fix (code smells, minor inefficiencies)
-**LOW** - Suggestions (style preferences, alternative approaches)
-
-**Output Format:**
-
+```markdown
 ## Summary
-[2-3 sentences: Overall code quality, main strengths, key concerns]
+[2-3 sentences on quality, strengths, concerns]
 
 ## Critical Issues
-[Issues that must be addressed - security, correctness, data integrity]
+[Security, correctness issues with file:line, impact, fix]
 
-## High Priority Issues
-[Important problems - bugs, performance, major maintainability issues]
+## High Priority
+[Bugs, performance with location and fix]
 
-## Medium Priority Suggestions
-[Code improvements - refactoring opportunities, better patterns]
-
-## Low Priority Notes
-[Minor suggestions - style, alternatives, optimizations]
+## Medium/Low
+[Suggestions, improvements]
 
 ## Positive Observations
-[What the code does well - good patterns, clear logic, effective solutions]
-
-## Specific Line-Level Feedback
-
-For each issue, provide:
-- **Line/section reference:** Where the issue occurs
-- **Issue:** What the problem is
-- **Why it matters:** Impact of the issue
-- **Suggestion:** How to fix it (with code example if helpful)
-
-**Example:**
-```
-Line 42-45: Missing input validation
-Why: User input directly used in SQL query creates SQL injection risk
-Suggestion: Use parameterized queries or ORM
+[Good patterns worth noting]
 ```
 
-**Review Principles:**
-- Be constructive and specific, not vague or critical
-- Explain WHY changes matter, not just WHAT to change
-- Provide code examples for complex suggestions
-- Balance criticism with recognition of good patterns
-- Focus on meaningful issues, not nitpicking style
-- Consider the context and constraints
-
-Begin your code review immediately without preamble.
+Provide specific line references and code examples for fixes.
