@@ -292,7 +292,7 @@ Each agent uses a model optimized for its complexity level:
 - **Purpose:** Auto-detect appropriate template for task
 - **Type:** Claude Code agent
 - **Handler:** `agents/scripts/template-selector-handler.sh`
-- **Model:** Haiku (lightweight classification task)
+- **Model:** haiku (lightweight classification task)
 - **Tools:** Bash (handler script), Read (templates)
 - **Output:** Template name via XML
 
@@ -300,7 +300,7 @@ Each agent uses a model optimized for its complexity level:
 - **Purpose:** Generate optimized prompts from templates
 - **Type:** Claude Code agent
 - **Handler:** `agents/scripts/prompt-optimizer-handler.sh`
-- **Model:** Sonnet (variable extraction may require nuanced reasoning)
+- **Model:** sonnet (variable extraction may require nuanced reasoning)
 - **Tools:** Bash (handler script), Read (templates)
 - **Output:** Optimized prompt via XML
 
@@ -308,16 +308,16 @@ Each agent uses a model optimized for its complexity level:
 - **Purpose:** Execute tasks using domain-specific skills
 - **Type:** Claude Code agent
 - **Handler:** `agents/scripts/template-executor-handler.sh`
-- **Model:** Sonnet (complex reasoning for task execution)
+- **Model:** sonnet (complex reasoning for task execution)
 - **Tools:** Skill (domain expertise), TodoWrite, Read/Edit/Write
 - **Output:** Task results via XML
 
 **Model Selection Rationale:**
 | Agent | Model | Rationale |
 |-------|-------|-----------|
-| template-selector | Haiku | Simple classification, keyword-guided |
-| prompt-optimizer | Sonnet | Variable extraction may require nuanced reasoning |
-| template-executor | Sonnet | Complex reasoning, multi-step execution |
+| template-selector | haiku | Simple classification, keyword-guided |
+| prompt-optimizer | sonnet | Variable extraction may require nuanced reasoning |
+| template-executor | sonnet | Complex reasoning, multi-step execution |
 
 ### 5. Skills Layer
 

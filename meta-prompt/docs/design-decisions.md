@@ -795,9 +795,9 @@ Implement **aggressive prompt optimization** following these principles:
 
 | Agent | Before | After | Rationale |
 |-------|--------|-------|-----------|
-| template-selector | Sonnet | Haiku | Keyword-guided classification |
-| prompt-optimizer | Sonnet | Sonnet | Variable extraction may require nuanced reasoning |
-| template-executor | Sonnet | Sonnet | Complex multi-step execution |
+| template-selector | sonnet | haiku | Keyword-guided classification |
+| prompt-optimizer | sonnet | sonnet | Variable extraction may require nuanced reasoning |
+| template-executor | sonnet | sonnet | Complex multi-step execution |
 
 **Alternatives Considered:**
 

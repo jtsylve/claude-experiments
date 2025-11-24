@@ -158,9 +158,9 @@ main() {
             FAILED_TEMPLATES=1
         fi
     else
-        # Validate all templates
+        # Validate all templates (excluding README.md)
         for template_file in "$TEMPLATE_DIR"/*.md; do
-            if [ -f "$template_file" ]; then
+            if [ -f "$template_file" ] && [[ "$(basename "$template_file")" != "README.md" ]]; then
                 TOTAL_TEMPLATES=$((TOTAL_TEMPLATES + 1))
                 if validate_template "$template_file"; then
                     PASSED_TEMPLATES=$((PASSED_TEMPLATES + 1))

@@ -41,3 +41,14 @@ Complete, runnable test code with:
 - Describe/context blocks for organization
 - Mocks for external dependencies
 - Setup/teardown where needed
+
+### Framework Quick Reference
+
+| Framework | Test Block | Assertion | Setup/Teardown |
+|-----------|------------|-----------|----------------|
+| Jest | `describe`, `test` | `expect` | `beforeEach`, `afterEach` |
+| Mocha | `describe`, `it` | `assert`/`expect` | `beforeEach`, `afterEach` |
+| pytest | `def test_*` | `assert` | `setup_method`, `teardown_method` |
+| JUnit | `@Test` | `assertEquals` | `@Before`, `@After` |
+| RSpec | `describe`, `it` | `expect` | `before`, `after` |
+| Go | `func TestXxx` | `t.Errorf` | setup in test func |
