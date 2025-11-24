@@ -90,13 +90,13 @@ load_template() {
 
     # Check if file exists
     if [ ! -f "$template_path" ]; then
-        echo "ERROR: Template file not found: $template_path" >&2
+        echo "Error: Template file not found: $template_path" >&2
         echo "" >&2
         echo "Available templates in $TEMPLATE_DIR:" >&2
         if [ -d "$TEMPLATE_DIR" ]; then
             ls -1 "$TEMPLATE_DIR"/*.md 2>/dev/null | sed 's/.*\//  - /' | sed 's/\.md$//' >&2 || echo "  (none found)" >&2
         else
-            echo "  ERROR: Template directory does not exist: $TEMPLATE_DIR" >&2
+            echo "  Error: Template directory does not exist: $TEMPLATE_DIR" >&2
         fi
         echo "" >&2
         echo "Requested template: $template_name" >&2
@@ -105,14 +105,14 @@ load_template() {
 
     # Check if file is readable
     if [ ! -r "$template_path" ]; then
-        echo "ERROR: Template file not readable: $template_path" >&2
+        echo "Error: Template file not readable: $template_path" >&2
         echo "Check file permissions." >&2
         return 1
     fi
 
     # Check if file is non-empty
     if [ ! -s "$template_path" ]; then
-        echo "ERROR: Template file is empty: $template_path" >&2
+        echo "Error: Template file is empty: $template_path" >&2
         echo "Template files must contain prompt content." >&2
         return 1
     fi
@@ -143,7 +143,7 @@ generate_instructions() {
     # Load template content
     local template_content
     template_content=$(load_template "$TEMPLATE") || {
-        echo "ERROR: Failed to load template '$TEMPLATE'" >&2
+        echo "Error: Failed to load template '$TEMPLATE'" >&2
         exit 1
     }
 

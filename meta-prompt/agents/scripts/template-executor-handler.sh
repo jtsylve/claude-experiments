@@ -29,13 +29,13 @@ validate_skill() {
     local skill_file="${SKILL_DIR}/${skill_name}.md"
 
     if [ ! -f "$skill_file" ]; then
-        echo "WARNING: Skill file not found: $skill_file" >&2
+        echo "Warning: Skill file not found: $skill_file" >&2
         echo "" >&2
         echo "Available skills in $SKILL_DIR:" >&2
         if [ -d "$SKILL_DIR" ]; then
             ls -1 "$SKILL_DIR"/*.md 2>/dev/null | sed 's/.*\//  - meta-prompt:/' | sed 's/\.md$//' >&2 || echo "  (none found)" >&2
         else
-            echo "  ERROR: Skill directory does not exist: $SKILL_DIR" >&2
+            echo "  Error: Skill directory does not exist: $SKILL_DIR" >&2
         fi
         echo "" >&2
         echo "Requested skill: $skill" >&2
