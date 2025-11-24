@@ -40,7 +40,7 @@ Perform a systematic code review following this framework:
 
 **Step 1: Planning with TodoWrite**
 Use TodoWrite to plan the review:
-- Get the list of files to review (either from paths_to_review or via git diff)
+- Get the list of files to review (either from paths_to_review or via git status --porcelain)
 - Read each file that needs to be reviewed
 - Identify review dimensions to analyze (correctness, security, performance, etc.)
 - Plan how to structure feedback by severity

@@ -285,8 +285,8 @@ sequenceDiagram
     User->>PromptMD: /prompt "Analyze security"
     PromptMD->>Handler: Execute script with task
     Handler->>Handler: Parse args, detect mode
-    Handler->>PromptMD: Return instructions with @agent- invocation
-    PromptMD->>Optimizer: Agent invocation
+    Handler->>PromptMD: Return Task tool invocation instructions
+    PromptMD->>Optimizer: Task tool invocation
     Optimizer->>CreatePrompt: /create-prompt
     CreatePrompt->>Optimizer: Optimized prompt
     Optimizer->>Task: Execute in new context
@@ -530,7 +530,7 @@ meta-prompt/                         # Plugin root
 **Claude Code CLI Integration:**
 - Commands available via `/prompt` and `/create-prompt`
 - Scripts executed in Claude Code's bash environment
-- Agents invoked via @agent- syntax (not as subagents)
+- Agents invoked via Task tool
 - Templates read via Read tool
 
 **Environment Variables:**

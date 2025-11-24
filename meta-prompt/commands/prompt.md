@@ -17,16 +17,16 @@ This command has been optimized to eliminate LLM orchestration overhead through 
 
 ## Process
 
-1. Execute the orchestration script to invoke the agent:
+1. Execute the orchestration script to generate Task tool invocation instructions:
    - Run: `~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh "{$TASK_DESCRIPTION}"`
    - The script will parse arguments and determine execution mode
-   - It will output an agent invocation using `@agent-meta-prompt:prompt-optimizer` followed by the task context
+   - It will output Task tool invocation instructions with `subagent_type="meta-prompt:prompt-optimizer"`
    - **Error Handling**: If the script fails or doesn't exist:
-     1. Notify the user: "The prompt-handler script failed. I can fall back to using the prompt-optimizer agent directly."
+     1. Notify the user: "The prompt-handler script failed. I can fall back to using the Task tool directly."
      2. Ask the user: "Would you like me to proceed with the fallback approach?"
-     3. Only if approved, invoke `@agent-meta-prompt:prompt-optimizer` directly with the task description
+     3. Only if approved, use Task tool with `subagent_type="meta-prompt:prompt-optimizer"` directly
 
-2. The output from the script will invoke the prompt-optimizer agent directly (not as a subagent)
+2. Follow the Task tool invocation instructions from the script output
 
 3. Present results to the user as directed by the agent
 
@@ -54,10 +54,10 @@ Example: `/prompt --code --return-only Fix the authentication bug`
 
 If the bash orchestration script fails for any reason:
 1. Notify the user of the error: "The orchestration script encountered an error: [error details]"
-2. Explain the fallback option: "I can use the prompt-optimizer agent directly to handle your request using the full LLM-based approach."
+2. Explain the fallback option: "I can use the Task tool to invoke the prompt-optimizer agent directly using the full LLM-based approach."
 3. Ask for confirmation: "Would you like me to proceed with this fallback?"
 4. Only if approved:
-   - Invoke the prompt-optimizer agent directly using `@agent-meta-prompt:prompt-optimizer`
+   - Use Task tool with `subagent_type="meta-prompt:prompt-optimizer"`
    - Pass the task description and any flags (--return-only, template flags) in the prompt
    - The prompt-optimizer agent will handle the request
 

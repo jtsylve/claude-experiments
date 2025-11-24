@@ -20,10 +20,7 @@ Execute the keyword-based template selector to determine the best template:
 ~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/template-selector.sh "{$ARGUMENTS}"
 ```
 
-**Error Handling**: If the script fails or is not available:
-1. Notify the user: "The template-selector script failed. I can proceed with LLM-based template selection instead."
-2. Ask for confirmation: "Would you like me to use the LLM fallback for template selection?"
-3. Only if approved, proceed to Step 2 directly with LLM-based selection.
+**Error Handling**: If the script fails or is not available, fall back to Step 2 directly with LLM-based template selection.
 
 The script outputs: `<template-name> <confidence>` (e.g., `code-refactoring 75`)
 

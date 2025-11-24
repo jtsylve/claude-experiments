@@ -97,7 +97,7 @@ meta-prompt/                                   # Plugin root
 **Purpose:** LLM agent definitions
 **File Format:** Markdown with YAML frontmatter
 **Count:** 1 agent (meta-prompt:prompt-optimizer)
-**Access:** Invoked via @agent-meta-prompt:prompt-optimizer syntax (not as subagent)
+**Access:** Invoked via Task tool with subagent_type="meta-prompt:prompt-optimizer"
 
 #### `commands/`
 **Purpose:** Slash command definitions

@@ -217,6 +217,32 @@ See [Template Authoring Guide](docs/template-authoring.md) to create your own.
 
 ---
 
+## Known Issues
+
+**Hardcoded Paths (Temporary Workaround)**
+
+Due to a Windows compatibility issue with Claude Code's `${CLAUDE_PLUGIN_ROOT}` variable normalization (see [Claude Code issue #11984](https://github.com/anthropics/claude-code/issues/11984)), the following files currently use hardcoded paths:
+
+- `agents/prompt-optimizer.md` - Template and guide paths in allowed-tools
+- `commands/create-prompt.md` - Script paths in allowed-tools
+- `commands/prompt.md` - Script paths in allowed-tools
+- `commands/scripts/template-selector.sh` - Template directory paths
+- `commands/scripts/template-processor.sh` - Template directory paths
+
+All hardcoded paths assume the plugin is installed at: `~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`
+
+**Impact:**
+- Plugin will not work if installed in a different location
+- Windows users may experience path normalization issues
+
+**Workaround:**
+- Test scripts intelligently derive the plugin root from their own location for local development
+- All workaround changes are marked with `TEMPORARY` comments for easy reverting
+
+**Resolution:** Once Claude Code fixes the path normalization issue, these hardcoded paths will be reverted to use `${CLAUDE_PLUGIN_ROOT}` for proper portability.
+
+---
+
 ## Version
 
 **Current Version:** Pre-release (targeting v1.0.0)
