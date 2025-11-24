@@ -153,22 +153,22 @@ echo ""
 echo -e "${YELLOW}Phase 4: Skill Files${NC}"
 
 run_test "code-refactoring skill exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-refactoring.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-refactoring/SKILL.md ]"
 
 run_test "code-review skill exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-review.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-review/SKILL.md ]"
 
 run_test "test-generation skill exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/test-generation.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/test-generation/SKILL.md ]"
 
 run_test "documentation-generator skill exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/documentation-generator.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/documentation-generator/SKILL.md ]"
 
 run_test "data-extraction skill exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/data-extraction.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/data-extraction/SKILL.md ]"
 
 run_test "code-comparison skill exists" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-comparison.md ]"
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-comparison/SKILL.md ]"
 
 echo ""
 

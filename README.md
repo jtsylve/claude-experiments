@@ -1,10 +1,10 @@
 # Claude Experiments
 
-A curated marketplace for Claude Code plugins focused on meta-prompt optimization and developer productivity.
+A curated marketplace for Claude Code plugins featuring state machine-based prompt optimization and developer productivity tools.
 
 ## What is This?
 
-This repository is a Claude Code plugin marketplace that provides tools to reduce LLM token consumption and improve prompt engineering workflows. Plugins in this marketplace help you work more efficiently with Claude by optimizing how prompts are constructed and executed.
+This repository is a Claude Code plugin marketplace that provides tools to reduce LLM token consumption and improve prompt engineering workflows through deterministic preprocessing and specialized LLM agents. Plugins in this marketplace help you work more efficiently with Claude by optimizing how prompts are constructed and executed.
 
 ## Installation
 
@@ -20,65 +20,72 @@ Once installed, all plugins in this marketplace will be available for use in you
 
 ### meta-prompt (v1.0.0)
 
-**Reduce LLM token consumption by 40-60% through deterministic preprocessing and template-based routing.**
+**State machine-based optimization infrastructure achieving 40-60% token reduction through deterministic preprocessing and template-based routing.**
 
-The meta-prompt plugin replaces LLM-based orchestration with shell scripts and pre-built templates, invoking the LLM only for actual creative and analytical work. This results in significant token savings while maintaining full functionality.
+The meta-prompt plugin implements a state machine architecture with three specialized LLM agents that work together to optimize prompt execution. The system uses deterministic bash scripts for orchestration (zero tokens) and invokes LLM agents only for targeted work: template selection, prompt optimization, and task execution.
+
+#### Architecture
+
+- **State Machine:** Deterministic bash orchestration with zero-token overhead
+- **Template Selector Agent:** Lightweight classifier for automatic template detection (Haiku model)
+- **Prompt Optimizer Agent:** Extracts variables and populates templates (Sonnet model)
+- **Template Executor Agent:** Executes optimized prompts with domain-specific skills (Sonnet model)
 
 #### Key Features
 
 - **Token Reduction:** 40-60% overall, 100% for orchestration
-- **Classification Accuracy:** 90%+ for template routing
+- **Classification Accuracy:** 90%+ for hybrid template routing
 - **Performance:** <100ms deterministic overhead
-- **Templates:** 10 pre-built templates covering common patterns
-- **Security:** Input sanitization, whitelist-based permissions
+- **Templates:** Domain-specific templates covering common development patterns
+- **Zero-Token Orchestration:** State machine routing eliminates LLM orchestration costs
+- **Specialized Agents:** Three focused agents for selection, optimization, and execution
+- **Hybrid Classification:** Keyword-based routing with LLM fallback for edge cases
 
 #### Commands
 
 - `/prompt <task>` - Optimize and execute a prompt with automatic template selection
-- `/prompt <task> --return-only` - Generate optimized prompt without executing
-- `/create-prompt <task>` - Generate a custom-tailored prompt template
+- `/prompt --template=<name> <task>` - Use a specific template (--code, --review, --test, --docs, --extract, --compare, --custom)
+- `/prompt --plan <task>` - Create execution plan and get approval before running
+- `/prompt --return-only <task>` - Generate optimized prompt without executing
 
 #### Templates Included
 
-| Template | Use Cases | Variables |
-|----------|-----------|-----------|
-| simple-classification | Compare items, check equivalence | 3 |
-| document-qa | Answer with citations, extract info | 2 |
-| code-refactoring | Modify code, fix bugs, add features | 2 |
-| function-calling | API usage, tool invocation | 2 |
-| interactive-dialogue | Tutors, customer support bots | 4 |
-| test-generation | Generate unit tests, test suites, edge cases | 3 |
-| code-review | Security audits, quality analysis, feedback | 3 |
-| documentation-generator | API docs, READMEs, docstrings, user guides | 3 |
-| data-extraction | Extract data from logs, JSON, HTML, text | 3 |
-| custom | Novel tasks (LLM fallback) | 1 |
+| Template | Use Cases | Key Variables |
+|----------|-----------|---------------|
+| code-refactoring | Modify code, fix bugs, implement features | TASK_REQUIREMENTS, TARGET_PATTERNS |
+| code-review | Security audits, quality analysis, feedback | PATHS, REVIEW_FOCUS, LANGUAGE_CONVENTIONS |
+| test-generation | Generate unit tests, test suites, coverage | CODE_CONTEXT, FOCUS_AREAS, TEST_FRAMEWORK |
+| documentation-generator | API docs, READMEs, docstrings, user guides | TARGET_FILES, DOCUMENTATION_STYLE, AUDIENCE |
+| data-extraction | Extract data from logs, JSON, HTML, text | INPUT_SOURCE, EXTRACTION_PATTERN, FORMAT |
+| code-comparison | Compare code snippets, check equivalence | FIRST_CODE, SECOND_CODE, COMPARISON_FOCUS |
+| custom | Novel tasks (LLM fallback) | TASK_DESCRIPTION |
 
 #### Template Variables
 
-Each template uses specific variables to customize behavior:
+Each template uses specific variables that are automatically extracted from your task description:
 
-**simple-classification:** ITEM1, ITEM2, COMPARISON_CRITERIA
-**document-qa:** DOCUMENT_CONTENT, QUESTION
-**code-refactoring:** CODE_TO_REFACTOR, REFACTORING_GOAL
-**function-calling:** API_DESCRIPTION, TASK_OBJECTIVE
-**interactive-dialogue:** ROLE_DESCRIPTION, DOMAIN_EXPERTISE, INTERACTION_STYLE, USER_LEVEL
-**test-generation:** CODE_TO_TEST, TEST_FRAMEWORK, TEST_SCOPE
-**code-review:** CODE_TO_REVIEW, REVIEW_FOCUS, LANGUAGE_CONVENTIONS
-**documentation-generator:** CODE_OR_CONTENT, DOC_TYPE, AUDIENCE
-**data-extraction:** SOURCE_DATA, EXTRACTION_TARGETS, OUTPUT_FORMAT
-**custom:** TASK_DESCRIPTION
+- **code-refactoring:** TASK_REQUIREMENTS, TARGET_PATTERNS
+- **code-review:** PATHS, REVIEW_FOCUS, LANGUAGE_CONVENTIONS
+- **test-generation:** CODE_CONTEXT, FOCUS_AREAS, TEST_FRAMEWORK
+- **documentation-generator:** TARGET_FILES, DOCUMENTATION_STYLE, AUDIENCE
+- **data-extraction:** INPUT_SOURCE, EXTRACTION_PATTERN, FORMAT
+- **code-comparison:** FIRST_CODE, SECOND_CODE, COMPARISON_FOCUS
+- **custom:** TASK_DESCRIPTION
 
 #### Quick Start
 
 ```bash
-# Optimize and execute a prompt
+# Auto-detect template and execute
 /prompt "Analyze security vulnerabilities in the authentication module"
 
-# Create an optimized prompt without executing
-/prompt "Refactor user service to use dependency injection" --return-only
+# Use explicit template with planning mode
+/prompt --review --plan "Check code for security issues"
 
-# Generate a prompt template
-/create-prompt "Compare two code snippets for semantic equivalence"
+# Generate tests with specific template
+/prompt --test "Generate pytest tests for user service"
+
+# Create optimized prompt without executing
+/prompt --code --return-only "Refactor user service to use dependency injection"
 ```
 
 #### Performance Metrics
