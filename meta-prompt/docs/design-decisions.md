@@ -361,16 +361,11 @@ Else:
 
 **Tuning Parameters:**
 
-Located in `commands/scripts/template-selector.sh:10`:
-
-```bash
-CONFIDENCE_THRESHOLD=70
-```
-
-Can be adjusted based on empirical accuracy metrics.
+Classification logic is now handled by the template-selector agent with its handler script.
 
 **References:**
-- `commands/scripts/template-selector.sh:10-166`
+- `agents/template-selector.md` - Agent definition
+- `agents/scripts/template-selector-handler.sh` - Classification logic
 
 ---
 

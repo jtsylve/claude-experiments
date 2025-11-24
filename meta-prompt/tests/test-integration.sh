@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# End-to-End Integration Test Suite
-# Tests all components of the optimization implementation
+# Integration Tests for Meta-Prompt Plugin
+# Tests installation, file structure, and basic functionality
+# For detailed unit tests, see test-*-handler.sh files
 
 set -euo pipefail
 
@@ -17,7 +18,6 @@ FAILED_TESTS=0
 
 # Setup: Set CLAUDE_PLUGIN_ROOT if not already set
 if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-    # Get the script directory and navigate to plugin root (one level up from tests/)
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     export CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 fi
@@ -28,14 +28,13 @@ run_test() {
     local test_command="$2"
 
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} $test_name"
 
     if eval "$test_command" > /dev/null 2>&1; then
-        echo -e "  ${GREEN}✓ PASSED${NC}"
+        echo -e "${GREEN}✓${NC} $test_name"
         PASSED_TESTS=$((PASSED_TESTS + 1))
         return 0
     else
-        echo -e "  ${RED}✗ FAILED${NC}"
+        echo -e "${RED}✗${NC} $test_name"
         FAILED_TESTS=$((FAILED_TESTS + 1))
         return 1
     fi
@@ -48,47 +47,58 @@ run_test_with_output() {
     local expected_pattern="$3"
 
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    echo -e "${BLUE}[TEST $TOTAL_TESTS]${NC} $test_name"
 
-    local output=$(eval "$test_command" 2>&1)
-    if echo "$output" | grep -Eq "$expected_pattern"; then
-        echo -e "  ${GREEN}✓ PASSED${NC} (matched: $expected_pattern)"
+    local output=$(eval "$test_command" 2>&1 || true)
+
+    if echo "$output" | grep -qE "$expected_pattern"; then
+        echo -e "${GREEN}✓${NC} $test_name"
         PASSED_TESTS=$((PASSED_TESTS + 1))
         return 0
     else
-        echo -e "  ${RED}✗ FAILED${NC} (expected pattern: $expected_pattern)"
-        echo "  Output: $output"
+        echo -e "${RED}✗${NC} $test_name (expected: $expected_pattern)"
         FAILED_TESTS=$((FAILED_TESTS + 1))
         return 1
     fi
 }
 
-echo -e "${YELLOW}=====================================${NC}"
-echo -e "${YELLOW}  LLM Optimization Integration Tests${NC}"
-echo -e "${YELLOW}=====================================${NC}"
+echo -e "${YELLOW}================================================${NC}"
+echo -e "${YELLOW}  Meta-Prompt Integration Tests${NC}"
+echo -e "${YELLOW}================================================${NC}"
 echo ""
 
-# ===== PHASE 1: Script Existence Tests =====
-echo -e "${YELLOW}Phase 1: Script Existence${NC}"
+# ===== PHASE 1: File Structure Tests =====
+echo -e "${YELLOW}Phase 1: File Structure${NC}"
 
+# Core scripts
 run_test "prompt-handler.sh exists and is executable" \
     "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh ]"
 
-run_test "template-selector.sh exists and is executable" \
-    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh ]"
+run_test "common.sh exists and is readable" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/scripts/common.sh ]"
 
-run_test "template-processor.sh exists and is executable" \
-    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh ]"
+# Agent handler scripts
+run_test "prompt-optimizer-handler.sh exists and is executable" \
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/agents/scripts/prompt-optimizer-handler.sh ]"
 
+run_test "template-selector-handler.sh exists and is executable" \
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-selector-handler.sh ]"
+
+run_test "template-executor-handler.sh exists and is executable" \
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-executor-handler.sh ]"
+
+# Validation scripts
 run_test "validate-templates.sh exists and is executable" \
     "[ -x \${CLAUDE_PLUGIN_ROOT}/tests/validate-templates.sh ]"
+
+run_test "verify-installation.sh exists and is executable" \
+    "[ -x \${CLAUDE_PLUGIN_ROOT}/commands/scripts/verify-installation.sh ]"
 
 echo ""
 
 # ===== PHASE 2: Template Validation =====
-echo -e "${YELLOW}Phase 2: Template Validation${NC}"
+echo -e "${YELLOW}Phase 2: Template Files${NC}"
 
-run_test "Correct number of templates exist" \
+run_test "Correct number of templates exist (7)" \
     "[ \$(find \${CLAUDE_PLUGIN_ROOT}/templates -name '*.md' -type f | wc -l | tr -d ' ') -eq 7 ]"
 
 run_test_with_output "All templates pass validation" \
@@ -118,213 +128,102 @@ run_test "custom template exists" \
 
 echo ""
 
-# ===== PHASE 2B: Engineering Guide Tests =====
-echo -e "${YELLOW}Phase 2B: Engineering Guide${NC}"
+# ===== PHASE 3: Agent Definitions =====
+echo -e "${YELLOW}Phase 3: Agent Definition Files${NC}"
 
-run_test "engineering-guide.md exists and is readable" \
-    "[ -f \${CLAUDE_PLUGIN_ROOT}/guides/engineering-guide.md ]"
+run_test "prompt-optimizer agent definition exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/agents/prompt-optimizer.md ]"
 
-run_test_with_output "create-prompt.md references engineering guide" \
-    "cat \${CLAUDE_PLUGIN_ROOT}/commands/create-prompt.md" \
-    "guides/engineering-guide.md"
+run_test "template-selector agent definition exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/agents/template-selector.md ]"
 
-run_test_with_output "engineering-guide.md has expected content" \
-    "cat \${CLAUDE_PLUGIN_ROOT}/guides/engineering-guide.md" \
-    "Comprehensive Prompt Engineering Guide"
+run_test "template-executor agent definition exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/agents/template-executor.md ]"
 
 echo ""
 
-# ===== PHASE 2C: Error Handling Tests =====
-echo -e "${YELLOW}Phase 2C: Error Handling${NC}"
+# ===== PHASE 4: Skills =====
+echo -e "${YELLOW}Phase 4: Skill Files${NC}"
 
-run_test_with_output "Handles missing template gracefully" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh nonexistent" \
-    "Template not found"
+run_test "code-refactoring skill exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-refactoring.md ]"
 
-run_test_with_output "Template processor requires template name" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh" \
-    "Usage"
+run_test "code-review skill exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-review.md ]"
 
-run_test_with_output "Template selector handles empty input" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh ''" \
-    "custom"
+run_test "test-generation skill exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/test-generation.md ]"
 
-run_test_with_output "Prompt handler handles special characters safely" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Task with \$SPECIAL and \`backticks\`'" \
-    "user_task"
+run_test "documentation-generator skill exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/documentation-generator.md ]"
 
-run_test_with_output "Prompt handler handles apostrophes correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh \"Fix the code so it doesn't crash\"" \
-    "doesn't crash"
+run_test "data-extraction skill exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/data-extraction.md ]"
 
-run_test_with_output "Prompt handler handles double quotes correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Review the \"main\" function'" \
-    "main"
-
-run_test_with_output "Prompt handler handles multiple apostrophes correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh \"Fix user's auth so it doesn't allow access\"" \
-    "user's auth so it doesn't"
-
-run_test_with_output "Template processor handles special characters in values" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
-    "test"
+run_test "code-comparison skill exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/skills/code-comparison.md ]"
 
 echo ""
 
-# ===== PHASE 3: Template Selection Tests =====
-echo -e "${YELLOW}Phase 3: Template Selection Accuracy${NC}"
+# ===== PHASE 5: Command Definitions =====
+echo -e "${YELLOW}Phase 5: Command Files${NC}"
 
-run_test_with_output "Classifies code refactoring correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Refactor the authentication module'" \
+run_test "prompt command definition exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/commands/prompt.md ]"
+
+echo ""
+
+# ===== PHASE 6: Handler Functionality =====
+echo -e "${YELLOW}Phase 6: Handler Basic Functionality${NC}"
+
+run_test_with_output "prompt-handler handles no template (spawns selector)" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix the bug'" \
+    "spawn_template_selector"
+
+run_test_with_output "prompt-handler handles --code flag" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--code Fix bug'" \
     "code-refactoring"
 
-run_test_with_output "Classifies code review correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Review this code for security issues'" \
-    "code-review"
+run_test_with_output "prompt-handler handles special characters" \
+    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix \\\$var and \`cmd\`'" \
+    "user_task"
 
-run_test_with_output "Classifies test generation correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate pytest tests for this function'" \
-    "test-generation"
+run_test_with_output "template-selector-handler classifies tasks" \
+    "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/template-selector-handler.sh '<template_selector_request><user_task>Refactor the code</user_task></template_selector_request>'" \
+    "code-refactoring"
 
-run_test_with_output "Classifies documentation generation correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate API documentation for this module'" \
-    "documentation-generator"
-
-run_test_with_output "Classifies data extraction correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Extract email addresses from this log file'" \
-    "data-extraction"
-
-run_test_with_output "Classifies code comparison correctly" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Compare these two functions for equivalence'" \
-    "code-comparison"
-
-run_test_with_output "Falls back to custom for novel tasks" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Write a creative poem'" \
-    "custom"
-
-run_test_with_output "Falls back to custom for conversational tasks" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Act as a Socratic tutor for students'" \
-    "custom"
+run_test_with_output "prompt-optimizer-handler loads templates" \
+    "\${CLAUDE_PLUGIN_ROOT}/agents/scripts/prompt-optimizer-handler.sh '<prompt_optimizer_request><user_task>Fix bug</user_task><template>code-refactoring</template><execution_mode>direct</execution_mode></prompt_optimizer_request>'" \
+    "Template: code-refactoring"
 
 echo ""
 
-# ===== PHASE 3B: Hybrid Routing Confidence Tests =====
-echo -e "${YELLOW}Phase 3B: Hybrid Routing Confidence Ranges${NC}"
+# ===== PHASE 7: Documentation =====
+echo -e "${YELLOW}Phase 7: Documentation Files${NC}"
 
-# High confidence tests (70-100%): Should route directly without LLM fallback
-run_test_with_output "High confidence: code refactoring (≥70%)" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Refactor authentication to use JWT tokens'" \
-    "code-refactoring [7-9][0-9]"
+run_test "README.md exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/README.md ]"
 
-run_test_with_output "High confidence: test generation (≥70%)" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Generate pytest tests with edge cases'" \
-    "test-generation [7-9][0-9]"
-
-run_test_with_output "High confidence: code review (≥70%)" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Review code for security vulnerabilities'" \
-    "code-review [7-9][0-9]"
-
-# Borderline confidence tests (60-69%): Should output confidence for LLM fallback
-# These tasks have some signals but may benefit from LLM verification
-# Note: With 2 supporting keywords (no strong indicator), confidence is typically 60%
-# Using flexible range to account for keyword list changes
-run_test_with_output "Borderline confidence: task with 2 supporting keywords outputs 60-69%" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'API reference' | awk '{print \$2}'" \
-    "^6[0-9]\$"
-
-# Low confidence tests (<60%): Should route to custom with confidence 0
-run_test_with_output "Low confidence: novel task routes to custom" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Write a haiku about recursion'" \
-    "custom 0"
-
-run_test_with_output "Low confidence: conversational task routes to custom" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Be a helpful assistant'" \
-    "custom"
-
-# Confidence output format validation
-run_test_with_output "Output format: template name and confidence score" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Fix bug in parser'" \
-    "^[a-z-]+ [0-9]+\$"
-
-# Confidence threshold boundary testing
-run_test_with_output "Strong indicators guarantee ≥75% confidence" \
-    "DEBUG=1 \${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-selector.sh 'Refactor this code' 2>&1" \
-    "Confidence: [7-9][0-9]%"
+run_test "architecture-refactoring.md exists" \
+    "[ -f \${CLAUDE_PLUGIN_ROOT}/docs/architecture-refactoring.md ]"
 
 echo ""
 
-# ===== PHASE 4: Template Processing Tests =====
-echo -e "${YELLOW}Phase 4: Template Processing${NC}"
-
-run_test_with_output "Template processor substitutes variables" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='function a()' ITEM2='function b()' CLASSIFICATION_CRITERIA='semantic equivalence'" \
-    "function a()"
-
-run_test_with_output "Template processor includes template content" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='code1' ITEM2='code2' CLASSIFICATION_CRITERIA='performance'" \
-    "code1"
-
-run_test_with_output "Template processor detects unreplaced variables" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/template-processor.sh code-comparison ITEM1='code1'" \
-    "unreplaced"
-
+# ===== Summary =====
 echo ""
-
-# ===== PHASE 5: Prompt Handler Tests =====
-echo -e "${YELLOW}Phase 5: Prompt Handler${NC}"
-
-run_test_with_output "Prompt handler detects execution mode" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Analyze security issues'" \
-    "Execute the task unless"
-
-run_test_with_output "Prompt handler detects return-only mode" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--return-only Analyze security issues'" \
-    "Return the prompt only"
-
-run_test_with_output "Prompt handler removes --return-only flag from task" \
-    "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--return-only Task description'" \
-    "Task description"
-
-echo ""
-
-# ===== PHASE 6: File Modification Tests =====
-echo -e "${YELLOW}Phase 6: Modified Command Files${NC}"
-
-run_test_with_output "prompt.md references bash handler" \
-    "cat \${CLAUDE_PLUGIN_ROOT}/commands/prompt.md" \
-    "prompt-handler.sh"
-
-run_test_with_output "create-prompt.md references template selector" \
-    "cat \${CLAUDE_PLUGIN_ROOT}/commands/create-prompt.md" \
-    "template-selector.sh"
-
-run_test "prompt-optimizer agent is streamlined (<100 lines)" \
-    "[ \$(wc -l < \${CLAUDE_PLUGIN_ROOT}/agents/prompt-optimizer.md | tr -d ' ') -lt 100 ]"
-
-echo ""
-
-# ===== SUMMARY =====
-echo -e "${YELLOW}=====================================${NC}"
-echo -e "${YELLOW}           Test Summary              ${NC}"
-echo -e "${YELLOW}=====================================${NC}"
-echo ""
-echo "Total Tests:  $TOTAL_TESTS"
-echo -e "${GREEN}Passed:       $PASSED_TESTS${NC}"
-echo -e "${RED}Failed:       $FAILED_TESTS${NC}"
-echo ""
-
-PASS_RATE=$((PASSED_TESTS * 100 / TOTAL_TESTS))
-echo "Pass Rate:    $PASS_RATE%"
-echo ""
-
-if [ $FAILED_TESTS -eq 0 ]; then
-    echo -e "${GREEN}✓ ALL TESTS PASSED!${NC}"
-    echo ""
-    echo "The LLM optimization implementation is ready for deployment."
+echo -e "${YELLOW}=== Summary ===${NC}"
+echo -e "Total tests: $TOTAL_TESTS"
+if [ $PASSED_TESTS -eq $TOTAL_TESTS ]; then
+    echo -e "${GREEN}Passed: $PASSED_TESTS${NC}"
+    echo -e "${GREEN}All integration tests passed!${NC}"
     exit 0
 else
-    echo -e "${RED}✗ SOME TESTS FAILED${NC}"
+    echo -e "${GREEN}Passed: $PASSED_TESTS${NC}"
+    echo -e "${RED}Failed: $FAILED_TESTS${NC}"
     echo ""
-    echo "Please review the failed tests above and fix any issues."
+    echo -e "${YELLOW}Note:${NC} For detailed unit tests, run:"
+    echo "  - test-template-selector-handler.sh"
+    echo "  - test-prompt-optimizer-handler.sh"
+    echo "  - test-prompt-handler.sh"
     exit 1
 fi

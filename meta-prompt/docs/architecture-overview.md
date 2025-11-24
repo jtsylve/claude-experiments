@@ -41,42 +41,45 @@ The system follows a **layered architecture** with deterministic preprocessing l
 
 ```mermaid
 graph TD
-    A[User Command] --> B{Command Type}
-    B -->|/prompt| C[prompt.md]
-    B -->|/create-prompt| D[create-prompt.md]
+    A[User Command] --> B[/prompt]
+    B --> C[prompt-handler.sh]
+    C --> D{State Machine}
 
-    C --> E[prompt-handler.sh]
-    E --> F[meta-prompt:prompt-optimizer agent]
-    F --> G[/create-prompt]
+    D -->|No template flag| E[template-selector agent]
+    E --> F[template-selector-handler.sh]
+    F --> G{Select Template}
+    G --> H[Return template name]
 
-    D --> H[template-selector.sh]
-    H --> I{Template Match?}
+    D -->|Has template flag or after selection| I[prompt-optimizer agent]
+    I --> J[prompt-optimizer-handler.sh]
+    J --> K{Load & Process Template}
+    K --> L[Return optimized prompt]
 
-    I -->|Yes: 90%| J[template-processor.sh]
-    I -->|No: 10%| K[LLM-based Generation]
+    L --> N{Execution Mode}
+    N -->|--plan flag| M[Plan agent]
+    M --> O[template-executor agent]
+    N -->|Direct execute| O
+    N -->|--return-only| P[Return to user]
 
-    J --> L[Load Template]
-    L --> M[Substitute Variables]
-    M --> N[Return Prompt]
+    O --> Q[template-executor-handler.sh]
+    Q --> R[Execute with skill]
 
-    K --> O[Custom Prompt Engineering]
-    O --> N
-
-    F --> P[Execute or Return]
-
-    style E fill:#90EE90
-    style H fill:#90EE90
+    style C fill:#90EE90
+    style F fill:#90EE90
     style J fill:#90EE90
-    style F fill:#FFB6C1
-    style K fill:#FFB6C1
+    style Q fill:#90EE90
+    style E fill:#FFB6C1
+    style I fill:#FFB6C1
+    style M fill:#FFB6C1
+    style O fill:#FFB6C1
 
     classDef deterministic fill:#90EE90,stroke:#006400
     classDef llm fill:#FFB6C1,stroke:#8B0000
 ```
 
 **Legend:**
-- Green (Deterministic): No LLM tokens consumed
-- Pink (LLM): Token consumption occurs here
+- Green (Deterministic): No LLM tokens consumed (bash handlers)
+- Pink (LLM): Token consumption occurs here (agents)
 
 ---
 
@@ -87,107 +90,80 @@ graph TD
 **Location:** `commands/`
 
 #### prompt.md
-- **Purpose:** Entry point for prompt optimization workflow
+- **Purpose:** Entry point for prompt optimization and execution workflow
 - **Type:** Claude Code slash command
-- **Lines:** ~40 (reduced from 105)
+- **Lines:** Streamlined command definition
 - **Token Savings:** 100% orchestration overhead eliminated
 - **Dependencies:**
-  - `scripts/prompt-handler.sh` (primary)
-  - `agents/meta-prompt:prompt-optimizer.md` (fallback)
+  - `commands/scripts/prompt-handler.sh` (state machine)
+  - `agents/template-selector.md` (template auto-detection)
+  - `agents/prompt-optimizer.md` (prompt generation)
+  - `agents/template-executor.md` (task execution)
 
-#### create-prompt.md
-- **Purpose:** Generate optimized prompts using templates or LLM
-- **Type:** Claude Code slash command
-- **Lines:** ~89 (streamlined with LLM fallback for borderline cases)
-- **Token Savings:** 75% when templates used, improved accuracy with LLM fallback
-- **Dependencies:**
-  - `scripts/template-selector.sh` (keyword classification + confidence scoring)
-  - `scripts/template-processor.sh` (variable substitution)
-  - `templates/*.md` (pre-built templates)
-- **LLM Fallback:** For borderline confidence (60-69%), agent performs template selection
+### 2. Handler Script Layer
 
-### 2. Script Layer (Deterministic Processing)
+**Location:** `commands/scripts/` and `agents/scripts/`
 
-**Location:** `commands/scripts/`
-
-All scripts are written in Bash with strict error handling (`set -euo pipefail`).
+All scripts are written in Bash with strict error handling (`set -euo pipefail`) and shared utilities in `scripts/common.sh`.
 
 #### prompt-handler.sh
 ```bash
-Purpose: Orchestrate /prompt command workflow
-Input:   $1 = task_description, $2 = optional flags
-Output:  Instructions for Claude Code to execute
-Flow:    Parse args → Detect mode → Generate instructions → Output
+Location: commands/scripts/prompt-handler.sh
+Purpose:  State machine for /prompt command workflow
+Input:    $1 = XML request with task, template, mode
+Output:   Agent spawn instructions
+Flow:     Parse XML → Manage state transitions → Route to agents
 ```
+
+**State Machine States:**
+- `initial`: Parse input, detect template flag
+- `post_template_selector`: Process template selection result
+- `post_optimizer`: Process optimized prompt
+- Routing to appropriate agent based on state
 
 **Key Features:**
-- Command injection prevention via input sanitization
-- Flag parsing (--return-only detection)
-- Mode-based instruction generation
-- Zero LLM token consumption
+- Zero-token orchestration
+- XML-based communication with agents
+- Flag parsing (--return-only, --plan, template flags)
+- State persistence across agent calls
 
-**Referenced by:** `commands/prompt.md:22`
+#### Agent Handler Scripts
 
-#### template-selector.sh
+**Location:** `agents/scripts/`
+
+##### template-selector-handler.sh
 ```bash
-Purpose: Classify tasks and route to templates
-Input:   $1 = task_description
-Output:  template_name confidence (e.g., "code-refactoring 75")
-Flow:    Normalize → Extract keywords → Score categories → Select best
+Purpose: Return instructions for template selection agent
+Input:   XML with task description
+Output:  Agent instructions for classification
+Flow:    Extract task → Return selection instructions
 ```
 
-**Classification Algorithm:**
-1. Convert input to lowercase
-2. Check for strong indicators (75% base confidence)
-3. Count supporting keywords (8% each)
-4. Calculate confidence per category
-5. Select highest confidence >= 70% threshold
-6. Fallback to "custom" if below threshold
-7. Preserve borderline confidence scores (60-69%) for LLM fallback
-8. Set low confidence (<60%) to 0
-
-**Performance:** ~60ms average, 90%+ accuracy
-
-**Output Format:** `<template-name> <confidence>` (both values on single line)
-
-**Confidence Ranges:**
-- High (70-100): Use keyword-selected template
-- Borderline (60-69): Trigger LLM-based fallback in create-prompt
-- Low (0-59): Use custom template with full prompt engineering
-
-**Referenced by:** `commands/create-prompt.md:19`
-
-#### template-processor.sh
+##### prompt-optimizer-handler.sh
 ```bash
-Purpose: Load templates and substitute variables
-Input:   $1 = template_name, $2+ = VAR=value pairs
-Output:  Processed template with substituted variables
-Flow:    Load → Extract vars → Substitute → Validate → Output
+Purpose: Return instructions for prompt optimization agent
+Input:   XML with template and task
+Output:  Agent instructions for optimization
+Flow:    Extract params → Load template → Return instructions
 ```
 
-**Security Features:**
-- Escapes backslashes, dollar signs, backticks, quotes
-- Prevents command injection in variable values
-- Validates all variables are replaced
-
-**Referenced by:** `commands/create-prompt.md:50`
-
-#### validate-templates.sh
+##### template-executor-handler.sh
 ```bash
-Purpose: Validate template files for syntax and completeness
-Input:   Optional template name (validates all if not specified)
-Output:  Validation results with color-coded status
-Checks:  Frontmatter, required fields, variable consistency, XML tags, content
+Purpose: Return instructions for execution agent
+Input:   XML with optimized prompt and skill
+Output:  Agent instructions for task execution
+Flow:    Parse request → Return execution instructions
 ```
 
-**Validation Rules:**
-- YAML frontmatter present and complete
-- All declared variables used in body
-- All used variables declared in frontmatter
-- XML tags balanced
-- Template has content (non-empty body)
+#### Shared Utilities
 
-**Usage:** CI/CD integration, development validation
+**Location:** `scripts/common.sh`
+
+Functions shared across all handlers:
+- `sanitize_input()`: Input sanitization for security
+- `extract_xml_value()`: Simple XML extraction
+- `extract_xml_multiline()`: Multiline XML extraction
+- `setup_plugin_root()`: CLAUDE_PLUGIN_ROOT initialization
 
 ### 3. Template Library
 
@@ -224,15 +200,41 @@ description: <description>
 
 **Location:** `agents/`
 
-#### meta-prompt:prompt-optimizer.md
-- **Purpose:** Expert prompt engineering for novel/complex cases
+#### template-selector
+- **Purpose:** Auto-detect appropriate template for task
 - **Type:** Claude Code agent
-- **Lines:** 50 (reduced from 125)
+- **Handler:** `agents/scripts/template-selector-handler.sh`
 - **Model:** Sonnet
-- **Scope:** Novel tasks, template refinement, multi-agent workflows
-- **Tools:** SlashCommand, Task, AskUserQuestion
+- **Tools:** Bash (handler script)
+- **Output:** Template name via XML
 
-**Key Reduction:** Removed template generation responsibilities (now handled by template-selector.sh + templates)
+#### prompt-optimizer
+- **Purpose:** Generate optimized prompts from templates
+- **Type:** Claude Code agent
+- **Handler:** `agents/scripts/prompt-optimizer-handler.sh`
+- **Model:** Sonnet
+- **Tools:** Bash (handler script), Read (templates)
+- **Output:** Optimized prompt via XML
+
+#### template-executor
+- **Purpose:** Execute tasks using domain-specific skills
+- **Type:** Claude Code agent
+- **Handler:** `agents/scripts/template-executor-handler.sh`
+- **Model:** Sonnet
+- **Tools:** Skill (domain expertise), TodoWrite, Read/Edit/Write
+- **Output:** Task results via XML
+
+### 5. Skills Layer
+
+**Location:** `skills/`
+
+Domain-specific expertise modules loaded by template-executor:
+- `code-refactoring.md`: Code modification guidance
+- `code-review.md`: Security and quality analysis
+- `test-generation.md`: Test creation patterns
+- `documentation-generator.md`: Documentation writing
+- `data-extraction.md`: Data parsing strategies
+- `code-comparison.md`: Comparison methodologies
 
 ---
 
@@ -269,127 +271,143 @@ description: <description>
 
 ## Data Flow
 
-### Flow 1: /prompt Command (Execution Mode)
+### Flow 1: /prompt Command (Auto-Detection Path)
 
-**Flow Description:** This sequence shows the `/prompt` command in execution mode (without `--return-only` flag). The user's task is passed to the prompt-handler.sh script (0 tokens), which generates instructions for the meta-prompt:prompt-optimizer agent. The optimizer uses `/create-prompt` to generate an optimized prompt, then executes it in a new task context. This flow demonstrates how bash orchestration eliminates the 300 tokens previously consumed for command coordination.
+**Flow Description:** This sequence shows the `/prompt` command with auto-detection (no template flag specified). The state machine routes through template-selector agent for classification, then prompt-optimizer for prompt generation, and finally template-executor for task execution. Handler scripts provide zero-token routing between agents.
 
 ```mermaid
 sequenceDiagram
     participant User
     participant PromptMD as prompt.md
     participant Handler as prompt-handler.sh
-    participant Optimizer as meta-prompt:prompt-optimizer agent
-    participant CreatePrompt as /create-prompt
-    participant Task as Task Execution
+    participant Selector as template-selector agent
+    participant SelectorH as selector-handler.sh
+    participant Optimizer as prompt-optimizer agent
+    participant OptimizerH as optimizer-handler.sh
+    participant Executor as template-executor agent
+    participant ExecutorH as executor-handler.sh
 
     User->>PromptMD: /prompt "Analyze security"
-    PromptMD->>Handler: Execute script with task
-    Handler->>Handler: Parse args, detect mode
-    Handler->>PromptMD: Return Task tool invocation instructions
-    PromptMD->>Optimizer: Task tool invocation
-    Optimizer->>CreatePrompt: /create-prompt
-    CreatePrompt->>Optimizer: Optimized prompt
-    Optimizer->>Task: Execute in new context
-    Task->>Optimizer: Results
-    Optimizer->>User: Present results
+    PromptMD->>Handler: Execute with task
+    Handler->>Handler: State: initial (no template flag)
+    Handler->>PromptMD: Spawn template-selector
+    PromptMD->>Selector: Agent spawned
+    Selector->>SelectorH: Get instructions
+    SelectorH->>Selector: Return selection logic
+    Selector->>Handler: Return XML with template name
+    Handler->>Handler: State: post_template_selector
+    Handler->>PromptMD: Spawn prompt-optimizer
+    PromptMD->>Optimizer: Agent spawned with template
+    Optimizer->>OptimizerH: Get instructions
+    OptimizerH->>Optimizer: Return optimization logic
+    Optimizer->>Handler: Return XML with prompt
+    Handler->>Handler: State: post_optimizer
+    Handler->>PromptMD: Spawn template-executor
+    PromptMD->>Executor: Agent spawned with prompt
+    Executor->>ExecutorH: Get instructions
+    ExecutorH->>Executor: Return execution logic
+    Executor->>User: Task results
 ```
 
 **Token Consumption:**
-- Handler script: 0 tokens (deterministic)
-- Optimizer agent: ~500 tokens (coordination only)
-- Total saved vs. original: ~300 tokens (100% of orchestration)
+- Handler scripts: 0 tokens (deterministic routing)
+- Selector agent: ~200-500 tokens (LLM classification)
+- Optimizer agent: ~300-500 tokens (template processing)
+- Executor agent: Variable (actual task execution)
+- Total orchestration overhead: ~0 tokens (vs ~300 tokens original)
 
-### Flow 2: /create-prompt Command (Template Match - High Confidence)
+### Flow 2: /prompt Command (Explicit Template Selection)
 
-**Flow Description:** This is the most common flow (70%+ of tasks). The template-selector.sh script classifies the task using keyword matching (0 tokens), identifies the best template with high confidence (70-100%), and template-processor.sh substitutes variables (0 tokens). The entire prompt generation happens deterministically, saving ~1480 tokens compared to LLM-based generation. The only tokens consumed are for reading the template file (~20 tokens).
+**Flow Description:** When user specifies a template flag (e.g., `--review`, `--code`), the system bypasses template selection and proceeds directly to prompt optimization and execution.
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant CreatePromptMD as create-prompt.md
-    participant Selector as template-selector.sh
-    participant Processor as template-processor.sh
-    participant Template as Template File
+    participant PromptMD as prompt.md
+    participant Handler as prompt-handler.sh
+    participant Optimizer as prompt-optimizer agent
+    participant OptimizerH as optimizer-handler.sh
+    participant Executor as template-executor agent
 
-    User->>CreatePromptMD: /create-prompt "Compare apples and oranges"
-    CreatePromptMD->>Selector: Classify task
-    Selector->>Selector: Extract keywords, score
-    Selector->>CreatePromptMD: "code-comparison 85"
-    CreatePromptMD->>Template: Read template
-    Template->>CreatePromptMD: Template content
-    CreatePromptMD->>Processor: Substitute variables
-    Processor->>Processor: ITEM1=apples, ITEM2=oranges
-    Processor->>CreatePromptMD: Processed prompt
-    CreatePromptMD->>User: Return optimized prompt
+    User->>PromptMD: /prompt --review "Check auth code"
+    PromptMD->>Handler: Execute with task + template flag
+    Handler->>Handler: State: initial (has template flag)
+    Handler->>PromptMD: Spawn prompt-optimizer (skip selector)
+    PromptMD->>Optimizer: Agent spawned with template=code-review
+    Optimizer->>OptimizerH: Get instructions
+    OptimizerH->>Optimizer: Return optimization logic
+    Optimizer->>Handler: Return XML with prompt
+    Handler->>PromptMD: Spawn template-executor
+    PromptMD->>Executor: Agent spawned
+    Executor->>User: Task results
 ```
 
 **Token Consumption:**
-- Selector script: 0 tokens (deterministic)
-- Processor script: 0 tokens (deterministic)
-- Read operations: ~20 tokens (template retrieval)
-- Total saved: ~1480 tokens (98% reduction vs. LLM generation)
+- Handler scripts: 0 tokens
+- Optimizer agent: ~300-500 tokens
+- Executor agent: Variable (task execution)
+- Template selection saved: ~200-500 tokens
 
-### Flow 2B: /create-prompt Command (Borderline Confidence - LLM Fallback)
+### Flow 3: /prompt Command (Return-Only Mode)
 
-**Flow Description:** When keyword classification yields borderline confidence (60-69%), the system uses LLM-based template selection to improve accuracy. This hybrid approach applies to ~20% of tasks where keyword matching is uncertain (synonyms, implicit intent, ambiguous phrasing). The agent selects the best template using its understanding, then proceeds with deterministic variable substitution. This flow consumes minimal LLM tokens while significantly improving template routing accuracy.
+**Flow Description:** With `--return-only` flag, the system generates and returns the optimized prompt without executing it, useful for review or later use.
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant CreatePromptMD as create-prompt.md
-    participant Selector as template-selector.sh
-    participant Agent as LLM Agent
-    participant Processor as template-processor.sh
-    participant Template as Template File
+    participant PromptMD as prompt.md
+    participant Handler as prompt-handler.sh
+    participant Optimizer as prompt-optimizer agent
 
-    User->>CreatePromptMD: /create-prompt "Reorganize the auth module"
-    CreatePromptMD->>Selector: Classify task
-    Selector->>Selector: Keywords uncertain
-    Selector->>CreatePromptMD: "custom 65" (borderline)
-    CreatePromptMD->>Agent: LLM selects best template
-    Agent->>Agent: Analyze task context
-    Agent->>CreatePromptMD: "code-refactoring" (LLM decision)
-    CreatePromptMD->>Template: Read template
-    Template->>CreatePromptMD: Template content
-    CreatePromptMD->>Processor: Substitute variables
-    Processor->>CreatePromptMD: Processed prompt
-    CreatePromptMD->>User: Return optimized prompt
+    User->>PromptMD: /prompt --return-only "task"
+    PromptMD->>Handler: Execute with --return-only flag
+    Handler->>Handler: Detect return-only mode
+    Handler->>PromptMD: Spawn prompt-optimizer only
+    PromptMD->>Optimizer: Agent spawned
+    Optimizer->>Handler: Return XML with prompt
+    Handler->>PromptMD: Skip executor, return prompt
+    PromptMD->>User: Optimized prompt (not executed)
 ```
 
 **Token Consumption:**
-- Selector script: 0 tokens (deterministic)
-- LLM template selection: ~200 tokens (lightweight decision)
-- Processor script: 0 tokens (deterministic)
-- Read operations: ~20 tokens (template retrieval)
-- Total: ~220 tokens (85% reduction vs. full LLM generation)
+- Handler scripts: 0 tokens
+- Optimizer agent: ~300-500 tokens
+- Execution skipped: Saves variable tokens
 
-**Benefit:** Improves accuracy for edge cases while maintaining high token efficiency
+### Flow 4: /prompt Command (Plan Mode)
 
-### Flow 3: /create-prompt Command (Low Confidence - Custom Fallback)
-
-**Flow Description:** When no template matches with sufficient confidence (<60%), the system gracefully falls back to full LLM-based prompt engineering. This ensures that novel or unusual tasks (like creative writing, complex multi-step workflows) still receive high-quality custom prompts. No token savings occur in this flow, but it only happens for ~10% of tasks, preserving the overall 40-60% reduction.
+**Flow Description:** With `--plan` flag, the system spawns a Plan agent after optimization to create a plan and get user approval before spawning the template-executor to execute the task.
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant CreatePromptMD as create-prompt.md
-    participant Selector as template-selector.sh
-    participant LLM as LLM Processing
+    participant PromptMD as prompt.md
+    participant Handler as prompt-handler.sh
+    participant Optimizer as prompt-optimizer agent
+    participant Plan as Plan agent
+    participant Executor as template-executor agent
 
-    User->>CreatePromptMD: /create-prompt "Write a sonnet"
-    CreatePromptMD->>Selector: Classify task
-    Selector->>Selector: No keywords match
-    Selector->>CreatePromptMD: "custom 0"
-    CreatePromptMD->>LLM: Full prompt engineering instructions
-    LLM->>LLM: Generate custom prompt
-    LLM->>CreatePromptMD: Custom prompt
-    CreatePromptMD->>User: Return custom prompt
+    User->>PromptMD: /prompt --plan "task"
+    PromptMD->>Handler: Execute with --plan flag
+    Handler->>PromptMD: Spawn prompt-optimizer
+    PromptMD->>Optimizer: Agent spawned
+    Optimizer->>Handler: Return XML with prompt
+    Handler->>PromptMD: Spawn Plan agent
+    PromptMD->>Plan: Agent spawned with optimized prompt
+    Plan->>User: Present plan, request approval
+    User->>Plan: Approve plan
+    Plan->>Handler: Plan approved
+    Handler->>PromptMD: Spawn template-executor
+    PromptMD->>Executor: Agent spawned with plan
+    Executor->>User: Task results
 ```
 
 **Token Consumption:**
-- Selector script: 0 tokens (deterministic)
-- LLM processing: ~1500 tokens (full generation)
-- Total: Same as original (no reduction, but necessary for novel tasks)
+- Handler scripts: 0 tokens
+- Optimizer agent: ~300-500 tokens
+- Plan agent: Variable (depends on task complexity)
+- Executor agent: Variable (task execution)
+- Planning overhead: Additional tokens for plan creation but reduces execution errors
 
 ---
 
@@ -499,26 +517,38 @@ meta-prompt/                         # Plugin root
 │   ├── plugin.json                  # Plugin metadata
 │   └── settings.json                # Permissions and settings
 ├── agents/
-│   └── meta-prompt:prompt-optimizer.md          # LLM agent (50 lines, streamlined)
+│   ├── template-selector.md         # Template selection agent
+│   ├── prompt-optimizer.md          # Prompt optimization agent
+│   ├── template-executor.md         # Task execution agent
+│   └── scripts/                     # Agent handler scripts
+│       ├── template-selector-handler.sh
+│       ├── prompt-optimizer-handler.sh
+│       └── template-executor-handler.sh
 ├── commands/
-│   ├── prompt.md                    # /prompt command (40 lines)
-│   ├── create-prompt.md             # /create-prompt command (196 lines)
-│   └── scripts/                     # Deterministic processing
-│       ├── prompt-handler.sh
-│       ├── template-selector.sh
-│       ├── template-processor.sh
-│       ├── validate-templates.sh
-│       └── test-integration.sh
+│   ├── prompt.md                    # /prompt command
+│   └── scripts/                     # State machine handler
+│       └── prompt-handler.sh
+├── scripts/
+│   └── common.sh                    # Shared utility functions
+├── skills/                          # Domain-specific skills
+│   ├── code-refactoring.md
+│   ├── code-review.md
+│   ├── test-generation.md
+│   ├── documentation-generator.md
+│   ├── data-extraction.md
+│   └── code-comparison.md
 ├── templates/                       # Template library (6 templates)
 │   ├── code-refactoring.md
 │   ├── code-review.md
 │   ├── test-generation.md
 │   ├── documentation-generator.md
 │   ├── data-extraction.md
-│   ├── code-comparison.md
-│   └── custom.md
-├── docs/                            # Documentation (this directory)
+│   └── code-comparison.md
+├── tests/                           # Test suite
+│   └── test-integration.sh
+├── docs/                            # Documentation
 │   ├── architecture-overview.md
+│   ├── architecture-refactoring.md
 │   ├── design-decisions.md
 │   └── infrastructure.md
 ├── CONTRIBUTING.md                  # Contribution guidelines
@@ -528,13 +558,13 @@ meta-prompt/                         # Plugin root
 ### Runtime Environment
 
 **Claude Code CLI Integration:**
-- Commands available via `/prompt` and `/create-prompt`
-- Scripts executed in Claude Code's bash environment
-- Agents invoked via Task tool
-- Templates read via Read tool
+- Commands available via `/prompt`
+- Handler scripts executed in Claude Code's bash environment
+- Agents spawned by command or other agents
+- Templates and skills read via Read tool
 
 **Environment Variables:**
-- `DEBUG=1` - Enable debug output in template-selector.sh
+- `CLAUDE_PLUGIN_ROOT` - Plugin root directory (set by Claude Code)
 
 ---
 
