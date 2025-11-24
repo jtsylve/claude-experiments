@@ -1,6 +1,6 @@
-# Testing Guide for Meta-Prompt Tool Restrictions
+# Testing Guide for Meta-Prompt Infrastructure
 
-This guide covers both automated and manual testing for the restricted tool permissions implemented in PR #13.
+This guide covers both automated and manual testing for the meta-prompt plugin.
 
 ## Automated Validation Tests
 
@@ -13,14 +13,14 @@ Run the automated test suite to verify all configurations and script functionali
 ### What the automated tests verify:
 
 1. **Environment Setup** - CLAUDE_PLUGIN_ROOT is set correctly
-2. **Script Accessibility** - All three bash scripts exist and are executable
-3. **Directory Access** - Templates and guides directories are readable
-4. **Bash Tool Execution** - All three scripts execute correctly with valid inputs
-5. **Read Tool Access** - Template and guide files can be read
+2. **Script Accessibility** - Handler scripts exist and are executable
+3. **Directory Access** - Templates directories are readable
+4. **Bash Tool Execution** - Scripts execute correctly with valid inputs
+5. **Read Tool Access** - Template files can be read
 6. **Security Path Restrictions** - Path patterns match allowed patterns
 7. **Configuration Verification** - Frontmatter has correct allowed-tools syntax
 
-**Expected Result:** All 25 tests should pass with green checkmarks.
+**Expected Result:** All tests should pass with green checkmarks.
 
 ---
 
@@ -28,62 +28,59 @@ Run the automated test suite to verify all configurations and script functionali
 
 These tests validate that the tool restrictions work correctly within Claude Code's permission system.
 
-### Test 1: `/meta-prompt:prompt` Command
+### Test 1: `/prompt` Command - Return Only Mode
 
-**Purpose:** Verify the prompt command can execute prompt-handler.sh
+**Purpose:** Verify the prompt command can generate optimized prompts
 
 **Steps:**
-1. Run: `/meta-prompt:prompt "refactor my code" --return-only`
+1. Run: `/prompt "refactor my code" --return-only`
 2. Verify the command executes without permission errors
-3. Verify output includes Task tool invocation instructions with subagent_type="meta-prompt:prompt-optimizer"
+3. Verify output includes an optimized prompt
 4. Verify the prompt is optimized but NOT executed (--return-only flag)
 
 **Expected Behavior:**
-- ✅ Bash tool successfully executes `prompt-handler.sh`
+- ✅ Command executes successfully
 - ✅ No permission denied errors
-- ✅ Output contains "DO NOT execute - just return the prompt"
+- ✅ Returns optimized prompt without executing
 
 ---
 
-### Test 2: `/meta-prompt:create-prompt` Command
+### Test 2: `/prompt` Command - Direct Execution
 
-**Purpose:** Verify create-prompt can access template scripts and files
+**Purpose:** Verify the prompt command can execute tasks
 
 **Steps:**
-1. Run: `/meta-prompt:create-prompt "write a code review assistant"`
-2. Verify the command can:
-   - Execute `template-selector.sh` (should select "code-review" template)
-   - Execute `template-processor.sh`
-   - Read template files from `templates/`
-   - Read guide files from `guides/`
+1. Run: `/prompt --compare "Compare TypeScript and Flow type systems"`
+2. Verify the command:
+   - Selects appropriate template (code-comparison)
+   - Generates optimized prompt
+   - Executes the task
 3. Verify no permission errors occur
 
 **Expected Behavior:**
-- ✅ Bash tool executes both template-selector.sh and template-processor.sh
-- ✅ Read tool accesses template files (e.g., code-review.md)
-- ✅ Read tool accesses guide files (e.g., engineering-guide.md)
+- ✅ Template selected correctly
+- ✅ Task executes successfully
 - ✅ No permission denied errors
-- ✅ Returns a properly formatted prompt based on the template
+- ✅ Returns task results
 
 ---
 
-### Test 3: Prompt Optimizer Agent
+### Test 3: Template Selection Agent
 
-**Purpose:** Verify the prompt-optimizer agent can call `/meta-prompt:create-prompt`
+**Purpose:** Verify the template-selector agent works correctly
 
 **Steps:**
-1. Launch the prompt-optimizer agent:
-   ```
-   Use Task tool with subagent_type="meta-prompt:prompt-optimizer"
-   ```
-2. In the agent, request: "Create a prompt for data extraction"
-3. Verify the agent successfully calls `/meta-prompt:create-prompt`
-4. Verify no permission errors
+1. Use the system to classify various tasks
+2. Verify correct template selection for:
+   - Code review tasks → code-review
+   - Testing tasks → test-generation
+   - Documentation tasks → documentation-generator
+3. Verify no permission errors
 
 **Expected Behavior:**
-- ✅ Agent can use SlashCommand tool with `/meta-prompt:create-prompt:*`
+- ✅ Template classification accuracy > 90%
 - ✅ No permission denied errors
-- ✅ Successfully generates optimized prompt
+- ✅ Appropriate template selected for each task type
 
 ---
 
@@ -109,12 +106,12 @@ These tests validate that the tool restrictions work correctly within Claude Cod
 
 ---
 
-## Test Checklist from PR #13
+## Test Checklist
 
-- [x] Verify prompt-optimizer agent can still call `/meta-prompt:create-prompt` commands
-- [x] Verify create-prompt command can access template scripts and files
-- [x] Verify prompt command can execute prompt-handler.sh
-- [x] Confirm restricted paths prevent unauthorized access to other files/commands
+- [x] Verify `/prompt` command works in return-only mode
+- [x] Verify `/prompt` command can execute tasks
+- [x] Verify template selection works correctly
+- [x] Confirm security restrictions prevent unauthorized access
 
 ---
 
@@ -167,11 +164,11 @@ export CLAUDE_PLUGIN_ROOT="$(pwd)/meta-prompt"
 
 All tests pass when:
 
-1. ✅ Automated test suite shows 25/25 tests passing
+1. ✅ Automated test suite shows all tests passing
 2. ✅ All manual integration tests complete without permission errors
 3. ✅ Unauthorized access attempts are properly blocked
 4. ✅ All scripts execute with correct outputs
-5. ✅ Template and guide files are accessible as expected
+5. ✅ Template files are accessible as expected
 
 ---
 

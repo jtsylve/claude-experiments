@@ -8,13 +8,10 @@ meta-prompt/                                   # Plugin root
 │   └── meta-prompt:prompt-optimizer.md                    # Prompt engineering agent (50 lines)
 │
 ├── commands/                                  # Slash commands
-│   ├── prompt.md                              # /prompt command (40 lines)
-│   ├── create-prompt.md                       # /create-prompt command (196 lines)
+│   ├── prompt.md                              # /prompt command
 │   │
 │   └── scripts/                               # Deterministic processing scripts
-│       ├── prompt-handler.sh                  # /prompt orchestration (77 lines)
-│       ├── template-selector.sh               # Task classification (194 lines)
-│       └── template-processor.sh              # Variable substitution (116 lines)
+│       └── prompt-handler.sh                  # /prompt orchestration
 │
 ├── tests/                                     # Test scripts
 │   ├── test-integration.sh                    # Integration tests (240 lines)
@@ -22,16 +19,14 @@ meta-prompt/                                   # Plugin root
 │   ├── validate-templates.sh                  # Template validation (180 lines)
 │   └── verify-documentation-counts.sh         # Doc count verification (160 lines)
 │
-├── templates/                                 # Template library
-│   ├── code-comparison.md               # Comparison template (37 lines)
-│   ├── document-qa.md                         # Document Q&A template (39 lines)
-│   ├── code-refactoring.md                    # Code modification template (64 lines)
+├── templates/                                 # Template library (7 templates)
+│   ├── code-comparison.md                     # Comparison template
+│   ├── code-refactoring.md                    # Code modification template
 │   ├── code-review.md                         # Code review template
-│   ├── interactive-dialogue.md                # Conversational agent template (38 lines)
 │   ├── test-generation.md                     # Test generation template
 │   ├── documentation-generator.md             # Documentation generator template
 │   ├── data-extraction.md                     # Data extraction template
-│   └── custom.md                              # LLM fallback template (20 lines)
+│   └── custom.md                              # LLM fallback template
 │
 ├── docs/                                      # Documentation
 │   ├── architecture-overview.md               # System architecture
@@ -49,24 +44,19 @@ meta-prompt/                                   # Plugin root
 │   │   └── meta-prompt:prompt-optimizer.md                # Prompt engineering agent (50 lines)
 │   │
 │   ├── commands/                              # Slash commands
-│   │   ├── prompt.md                          # /prompt command (40 lines)
-│   │   ├── create-prompt.md                   # /create-prompt command (196 lines)
+│   │   ├── prompt.md                          # /prompt command
 │   │   │
 │   │   └── scripts/                           # Deterministic processing scripts
-│   │       ├── prompt-handler.sh              # /prompt orchestration (77 lines)
-│   │       ├── template-selector.sh           # Task classification (194 lines)
-│   │       └── template-processor.sh          # Variable substitution (116 lines)
+│   │       └── prompt-handler.sh              # /prompt orchestration
 │   │
-│   ├── templates/                             # Template library
-│   │   ├── code-comparison.md           # Comparison template (37 lines)
-│   │   ├── document-qa.md                     # Document Q&A template (39 lines)
-│   │   ├── code-refactoring.md                # Code modification template (64 lines)
+│   ├── templates/                             # Template library (7 templates)
+│   │   ├── code-comparison.md                 # Comparison template
+│   │   ├── code-refactoring.md                # Code modification template
 │   │   ├── code-review.md                     # Code review template
-│   │   ├── interactive-dialogue.md            # Conversational agent template (38 lines)
 │   │   ├── test-generation.md                 # Test generation template
 │   │   ├── documentation-generator.md         # Documentation generator template
 │   │   ├── data-extraction.md                 # Data extraction template
-│   │   └── custom.md                          # LLM fallback template (20 lines)
+│   │   └── custom.md                          # LLM fallback template
 │   │
 │
 ├── docs/                                      # Documentation
@@ -102,7 +92,7 @@ meta-prompt/                                   # Plugin root
 #### `commands/`
 **Purpose:** Slash command definitions
 **File Format:** Markdown with YAML frontmatter
-**Count:** 2 commands (/prompt, /create-prompt)
+**Count:** 1 command (/prompt)
 **Access:** User invokes via `/command-name` syntax in Claude Code
 
 #### `commands/scripts/`
@@ -146,17 +136,10 @@ meta-prompt/                                   # Plugin root
 {
   "permissions": {
     "allow": [
-      "SlashCommand(/create-prompt:*)",
       "Bash(commands/scripts/prompt-handler.sh:*)",
       "Bash(chmod:*)",
-      "Bash(commands/scripts/template-processor.sh:*)",
       "Bash(tests/validate-templates.sh:*)",
-      "Bash(DEBUG=1 commands/scripts/template-selector.sh:*)",
-      "Bash(./commands/scripts/test-integration.sh)",
-      "Bash(commands/scripts/template-selector.sh:*)",
-      "Bash(commands/scripts/test-integration.sh:*)",
-      "Bash(commands/scripts/template-processor.sh:*)",
-      "Bash(commands/scripts/test-integration.sh)"
+      "Bash(tests/test-integration.sh:*)"
     ],
     "deny": [],
     "ask": []
@@ -519,10 +502,8 @@ Ensure all scripts are in the `allow` list:
   "permissions": {
     "allow": [
       "Bash(commands/scripts/prompt-handler.sh:*)",
-      "Bash(commands/scripts/template-selector.sh:*)",
-      "Bash(commands/scripts/template-processor.sh:*)",
       "Bash(tests/validate-templates.sh:*)",
-      "Bash(commands/scripts/test-integration.sh:*)"
+      "Bash(tests/test-integration.sh:*)"
     ]
   }
 }
@@ -533,21 +514,7 @@ Ensure all scripts are in the `allow` list:
 ```bash
 # In Claude Code CLI
 /prompt "Analyze security issues in authentication module"
-/create-prompt "Compare two sentences for semantic similarity"
-```
-
-#### 3. Enable Debug Mode (Optional)
-
-```bash
-# Set DEBUG environment variable for verbose output
-DEBUG=1 commands/scripts/template-selector.sh "Your task description"
-```
-
-**Debug Output Example:**
-```
-code-comparison
-Confidence: 85%
-Threshold: 70%
+/prompt --compare "Compare Python and JavaScript for web development"
 ```
 
 ---
@@ -1296,131 +1263,6 @@ commands/scripts/prompt-handler.sh "Refactor code" --return-only
 
 ---
 
-### template-selector.sh
-
-**Purpose:** Classify tasks and select appropriate template
-
-**Location:** `commands/scripts/template-selector.sh`
-
-**Synopsis:**
-```bash
-[DEBUG=1] template-selector.sh <task_description>
-```
-
-**Input Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `$1` | string | Yes | Task description to classify |
-| `DEBUG` | env var | No | Set to `1` for verbose output |
-
-**Output Format:**
-
-**Standard mode:**
-```
-template-name
-```
-
-**Debug mode (DEBUG=1):**
-```
-template-name
-Confidence: 85%
-Threshold: 70%
-```
-
-**Exit Codes:**
-| Code | Meaning |
-|------|---------|
-| `0` | Success (template found) |
-| `1` | Error (invalid input) |
-
-**Example Usage:**
-```bash
-# Normal usage
-template=$(commands/scripts/template-selector.sh "Compare Python and JavaScript")
-echo "$template"  # Output: code-comparison
-
-# Debug mode
-DEBUG=1 commands/scripts/template-selector.sh "Refactor authentication module"
-# Output:
-# code-refactoring
-# Confidence: 91%
-# Threshold: 70%
-```
-
-**Algorithm:**
-1. Normalize task to lowercase
-2. Check for strong indicators (75% base confidence)
-3. Count supporting keywords (8% each)
-4. Select template with highest confidence ≥ 70%
-5. Return "custom" if no template meets threshold
-
-**Configuration:**
-- `CONFIDENCE_THRESHOLD`: Line 10 (default: 70)
-- Keyword arrays: Lines 83-166
-
-**Key Functions:**
-- `score_category()`: Calculate confidence for template category
-
----
-
-### template-processor.sh
-
-**Purpose:** Load template and substitute variables
-
-**Location:** `commands/scripts/template-processor.sh`
-
-**Synopsis:**
-```bash
-template-processor.sh <template_name> [VAR1=value1 VAR2=value2 ...]
-```
-
-**Input Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `$1` | string | Yes | Template name (without .md) |
-| `$2+` | key=value | Yes | Variable assignments |
-
-**Output Format:**
-```
-Processed template with substituted variables
-(Full template content on stdout)
-```
-
-**Exit Codes:**
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `1` | Template not found |
-| `2` | Unreplaced variables remain |
-
-**Example Usage:**
-```bash
-# Simple classification example
-commands/scripts/template-processor.sh code-comparison \
-    ITEM1='Python' \
-    ITEM2='JavaScript' \
-    CLASSIFICATION_CRITERIA='execution model'
-
-# Code refactoring example
-commands/scripts/template-processor.sh code-refactoring \
-    TASK_REQUIREMENTS='Add error handling' \
-    TARGET_PATTERNS='api/routes/*.js'
-```
-
-**Variable Syntax:**
-- Template: `{$VARIABLE_NAME}`
-- Command line: `VARIABLE_NAME='value'`
-
-**Security Features:**
-- Escapes: `\`, `$`, `` ` ``, `"`
-- Prevents command injection
-- Validates all variables replaced
-
-**Key Functions:**
-- `escape_value()`: Security escaping for variable values
-
----
-
 ### validate-templates.sh
 
 **Purpose:** Validate template structure and metadata
@@ -1551,7 +1393,6 @@ bash -x commands/scripts/test-integration.sh
 - **Architecture Overview:** `docs/architecture-overview.md`
 - **Design Decisions:** `docs/design-decisions.md`
 - **Documentation Index:** `README.md`
-- **Implementation Plan:** `OPTIMIZATION_IMPLEMENTATION_PLAN.md`
 
 ### External Resources
 

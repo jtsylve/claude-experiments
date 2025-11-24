@@ -79,9 +79,8 @@ git checkout -b fix/bug-description
 
 **For adding a template:**
 1. Create template file in `templates/`
-2. Update classification keywords in `template-selector.sh`
-3. Add test case to `test-integration.sh`
-4. Update documentation (README.md, architecture-overview.md)
+2. Add test case to `test-integration.sh`
+3. Update documentation (README.md, architecture-overview.md)
 
 **For modifying scripts:**
 1. Follow [Script Development Guide](docs/script-development.md)
@@ -103,17 +102,11 @@ tests/validate-templates.sh
 
 # Run integration tests
 tests/test-integration.sh
-
-# Test logging infrastructure
-tests/test-logging.sh
-
-# Test manually with debug mode
-DEBUG=1 commands/scripts/template-selector.sh "test task"
 ```
 
 **Success criteria:**
-- All templates pass validation (7/7)
-- All integration tests pass (53/53 or more)
+- All templates pass validation
+- All integration tests pass
 - Manual testing confirms expected behavior
 
 ### Step 4: Update Documentation
@@ -123,7 +116,6 @@ DEBUG=1 commands/scripts/template-selector.sh "test task"
 **If you added a template:**
 - [ ] README.md (template list)
 - [ ] docs/architecture-overview.md (template table)
-- [ ] docs/examples.md (add example usage)
 
 **If you modified scripts:**
 - [ ] docs/script-development.md (if new patterns added)
@@ -406,13 +398,13 @@ tests/test-integration.sh
 **Expected results:**
 ```
 === Template Validation ===
-Total templates: 10+
-Passed: 10+
+Total templates: 7
+Passed: 7
 Failed: 0
 
 === Integration Tests ===
-Total Tests: 53+
-Passed: 50+
+Total Tests: 49
+Passed: 49
 Failed: 0
 ✓ ALL TESTS PASSED!
 ```
@@ -425,12 +417,8 @@ Failed: 0
 # Test classification
 DEBUG=1 commands/scripts/template-selector.sh "example task"
 
-# Test processing
-commands/scripts/template-processor.sh template-name \
-    VAR1='value1' VAR2='value2'
-
-# Test end-to-end
-/create-prompt "example task description"
+# Test end-to-end with return-only mode
+/prompt --return-only "example task description"
 ```
 
 ### Test Coverage
@@ -519,7 +507,7 @@ key: value
 ### Resources
 
 - **Documentation:** Start with [README.md](README.md)
-- **Examples:** See [docs/examples.md](docs/examples.md)
+- **Getting Started:** See [docs/getting-started.md](docs/getting-started.md)
 - **Guides:** Browse [docs/](docs/) directory
 - **Code:** Read existing scripts for patterns
 
@@ -563,11 +551,10 @@ We use semantic versioning (semver):
 **For maintainers:**
 
 1. Update version numbers
-2. Update CHANGELOG.md
-3. Run full test suite
-4. Create git tag: `git tag -a v1.1.0 -m "Release 1.1.0"`
-5. Push tag: `git push --tags`
-6. Create GitHub release with notes
+2. Run full test suite
+3. Create git tag: `git tag -a v1.1.0 -m "Release 1.1.0"`
+4. Push tag: `git push --tags`
+5. Create GitHub release with notes
 
 ---
 

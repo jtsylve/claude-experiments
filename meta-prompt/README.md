@@ -48,7 +48,6 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 
 | Document | Purpose |
 |----------|---------|
-| [Examples](docs/examples.md) | 6 practical use cases with token savings |
 | [Template Authoring](docs/template-authoring.md) | Creating custom templates |
 | [Script Development](docs/script-development.md) | Modifying bash scripts |
 | [Glossary](docs/glossary.md) | Key terminology reference |
@@ -61,7 +60,7 @@ This project implements a meta-prompt optimization infrastructure for Claude Cod
 - **Token Reduction:** 40-60% overall, 100% for orchestration
 - **Classification Accuracy:** 90%+ for template routing with LLM fallback for edge cases
 - **Performance:** <100ms for keyword routing (70%+ of tasks), +500ms-2s for LLM fallback (20% of tasks)
-- **Templates:** 7 pre-built templates optimized for software development
+- **Templates:** 6 specialized templates + 1 custom fallback optimized for software development
 - **Hybrid Routing:** Keyword-based classification with intelligent LLM fallback for borderline cases (60-69% confidence)
 - **Security:** Input sanitization, whitelist-based permissions
 
@@ -79,12 +78,6 @@ tests/validate-templates.sh
 
 # Run integration tests
 tests/test-integration.sh
-
-# Test logging infrastructure
-tests/test-logging.sh
-
-# Debug template classification
-DEBUG=1 commands/scripts/template-selector.sh "your task"
 
 # Make scripts executable
 chmod +x commands/scripts/*.sh tests/*.sh
@@ -131,7 +124,7 @@ Install from claude-experiments:
 /plugin install jtsylve/claude-experiments
 ```
 
-The meta-prompt plugin will be available immediately with `/prompt` and `/create-prompt` commands.
+The meta-prompt plugin will be available immediately with the `/prompt` command.
 
 **Windows Users:**
 ⚠️ **Temporary Limitation**: This version uses intelligent path detection with a fallback to the standard installation location (`~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`) due to a Windows path normalization bug in Claude Code.
@@ -170,19 +163,16 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Testing requirements
 
 **Quick checklist before submitting:**
-- [ ] All templates pass validation (7/7)
-- [ ] Integration tests pass (49/49 in `test-integration.sh`)
-- [ ] Pre-push tests pass (6/6 automated via git hook)
+- [ ] All templates pass validation
+- [ ] Integration tests pass (`test-integration.sh`)
 - [ ] Documentation updated
 - [ ] Permissions updated in settings.json
-
-**Note:** The 6 pre-push tests are high-level test suites that run automatically before each push. The 49 integration tests provide detailed unit and integration coverage.
 
 ---
 
 ## Templates
 
-Six templates optimized for software development workflows:
+Six specialized templates plus one custom fallback optimized for software development workflows:
 
 | Template | Use Cases | Flags |
 |----------|-----------|-------|
