@@ -196,7 +196,8 @@ parse_initial_flags() {
 # Handle initial state - spawn template-selector or prompt-optimizer
 handle_initial_state() {
     parse_initial_flags "$1"
-    local sanitized_task=$(sanitize_input "$TASK_DESCRIPTION")
+    # Sanitize for shell safety, then escape for CDATA safety
+    local sanitized_task=$(escape_cdata "$(sanitize_input "$TASK_DESCRIPTION")")
 
     # If no template specified, spawn template-selector first
     if [ -z "$TEMPLATE" ]; then
@@ -303,8 +304,8 @@ handle_post_template_selector_state() {
     local plan_flag=$(echo "$selector_output" | sed -n 's/.*<plan_flag>\(.*\)<\/plan_flag>.*/\1/p')
     local return_only_flag=$(echo "$selector_output" | sed -n 's/.*<return_only_flag>\(.*\)<\/return_only_flag>.*/\1/p')
 
-    # Sanitize for safe output
-    local sanitized_task=$(sanitize_input "$original_task")
+    # Sanitize for shell safety, then escape for CDATA safety
+    local sanitized_task=$(escape_cdata "$(sanitize_input "$original_task")")
 
     # Determine execution mode
     local execution_mode="direct"
@@ -379,8 +380,9 @@ handle_post_optimizer_state() {
     local execution_mode=$(echo "$optimizer_output" | sed -n 's/.*<execution_mode>\(.*\)<\/execution_mode>.*/\1/p')
     local optimized_prompt=$(echo "$optimizer_output" | sed -n 's/.*<optimized_prompt>\(.*\)<\/optimized_prompt>.*/\1/p')
 
-    # Sanitize for safe output
-    local sanitized_skill=$(sanitize_input "$skill")
+    # Sanitize for shell safety, then escape for CDATA safety
+    local sanitized_skill=$(escape_cdata "$(sanitize_input "$skill")")
+    local sanitized_prompt=$(escape_cdata "$optimized_prompt")
 
     if [ "$execution_mode" = "plan" ]; then
         cat <<EOF
@@ -398,12 +400,12 @@ handle_post_optimizer_state() {
 <description>Create execution plan</description>
 <prompt><![CDATA[SKILL_TO_LOAD: $sanitized_skill
 
-$optimized_prompt]]></prompt>
+$sanitized_prompt]]></prompt>
 </task_tool>
 <next_handler_call><![CDATA[~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<plan_result>
 <skill>$sanitized_skill</skill>
 <optimized_prompt>
-$optimized_prompt
+$sanitized_prompt
 </optimized_prompt>
 </plan_result>']]></next_handler_call>
 </handler_response>
@@ -426,7 +428,7 @@ EOF
 <template_executor_request>
 <skill>$sanitized_skill</skill>
 <optimized_prompt>
-$optimized_prompt
+$sanitized_prompt
 </optimized_prompt>
 </template_executor_request>
 
@@ -448,8 +450,9 @@ handle_post_plan_state() {
     # Extract optimized_prompt (multiline content)
     local optimized_prompt=$(echo "$plan_output" | sed -n '/<optimized_prompt>/,/<\/optimized_prompt>/p' | sed '1d;$d')
 
-    # Sanitize for safe output
-    local sanitized_skill=$(sanitize_input "$skill")
+    # Sanitize for shell safety, then escape for CDATA safety
+    local sanitized_skill=$(escape_cdata "$(sanitize_input "$skill")")
+    local sanitized_prompt=$(escape_cdata "$optimized_prompt")
 
     cat <<EOF
 <handler_response>
@@ -469,7 +472,7 @@ handle_post_plan_state() {
 <template_executor_request>
 <skill>$sanitized_skill</skill>
 <optimized_prompt>
-$optimized_prompt
+$sanitized_prompt
 </optimized_prompt>
 </template_executor_request>
 

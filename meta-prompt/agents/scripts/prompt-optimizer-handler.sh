@@ -157,6 +157,34 @@ extract_variable_descriptions() {
     done
 }
 
+# Format variable descriptions for display
+# Input: raw variable descriptions (one per line in "NAME: description" format)
+# Output: formatted markdown list
+format_variable_descriptions() {
+    local var_descriptions="$1"
+
+    # Skip if empty or only whitespace
+    [ -z "$var_descriptions" ] && return 0
+    echo "$var_descriptions" | grep -q '[^[:space:]]' || return 0
+
+    echo "## Variable Descriptions"
+    echo ""
+    echo "$var_descriptions" | while IFS= read -r line; do
+        # Skip empty lines
+        [ -z "$line" ] && continue
+        # Split on first colon only to handle descriptions containing colons
+        name="${line%%:*}"
+        desc="${line#*:}"
+        # Trim whitespace from name
+        name="$(echo "$name" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+        # Skip if name is empty
+        [ -z "$name" ] && continue
+        # Clean up the description (remove surrounding quotes and whitespace)
+        desc=$(echo "$desc" | sed 's/^[[:space:]]*"//; s/"[[:space:]]*$//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+        echo "- **$name**: $desc"
+    done
+}
+
 # Escape special characters for output
 escape_for_output() {
     local value="$1"
@@ -230,15 +258,7 @@ $(if [ -n "$required_vars" ]; then echo "Required: $required_vars"; fi)
 $(if [ -n "$optional_vars" ]; then echo "Optional: $optional_vars"; fi)
 $(if [ -z "$required_vars" ] && [ -z "$optional_vars" ]; then echo "This template has no variables."; fi)
 
-$(if [ -n "$var_descriptions" ]; then
-echo "## Variable Descriptions"
-echo ""
-echo "$var_descriptions" | while IFS=':' read -r name desc; do
-    # Clean up the description (remove surrounding quotes and whitespace)
-    desc=$(echo "$desc" | sed 's/^[[:space:]]*"//; s/"[[:space:]]*$//')
-    echo "- **$name**: $desc"
-done
-fi)
+$(format_variable_descriptions "$var_descriptions")
 
 ## Instructions
 

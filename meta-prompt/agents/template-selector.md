@@ -1,7 +1,7 @@
 ---
 name: template-selector
 description: Lightweight template classifier for borderline and uncertain cases
-allowed-tools: [Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/**), Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/agents/scripts/template-selector-handler.sh)]
+allowed-tools: [Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/templates/**), Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/agents/scripts/template-selector-handler.sh:*)]
 model: haiku
 ---
 

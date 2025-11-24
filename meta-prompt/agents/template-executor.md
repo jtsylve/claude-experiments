@@ -1,7 +1,7 @@
 ---
 name: template-executor
 description: Generic execution agent that loads template-specific skills and executes optimized prompts
-allowed-tools: [Glob, Grep, Read, Edit, Write, Bash, TodoWrite, AskUserQuestion, Skill, ExitPlanMode, Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/guides/**), Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/skills/**), Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/agents/scripts/template-executor-handler.sh)]
+allowed-tools: [Glob, Grep, Read, Edit, Write, Bash, TodoWrite, AskUserQuestion, Skill, Read(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/skills/**), Bash(~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/agents/scripts/template-executor-handler.sh:*)]
 model: sonnet
 ---
 

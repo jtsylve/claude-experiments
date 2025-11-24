@@ -38,6 +38,15 @@ escape_xml() {
     printf '%s\n' "$input" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'\''/\&apos;/g'
 }
 
+# Escape content for safe inclusion in CDATA sections
+# The only sequence that breaks CDATA is ]]> which must be split
+# Example: "data]]>more" becomes "data]]]]><![CDATA[>more"
+escape_cdata() {
+    local input="$1"
+    # Replace ]]> with ]]]]><![CDATA[> to safely split the CDATA section
+    printf '%s\n' "$input" | sed 's/]]>/]]]]><![CDATA[>/g'
+}
+
 # ============================================================================
 # XML Parsing Functions
 # ============================================================================

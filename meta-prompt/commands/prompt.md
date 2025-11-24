@@ -22,13 +22,32 @@ Execute tasks using optimized prompts with domain-specific skills.
    - Check `<next_action>` and `<final_action>` for flow control
 
 3. **Update TodoWrite** from `<todos>`:
-   Parse each `<todo status="..." content="..." activeForm="..."/>` and call TodoWrite with the array
+   Parse each `<todo status="..." content="..." activeForm="..."/>` and call TodoWrite with the array.
+
+   **Example transformation:**
+   ```xml
+   <todos>
+   <todo status="in_progress" content="Optimize prompt" activeForm="Optimizing prompt"/>
+   <todo status="pending" content="Execute task" activeForm="Executing task"/>
+   </todos>
+   ```
+   Becomes TodoWrite input:
+   ```json
+   [
+     {"status": "in_progress", "content": "Optimize prompt", "activeForm": "Optimizing prompt"},
+     {"status": "pending", "content": "Execute task", "activeForm": "Executing task"}
+   ]
+   ```
 
 4. **Execute based on `<next_action>`:**
    - If spawning subagent: Use Task tool with `<subagent_type>`, `<description>`, `<prompt>`
    - Pass subagent XML results back to handler via `<next_handler_call>`
-   - If `<final_action>` present: execute that action (present_results, present_optimized_prompt)
+   - If `<final_action>` present: execute that action instead of looping
 
-5. **Loop until `<next_action>done</next_action>`**
+5. **Handle `<final_action>` values:**
+   - `present_results`: Display the task execution results to the user
+   - `present_optimized_prompt`: Display the optimized prompt to the user (for --return-only mode)
 
-6. **Present results** to user when complete.
+6. **Loop until `<next_action>done</next_action>`**
+
+7. **Present results** to user when complete.
