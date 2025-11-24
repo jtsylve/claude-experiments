@@ -4,9 +4,9 @@
 
 This project implements a meta-prompt optimization infrastructure for Claude Code that replaces LLM-based orchestration with shell scripts and pre-built templates, invoking the LLM only for actual creative and analytical work.
 
-> **⚠️ PRE-RELEASE SOFTWARE - NOT STABLE**
+> **⚠️ PRE-RELEASE SOFTWARE**
 >
-> This project is currently in active development and **should not be considered stable until the v1.0.0 release**. Breaking changes may occur at any time without prior notification or migration instructions. Use in production environments at your own risk.
+> This project is preparing for its initial v1.0.0 release. While core functionality is complete and tested, the API and file structure may still change. Use in production environments at your own risk until v1.0.0 is officially released.
 
 ---
 
@@ -167,10 +167,13 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Testing requirements
 
 **Quick checklist before submitting:**
-- [ ] All templates pass validation
-- [ ] Integration tests pass (53/53)
+- [ ] All templates pass validation (7/7)
+- [ ] Integration tests pass (49/49 in `test-integration.sh`)
+- [ ] Pre-push tests pass (6/6 automated via git hook)
 - [ ] Documentation updated
 - [ ] Permissions updated in settings.json
+
+**Note:** The 6 pre-push tests are high-level test suites that run automatically before each push. The 49 integration tests provide detailed unit and integration coverage.
 
 ---
 
@@ -212,34 +215,9 @@ See [Template Authoring Guide](docs/template-authoring.md) to create your own.
 
 **Troubleshooting:**
 - See [Infrastructure Guide - Troubleshooting](docs/infrastructure.md#troubleshooting)
+  - Note: Windows users should review the [hardcoded paths workaround](docs/infrastructure.md#issue-windows-compatibility---claude_plugin_root-path-normalization-claude-code-bug)
 - Use `DEBUG=1` with scripts for verbose output
 - Run validation and tests to diagnose issues
-
----
-
-## Known Issues
-
-**Hardcoded Paths (Temporary Workaround)**
-
-Due to a Windows compatibility issue with Claude Code's `${CLAUDE_PLUGIN_ROOT}` variable normalization (see [Claude Code issue #11984](https://github.com/anthropics/claude-code/issues/11984)), the following files currently use hardcoded paths:
-
-- `agents/prompt-optimizer.md` - Template and guide paths in allowed-tools
-- `commands/create-prompt.md` - Script paths in allowed-tools
-- `commands/prompt.md` - Script paths in allowed-tools
-- `commands/scripts/template-selector.sh` - Template directory paths
-- `commands/scripts/template-processor.sh` - Template directory paths
-
-All hardcoded paths assume the plugin is installed at: `~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`
-
-**Impact:**
-- Plugin will not work if installed in a different location
-- Windows users may experience path normalization issues
-
-**Workaround:**
-- Test scripts intelligently derive the plugin root from their own location for local development
-- All workaround changes are marked with `TEMPORARY` comments for easy reverting
-
-**Resolution:** Once Claude Code fixes the path normalization issue, these hardcoded paths will be reverted to use `${CLAUDE_PLUGIN_ROOT}` for proper portability.
 
 ---
 

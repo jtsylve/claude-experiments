@@ -113,16 +113,6 @@ while true; do
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--comparison}"
             RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
             ;;
-        --function\ *|--function)
-            if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
-                echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
-                exit 1
-            fi
-            TEMPLATE="function-calling"
-            TEMPLATE_FLAG_SEEN=true
-            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION#--function}"
-            RAW_TASK_DESCRIPTION="${RAW_TASK_DESCRIPTION# }"
-            ;;
         --custom\ *|--custom)
             if [ "$TEMPLATE_FLAG_SEEN" = true ]; then
                 echo "Error: Multiple template flags specified. Only one template flag is allowed." >&2
@@ -148,7 +138,7 @@ done
 # Validate template name if provided (whitelist approach for security)
 if [ -n "$TEMPLATE" ]; then
     case "$TEMPLATE" in
-        code-refactoring|code-review|test-generation|documentation-generator|function-calling|data-extraction|code-comparison|custom)
+        code-refactoring|code-review|test-generation|documentation-generator|data-extraction|code-comparison|custom)
             # Valid template, continue
             ;;
         *)

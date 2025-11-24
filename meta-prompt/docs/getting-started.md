@@ -61,7 +61,7 @@ You can also explicitly select a template using flags:
 /prompt --compare "Compare Python and JavaScript for web development"
 ```
 
-This bypasses the auto-detection logic entirely and uses the specified template directly. Available flags: `--code`, `--refactor`, `--review`, `--test`, `--docs`, `--documentation`, `--extract`, `--compare`, `--comparison`, `--function`, `--custom`.
+This bypasses the auto-detection logic entirely and uses the specified template directly. Available flags: `--code`, `--refactor`, `--review`, `--test`, `--docs`, `--documentation`, `--extract`, `--compare`, `--comparison`, `--custom`.
 
 ---
 
