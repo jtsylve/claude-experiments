@@ -1,10 +1,19 @@
 {
   "name": "meta-prompt",
-  "description": "Meta-prompt optimization infrastructure that reduces LLM token consumption by 40-60% through deterministic preprocessing and template-based routing. Includes /prompt and /create-prompt commands, 7 pre-built templates, and intelligent task classification.",
   "version": "1.0.0",
+  "description": "State machine-based optimization infrastructure achieving 40-60% token reduction through deterministic preprocessing and template-based routing. Features zero-token orchestration, domain-specific templates, hybrid classification with high accuracy, and specialized LLM agents for template selection, prompt optimization, and task execution.",
   "author": {
     "name": "Joe T. Sylve, Ph.D.",
     "email": "joe.sylve@gmail.com"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "prompt-optimization",
+    "token-reduction",
+    "state-machine",
+    "templates",
+    "agents",
+    "preprocessing",
+    "efficiency"
+  ]
 }
