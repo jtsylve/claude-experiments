@@ -19,7 +19,7 @@ meta-prompt/                                   # Plugin root
 │   ├── validate-templates.sh                  # Template validation (180 lines)
 │   └── verify-documentation-counts.sh         # Doc count verification (160 lines)
 │
-├── templates/                                 # Template library (7 templates)
+├── templates/                                 # Template library (6 specialized templates + 1 custom fallback)
 │   ├── code-comparison.md                     # Comparison template
 │   ├── code-refactoring.md                    # Code modification template
 │   ├── code-review.md                         # Code review template
@@ -49,7 +49,7 @@ meta-prompt/                                   # Plugin root
 │   │   └── scripts/                           # Deterministic processing scripts
 │   │       └── prompt-handler.sh              # /prompt orchestration
 │   │
-│   ├── templates/                             # Template library (7 templates)
+│   ├── templates/                             # Template library (6 specialized templates + 1 custom fallback)
 │   │   ├── code-comparison.md                 # Comparison template
 │   │   ├── code-refactoring.md                # Code modification template
 │   │   ├── code-review.md                     # Code review template
@@ -199,7 +199,7 @@ variable_descriptions:          # Optional: Detailed variable explanations
 
 - **template_name:** Must match filename without .md extension
 - **category:** Groups related templates (comparison, analysis, development, etc.)
-- **keywords:** Array of words used for classification (see template-selector.sh)
+- **keywords:** Array of words used for classification (see template-selector-handler.sh)
 - **complexity:** Indicates cognitive load (simple ≤3 steps, complex >7 steps)
 - **variables:** List of all `{$VARIABLE}` placeholders in template body
 - **version:** Semantic versioning for template evolution
@@ -745,9 +745,8 @@ fi
    - Test dataset: `tests/template-selection-dataset.txt` (to be created)
 
 4. **Performance**
-   - Target: <100ms total overhead
+   - Target: <100ms total overhead for deterministic processing
    - Measurement: Time script execution
-   - Command: `time commands/scripts/template-selector.sh "task"`
 
 5. **Error Rate**
    - Target: <2% errors
@@ -802,10 +801,8 @@ Currently manual. Future improvements:
    - Write template body
 
 3. **Add classification keywords:**
-   ```bash
-   # Edit template-selector.sh
-   # Add keywords to appropriate category
-   ```
+   - Edit `agents/scripts/template-selector-handler.sh`
+   - Add keywords to appropriate category
 
 4. **Validate:**
    ```bash
@@ -814,9 +811,8 @@ Currently manual. Future improvements:
 
 5. **Test:**
    ```bash
-   # Add test case to test-integration.sh
    # Run full test suite
-   commands/scripts/test-integration.sh
+   tests/test-integration.sh
    ```
 
 6. **Document:**
@@ -830,20 +826,18 @@ Currently manual. Future improvements:
    - Review tasks that went to custom instead of template
    - Identify common words/patterns
 
-2. **Update template-selector.sh:**
-   ```bash
-   # Locate keyword arrays (lines 83-87)
-   # Add new keywords to appropriate category
-   ```
+2. **Update template-selector-handler.sh:**
+   - Edit `agents/scripts/template-selector-handler.sh`
+   - Add new keywords to appropriate category
 
 3. **Test classification:**
    ```bash
-   DEBUG=1 commands/scripts/template-selector.sh "test task description"
+   /prompt --return-only "test task description"
    ```
 
 4. **Run full test suite:**
    ```bash
-   commands/scripts/test-integration.sh
+   tests/test-integration.sh
    ```
 
 5. **Commit changes:**
@@ -863,10 +857,7 @@ Currently manual. Future improvements:
    - Calculate accuracy
 
 2. **Experiment with threshold:**
-   ```bash
-   # Edit template-selector.sh line 10
-   CONFIDENCE_THRESHOLD=70  # Try 60, 70, 80, 90
-   ```
+   Edit `agents/scripts/template-selector-handler.sh` and adjust the confidence threshold.
 
 3. **Re-run accuracy tests:**
    - Measure precision (correct / total selected)
@@ -946,10 +937,8 @@ As of the current version, the plugin includes a temporary workaround for this W
 
 1. **Production Scripts:** The following files now use hardcoded paths (`~/.claude/plugins/marketplaces/claude-experiments/meta-prompt`) instead of `${CLAUDE_PLUGIN_ROOT}`:
    - `agents/prompt-optimizer.md` - Template and guide paths in allowed-tools
-   - `commands/create-prompt.md` - Script paths in allowed-tools
    - `commands/prompt.md` - Script paths in allowed-tools
-   - `commands/scripts/template-selector.sh` - Template directory paths
-   - `commands/scripts/template-processor.sh` - Template directory paths
+   - `agents/scripts/*-handler.sh` - Handler scripts
 2. **Test Scripts:** Test files intelligently derive the plugin root from their own location, allowing local testing without environment variables
 3. **Revertible:** All workaround changes are marked with `TEMPORARY` comments for easy removal when Claude Code fixes the underlying issue
 
@@ -997,15 +986,15 @@ echo "TEMPLATE_DIR=$TEMPLATE_DIR"
 
 **Symptom:** `ERROR: Template has unreplaced variables`
 
-**Cause:** Variable not provided to template-processor.sh
+**Cause:** Variable not extracted from user task
 
 **Solution:**
 ```bash
 # Check template's required variables
 grep "variables:" templates/template-name.md
 
-# Provide all required variables
-commands/scripts/template-processor.sh template-name VAR1='value1' VAR2='value2'
+# Test with explicit template flag
+/prompt --code "your task description"
 ```
 
 #### Issue: Classification Always Returns "custom"
@@ -1016,11 +1005,11 @@ commands/scripts/template-processor.sh template-name VAR1='value1' VAR2='value2'
 
 **Solution:**
 ```bash
-# Debug classification
-DEBUG=1 commands/scripts/template-selector.sh "your task description"
+# Test classification with explicit template flags
+/prompt --code "your task description"
+/prompt --review "your task description"
 
-# Check confidence scores
-# Adjust threshold or keywords as needed
+# Adjust keywords in agents/scripts/template-selector-handler.sh as needed
 ```
 
 #### Issue: Bash Version Too Old
@@ -1061,7 +1050,7 @@ All user input is sanitized before processing:
 
 **Validation Functions:**
 - `sanitize_input()` in prompt-handler.sh
-- `escape_value()` in template-processor.sh
+- `escape_value()` in handler scripts
 
 ### Script Execution Permissions
 

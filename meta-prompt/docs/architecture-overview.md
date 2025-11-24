@@ -513,8 +513,8 @@ sequenceDiagram
 | Operation | Time | Notes |
 |-----------|------|-------|
 | prompt-handler.sh execution | <10ms | Argument parsing, mode detection |
-| template-selector.sh classification | ~60ms | Keyword extraction, scoring |
-| template-processor.sh substitution | <20ms | File load, variable replacement |
+| template-selector-handler.sh classification | ~60ms | Keyword extraction, scoring |
+| prompt-optimizer-handler.sh processing | <20ms | File load, variable extraction |
 | Template file read | <20ms | I/O from disk |
 | **Total deterministic overhead** | **~110ms** | Target <150ms met |
 
@@ -523,8 +523,8 @@ sequenceDiagram
 | Scenario | Original | Optimized | Reduction |
 |----------|----------|-----------|-----------|
 | /prompt orchestration | 300 tokens | 0 tokens | 100% |
-| /create-prompt (template match) | 1500 tokens | 20 tokens | 98.7% |
-| /create-prompt (custom) | 1500 tokens | 1500 tokens | 0% |
+| /prompt (template match) | 1500 tokens | 20 tokens | 98.7% |
+| /prompt (custom) | 1500 tokens | 1500 tokens | 0% |
 | **Weighted average (90% template)** | **1440 tokens** | **158 tokens** | **89%** |
 
 **Note:** 90% template match rate based on 90%+ classification accuracy target.
@@ -556,7 +556,7 @@ sanitize_input() {
 }
 ```
 
-**Location:** `commands/scripts/template-processor.sh:37-41`
+**Location:** `agents/scripts/prompt-optimizer-handler.sh`
 
 ```bash
 escape_value() {
@@ -643,7 +643,6 @@ meta-prompt/                         # Plugin root
 │   └── test-integration.sh
 ├── docs/                            # Documentation
 │   ├── architecture-overview.md
-│   ├── architecture-refactoring.md
 │   ├── design-decisions.md
 │   └── infrastructure.md
 ├── CONTRIBUTING.md                  # Contribution guidelines
@@ -670,7 +669,7 @@ meta-prompt/                         # Plugin root
 **Current:** 6 templates covering 5 categories + 1 fallback
 **Scalability:** New templates can be added by:
 1. Creating new `.md` file in `/templates/`
-2. Adding keywords to `template-selector.sh`
+2. Adding keywords to `template-selector-handler.sh`
 3. Running `validate-templates.sh` for verification
 4. Updating test cases in `test-integration.sh`
 

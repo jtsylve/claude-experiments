@@ -299,7 +299,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
    ## Testing
    - [ ] All templates pass validation
-   - [ ] All integration tests pass (53/53)
+   - [ ] All integration tests pass
    - [ ] Manual testing completed
    - [ ] Documentation updated
 
@@ -403,8 +403,8 @@ Passed: 7
 Failed: 0
 
 === Integration Tests ===
-Total Tests: 49
-Passed: 49
+Total Tests: [N]
+Passed: [N]
 Failed: 0
 ✓ ALL TESTS PASSED!
 ```
@@ -414,9 +414,6 @@ Failed: 0
 **For template changes:**
 
 ```bash
-# Test classification
-DEBUG=1 commands/scripts/template-selector.sh "example task"
-
 # Test end-to-end with return-only mode
 /prompt --return-only "example task description"
 ```
@@ -452,9 +449,9 @@ New features must include tests:
 **Use relative paths from project root:**
 
 ```markdown
-✓ Good: `commands/scripts/template-selector.sh`
+✓ Good: `commands/scripts/prompt-handler.sh`
 ✓ Good: `docs/architecture-overview.md`
-✗ Bad: `../scripts/template-selector.sh`
+✗ Bad: `../scripts/prompt-handler.sh`
 ✗ Bad: `/Users/joe/project/file.sh`
 ```
 
@@ -463,9 +460,9 @@ New features must include tests:
 **Include line numbers for specific locations:**
 
 ```markdown
-✓ Good: `commands/scripts/template-selector.sh:83-166`
-✓ Good: See template-processor.sh:37 for escaping logic
-✗ Bad: See the template processor script
+✓ Good: `agents/scripts/template-selector-handler.sh:83-166`
+✓ Good: See prompt-optimizer-handler.sh:37 for escaping logic
+✗ Bad: See the handler script
 ```
 
 ### Markdown Formatting
@@ -497,7 +494,7 @@ key: value
 
 **When to update:**
 - Architecture changes → architecture-overview.md
-- New patterns → examples.md, template-authoring.md
+- New patterns → template-authoring.md
 - Process changes → CONTRIBUTING.md
 
 ---

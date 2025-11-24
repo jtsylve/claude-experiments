@@ -9,7 +9,7 @@ Key terminology used in the meta-prompt optimization infrastructure.
 ### Deterministic Preprocessor
 A bash script that makes routing and processing decisions without consuming LLM tokens. Deterministic means the same input always produces the same output, enabling zero-token orchestration.
 
-**Example:** `template-selector.sh` classifies tasks using keyword matching (deterministic) instead of LLM analysis (non-deterministic).
+**Example:** The template selector handler classifies tasks using keyword matching (deterministic) instead of LLM analysis (non-deterministic).
 
 **Related:** Architectural pattern (AD-001)
 
@@ -38,7 +38,7 @@ The minimum confidence score (default: 70%) required to use a template instead o
 
 **Why 70%:** Balances token savings with classification accuracy. Lower threshold = more savings but more misclassifications. Higher threshold = fewer savings but higher accuracy.
 
-**Location:** `template-selector.sh:10`
+**Location:** `agents/scripts/template-selector-handler.sh`
 
 ---
 
@@ -51,7 +51,7 @@ The process of analyzing a task description and routing it to the appropriate te
 3. Calculate confidence score
 4. Select template if confidence ≥ 70%
 
-**Script:** `commands/scripts/template-selector.sh`
+**Script:** `agents/scripts/template-selector-handler.sh`
 
 ---
 
@@ -74,7 +74,7 @@ Template: "Compare {$ITEM1} and {$ITEM2}"
 After substitution: "Compare Python and JavaScript"
 ```
 
-**Script:** `commands/scripts/template-processor.sh`
+**Script:** `agents/scripts/prompt-optimizer-handler.sh`
 
 ---
 
@@ -155,12 +155,11 @@ A broad grouping of related templates. Used for organization and naming conventi
 ## System Components
 
 ### Slash Command
-A user-facing command in Claude Code that starts with `/`. This project implements two: `/prompt` and `/create-prompt`.
+A user-facing command in Claude Code that starts with `/`. This project implements `/prompt`.
 
 **Usage:**
 ```bash
 /prompt "task description"
-/create-prompt "task description"
 ```
 
 **Implementation:** Markdown files in `commands/`

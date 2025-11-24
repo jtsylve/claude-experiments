@@ -385,7 +385,7 @@ Templates must support dynamic variable substitution where user input is inserte
 
 **Decision:**
 
-Implement **variable substitution with comprehensive escaping** in template-processor.sh:
+Implement **variable substitution with comprehensive escaping** in the handler scripts:
 
 1. **Variable Syntax:** `{$VARIABLE_NAME}` in templates
 2. **Input Format:** `VAR_NAME=value` as command-line arguments
@@ -423,7 +423,7 @@ Implement **variable substitution with comprehensive escaping** in template-proc
 
 **Security Implementation:**
 
-Located in `commands/scripts/template-processor.sh:37-41`:
+Example escaping function:
 
 ```bash
 escape_value() {
@@ -457,16 +457,7 @@ escape_value() {
 
 **Test Coverage:**
 
-Located in `tests/test-integration.sh:130-132`:
-
-```bash
-run_test_with_output "Template processor handles special characters in values" \
-    "commands/scripts/template-processor.sh code-comparison ITEM1='test\$var' ITEM2='back\`tick' CLASSIFICATION_CRITERIA='criteria'" \
-    "test"
-```
-
-**References:**
-- `commands/scripts/template-processor.sh:37-66`
+See `tests/test-prompt-optimizer-handler.sh` for special character handling tests.
 
 ---
 
@@ -551,8 +542,7 @@ The LLM fallback is implemented in the agent layer (not bash scripts) to:
 **Implementation Notes:**
 
 Located in:
-- `commands/scripts/template-selector.sh:236-243` (preserve borderline confidence)
-- `commands/create-prompt.md:29-56` (LLM fallback step)
+- `agents/scripts/template-selector-handler.sh` (preserve borderline confidence)
 
 **Cost Analysis:**
 
@@ -561,11 +551,6 @@ Per borderline request:
 - Template usage savings: ~1300 tokens (vs. custom)
 - Net savings: ~1100 tokens (85% reduction)
 - ROI: 550% token savings per correctly routed request
-
-**References:**
-- LLM-FALLBACK-IMPLEMENTATION.md
-- `commands/scripts/template-selector.sh:12-14, 236-243`
-- `commands/create-prompt.md:29-56`
 
 ---
 
@@ -701,10 +686,7 @@ Implement **privacy-preserving structured logging** with these principles:
 
 **Implementation Notes:**
 
-Located in:
-- `commands/scripts/template-selector.sh:44-54` (hash function)
-- `commands/scripts/template-selector.sh:268-305` (logging implementation)
-- `commands/scripts/template-selector.sh:23` (opt-out via ENABLE_LOGGING)
+Located in `agents/scripts/template-selector-handler.sh`.
 
 **Log Format Example:**
 ```json
@@ -732,8 +714,7 @@ Located in:
 - Right to Erasure: Can delete logs without impacting functionality
 
 **References:**
-- `commands/scripts/template-selector.sh:44-54, 268-305`
-- `tests/test-concurrency.sh` (validates log integrity under concurrent access)
+- `agents/scripts/template-selector-handler.sh` (hashing implementation)
 
 ---
 
@@ -994,12 +975,7 @@ This ensures:
 
 **Implementation:**
 
-All 5 scripts include this pattern:
-- prompt-handler.sh:7
-- template-selector.sh:7
-- template-processor.sh:6
-- validate-templates.sh:6
-- test-integration.sh:5
+All scripts include this pattern at the start of the file.
 
 ---
 
@@ -1025,11 +1001,11 @@ Implement dedicated `sanitize_input()` and `escape_value()` functions as first s
 **Implementation:**
 
 - `prompt-handler.sh` - Sanitizes task description
-- `template-processor.sh` - Escapes variable values
+- Handler scripts - Escape variable values
 
 **References:**
-- `commands/scripts/prompt-handler.sh:10-14`
-- `commands/scripts/template-processor.sh:37-41`
+- `commands/scripts/prompt-handler.sh`
+- `agents/scripts/prompt-optimizer-handler.sh`
 
 ---
 
@@ -1046,7 +1022,6 @@ Deterministic systems can fail or encounter edge cases. Need fallback strategy.
 Implement **graceful degradation** pattern:
 1. Try deterministic approach first
 2. On failure or low confidence, fall back to LLM
-3. Log reason for fallback (if DEBUG=1)
 
 **Examples:**
 
@@ -1062,9 +1037,8 @@ Implement **graceful degradation** pattern:
 
 **Implementation:**
 
-- `commands/prompt.md:31-36`
-- `commands/create-prompt.md:24`
-- `commands/scripts/template-selector.sh:158-162`
+- `commands/prompt.md`
+- `agents/scripts/template-selector-handler.sh`
 
 ---
 
@@ -1311,8 +1285,9 @@ Test suite with 30+ tests covering:
 ### Key Implementation Files
 
 - **Prompt Handler:** `commands/scripts/prompt-handler.sh`
-- **Template Selector:** `commands/scripts/template-selector.sh`
-- **Template Processor:** `commands/scripts/template-processor.sh`
+- **Template Selector Handler:** `agents/scripts/template-selector-handler.sh`
+- **Prompt Optimizer Handler:** `agents/scripts/prompt-optimizer-handler.sh`
+- **Template Executor Handler:** `agents/scripts/template-executor-handler.sh`
 - **Validator:** `tests/validate-templates.sh`
 - **Test Suite:** `tests/test-integration.sh`
 

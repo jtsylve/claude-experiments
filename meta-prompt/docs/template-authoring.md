@@ -186,24 +186,7 @@ Begin your analysis immediately without preamble.
 
 ### Step 6: Update Classification Logic
 
-Edit `commands/scripts/template-selector.sh`:
-
-Find the keyword arrays (around line 83) and add:
-
-```bash
-# Around line 95 (add new category)
-local -A sentiment_keywords=(
-    [strong]="sentiment|emotion|feeling"
-    [supporting]="positive|negative|neutral|analyze|tone|mood|review|tweet|feedback"
-)
-
-# Around line 130 (add scoring logic)
-score_sentiment=$(score_category "sentiment" "$task_lower")
-if [ "$score_sentiment" -gt "$best_score" ]; then
-    best_template="sentiment-analysis"
-    best_score="$score_sentiment"
-fi
-```
+Edit `agents/scripts/template-selector-handler.sh` to add classification keywords for your new template.
 
 ### Step 7: Validate
 
@@ -232,46 +215,27 @@ PASSED: sentiment-analysis
 
 ### Step 8: Test Classification
 
-```bash
-DEBUG=1 commands/scripts/template-selector.sh \
-  "Analyze the sentiment of this product review"
-```
-
-**Expected output:**
-```
-sentiment-analysis
-Confidence: 83%
-Threshold: 70%
-```
-
-### Step 9: Add Integration Tests
-
-Edit `tests/test-integration.sh`:
-
-Add test case in Phase 3 (Template Selection Accuracy):
+Test that your template is being selected correctly:
 
 ```bash
-run_test "Sentiment analysis task routes to sentiment-analysis template" \
-    "commands/scripts/template-selector.sh 'Analyze sentiment of this tweet'" \
-    "sentiment-analysis"
+/prompt --return-only "Analyze the sentiment of this product review"
 ```
 
-### Step 10: Test Full Workflow
+### Step 9: Test Full Workflow
 
 ```bash
 # Run complete test suite
 tests/test-integration.sh
 
 # Test actual usage
-/create-prompt "Analyze the sentiment of this movie review: [review text]"
+/prompt "Analyze the sentiment of this movie review: [review text]"
 ```
 
 ### Step 11: Update Documentation
 
-1. Add to `docs/examples.md` (new example)
-2. Update `docs/architecture-overview.md:186` (template table)
-3. Update `README.md:138` (template list)
-4. Commit with descriptive message
+1. Update `docs/architecture-overview.md` (template table)
+2. Update `README.md` (template list)
+3. Commit with descriptive message
 
 ---
 
@@ -519,12 +483,12 @@ Begin your response immediately without preamble.
 ### Testing Keywords
 
 ```bash
-# Test multiple variations
-DEBUG=1 commands/scripts/template-selector.sh "refactor the code"
-DEBUG=1 commands/scripts/template-selector.sh "modify the function"
-DEBUG=1 commands/scripts/template-selector.sh "update the class"
+# Test multiple variations using /prompt --return-only
+/prompt --return-only "refactor the code"
+/prompt --return-only "modify the function"
+/prompt --return-only "update the class"
 
-# All should route to code-refactoring with >70% confidence
+# All should route to code-refactoring template
 ```
 
 ---
@@ -547,30 +511,21 @@ tests/validate-templates.sh your-template-name
 
 ### Classification Tests
 
+Test that tasks route correctly using the `/prompt` command:
+
 ```bash
-# Test that tasks route correctly
-DEBUG=1 commands/scripts/template-selector.sh "task description"
+/prompt --return-only "task description"
 ```
 
 **Success criteria:**
-- Confidence ≥ 70% for matching tasks
-- Confidence < 70% for non-matching tasks
-
-### Integration Tests
-
-Add to `tests/test-integration.sh`:
-
-```bash
-run_test "Your template routes correctly" \
-    "commands/scripts/template-selector.sh 'example task'" \
-    "your-template-name"
-```
+- Your template is selected for matching tasks
+- Tasks that don't match fall back to another template or custom
 
 ### Manual Testing
 
 ```bash
 # Test full workflow
-/create-prompt "actual task description"
+/prompt "actual task description"
 
 # Verify:
 # 1. Correct template selected
@@ -660,22 +615,11 @@ Begin your comparison immediately.
 
 ### Step 4: Update Classification
 
-Edit `commands/scripts/template-selector.sh`:
+Edit `agents/scripts/template-selector-handler.sh` to add keywords for your new template.
 
-```bash
-# Add to keyword arrays (around line 90)
-local -A code_comparison_keywords=(
-    [strong]="difference|compare|versus|vs"
-    [supporting]="better|worse|implementation|approach|alternative|snippet"
-)
-
-# Add scoring (around line 140)
-score_code_comparison=$(score_category "code_comparison" "$task_lower")
-if [ "$score_code_comparison" -gt "$best_score" ]; then
-    best_template="code-comparison"
-    best_score="$score_code_comparison"
-fi
-```
+Add strong and supporting keywords:
+- Strong keywords provide 75% base confidence
+- Supporting keywords add 8% each
 
 ### Step 5: Validate
 
@@ -687,27 +631,14 @@ tests/validate-templates.sh code-comparison
 ### Step 6: Test
 
 ```bash
-DEBUG=1 commands/scripts/template-selector.sh \
-  "Compare these two implementations for readability"
-
-# Expected: code-comparison, Confidence: 83%+
+/prompt --return-only "Compare these two implementations for readability"
 ```
 
-### Step 7: Add Test Case
-
-```bash
-# In test-integration.sh, Phase 3
-run_test "Code comparison task routes correctly" \
-    "commands/scripts/template-selector.sh 'Compare implementation A vs B'" \
-    "code-comparison"
-```
-
-### Step 8: Document
+### Step 7: Document
 
 Update:
-- `README.md:138` - Add to template list
-- `docs/architecture-overview.md:186` - Add to template table
-- `docs/examples.md` - Add example usage
+- `README.md` - Add to template list
+- `docs/architecture-overview.md` - Add to template table
 - Git commit with clear message
 
 ---
@@ -793,15 +724,14 @@ Update:
 
 ### Scripts
 - Validation: `tests/validate-templates.sh`
-- Classification: `commands/scripts/template-selector.sh`
-- Processing: `commands/scripts/template-processor.sh`
+- Classification: `agents/scripts/template-selector-handler.sh`
+- Processing: `agents/scripts/prompt-optimizer-handler.sh`
 - Testing: `tests/test-integration.sh`
 
 ### Documentation
 - [Architecture Overview](architecture-overview.md) - Template system design
 - [Design Decisions](design-decisions.md) - Why templates work this way
 - [Infrastructure Guide](infrastructure.md) - Operational details
-- [Examples](examples.md) - Real-world template usage
 
 ---
 
@@ -809,8 +739,8 @@ Update:
 
 **Questions? Issues?**
 1. Review existing templates for inspiration
-2. Test with `DEBUG=1` to see classification behavior
+2. Use `/prompt --return-only` to test classification behavior
 3. Run validation early and often
 4. See [CONTRIBUTING.md](CONTRIBUTING.md) for support channels
 
-Happy template authoring! 🎨
+Happy template authoring!
