@@ -220,11 +220,11 @@ echo -e "${YELLOW}Phase 6: Handler Basic Functionality${NC}"
 
 run_test_with_output "prompt-handler handles no template (spawns selector)" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix the bug'" \
-    "NEXT_ACTION: spawn_template_selector"
+    "<next_action>spawn_template_selector</next_action>"
 
 run_test_with_output "prompt-handler handles --code flag" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh '--code Fix bug'" \
-    "NEXT_ACTION: spawn_optimizer"
+    "<next_action>spawn_optimizer</next_action>"
 
 run_test_with_output "prompt-handler handles special characters (dollar/backtick)" \
     "\${CLAUDE_PLUGIN_ROOT}/commands/scripts/prompt-handler.sh 'Fix \\\$var and \`cmd\`'" \

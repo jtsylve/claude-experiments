@@ -128,6 +128,35 @@ extract_variables() {
     echo "$template" | grep -oE '\{\$[A-Z_][A-Z0-9_]*(:[^}]*)?\}' 2>/dev/null | sort -u | sed 's/[{}$]//g' || true
 }
 
+# Extract variable descriptions from template YAML frontmatter
+# Returns formatted variable descriptions for agent guidance
+extract_variable_descriptions() {
+    local template_content="$1"
+
+    # Extract YAML frontmatter (between first two ---)
+    local frontmatter
+    frontmatter=$(echo "$template_content" | awk '/^---$/{if(++n==1){next}else{exit}} n==1{print}')
+
+    # Check for variable_descriptions section
+    if ! echo "$frontmatter" | grep -q "variable_descriptions:"; then
+        return 0  # No descriptions available
+    fi
+
+    # Extract variable_descriptions block - get lines after variable_descriptions: until next top-level key
+    # Pipe through sanitize_input to escape potential shell metacharacters
+    echo "$frontmatter" | awk '
+        /^variable_descriptions:/ { in_block=1; next }
+        in_block && /^[a-z_]+:/ { exit }
+        in_block && /^  [A-Z_]+:/ {
+            # Remove leading spaces and print
+            sub(/^  /, "");
+            print
+        }
+    ' | while IFS= read -r line; do
+        sanitize_input "$line"
+    done
+}
+
 # Escape special characters for output
 escape_for_output() {
     local value="$1"
@@ -150,6 +179,10 @@ generate_instructions() {
     # Extract variables from template
     local variables
     variables=$(extract_variables "$template_content")
+
+    # Extract variable descriptions from frontmatter
+    local var_descriptions
+    var_descriptions=$(extract_variable_descriptions "$template_content")
 
     # Escape template content for safe output
     local escaped_template=$(escape_for_output "$template_content")
@@ -197,10 +230,21 @@ $(if [ -n "$required_vars" ]; then echo "Required: $required_vars"; fi)
 $(if [ -n "$optional_vars" ]; then echo "Optional: $optional_vars"; fi)
 $(if [ -z "$required_vars" ] && [ -z "$optional_vars" ]; then echo "This template has no variables."; fi)
 
+$(if [ -n "$var_descriptions" ]; then
+echo "## Variable Descriptions"
+echo ""
+echo "$var_descriptions" | while IFS=':' read -r name desc; do
+    # Clean up the description (remove surrounding quotes and whitespace)
+    desc=$(echo "$desc" | sed 's/^[[:space:]]*"//; s/"[[:space:]]*$//')
+    echo "- **$name**: $desc"
+done
+fi)
+
 ## Instructions
 
 1. **Extract variable values** from the user task:
    - Analyze the user task to identify values for each variable
+   - Use the variable descriptions above as guidance for what to extract
    - Required variables must have values
    - Optional variables can use their defaults if not specified in the task
    - Use AskUserQuestion if any required information is unclear
@@ -210,7 +254,13 @@ $(if [ -z "$required_vars" ] && [ -z "$optional_vars" ]; then echo "This templat
    - For optional variables without values, use their default
    - Ensure all {\\\$...} patterns are replaced
 
-3. **Output the result** in this XML format:
+3. **Validate your result** before outputting:
+   - Scan your substituted template for any remaining {\\\$...} patterns
+   - If ANY remain, go back and extract/infer appropriate values
+   - For optional variables you missed, use their default value from the pattern
+   - Your output MUST have ZERO remaining placeholders
+
+4. **Output the result** in this XML format:
 
 \`\`\`xml
 <prompt_optimizer_result>
@@ -229,10 +279,14 @@ $(if [ -z "$required_vars" ] && [ -z "$optional_vars" ]; then echo "This templat
 $escaped_template
 \`\`\`
 
-IMPORTANT:
-- The <optimized_prompt> must contain the COMPLETE template with ALL variables replaced
-- Do NOT include the YAML frontmatter (lines between ---) in the final output
-- Ensure no {\\\$VARIABLE} patterns remain in the output
+## Validation Checklist
+
+Before returning your result, verify:
+- [ ] No {\\\$VARIABLE} patterns remain in <optimized_prompt>
+- [ ] No {\\\$VARIABLE:default} patterns remain in <optimized_prompt>
+- [ ] YAML frontmatter (lines between ---) is NOT included
+- [ ] All required variables have meaningful values from user task
+- [ ] Optional variables either have extracted values or use their defaults
 EOF
 }
 

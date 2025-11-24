@@ -85,11 +85,15 @@ echo -e "${YELLOW}Phase 1: Initial State - Template Auto-Selection${NC}"
 
 run_test_initial "Spawns template-selector when no template flag" \
     "Fix the bug in auth" \
-    "spawn_template_selector"
+    "<next_action>spawn_template_selector</next_action>"
 
 run_test_initial "Includes user task in selector spawn" \
     "Fix the bug in auth" \
     "<user_task>Fix the bug in auth</user_task>"
+
+run_test_initial "Returns XML with todos" \
+    "Fix the bug in auth" \
+    "<todos>"
 
 echo ""
 
@@ -98,7 +102,7 @@ echo -e "${YELLOW}Phase 2: Initial State - Explicit Template${NC}"
 
 run_test_initial "Spawns prompt-optimizer with --code flag" \
     "--code Fix the bug" \
-    "spawn_optimizer"
+    "<next_action>spawn_optimizer</next_action>"
 
 run_test_initial "Includes template in optimizer spawn with --code" \
     "--code Fix the bug" \
@@ -131,7 +135,7 @@ run_test_initial "Handles --plan flag" \
 
 run_test_initial "Handles --return-only flag" \
     "--code --return-only Fix bug" \
-    "spawn_optimizer_return_only"
+    "<next_action>spawn_optimizer_return_only</next_action>"
 
 run_test_initial "Handles combined flags" \
     "--review --plan Check code" \
@@ -147,7 +151,7 @@ run_test_xml "Processes template-selector result" \
 <original_task>Fix bug</original_task>
 <plan_flag>false</plan_flag>
 <return_only_flag>false</return_only_flag>" \
-    "spawn_optimizer"
+    "<next_action>spawn_optimizer</next_action>"
 
 run_test_xml "Includes selected template in optimizer spawn" \
     "<template_selector_result><selected_template>test-generation</selected_template><confidence>80</confidence></template_selector_result>
@@ -170,11 +174,11 @@ echo -e "${YELLOW}Phase 5: Post-Optimizer State${NC}"
 
 run_test_xml "Spawns template-executor for direct execution" \
     "<prompt_optimizer_result><template>code-refactoring</template><skill>meta-prompt:code-refactoring</skill><execution_mode>direct</execution_mode><optimized_prompt>Test prompt</optimized_prompt></prompt_optimizer_result>" \
-    "spawn_template_executor"
+    "<next_action>spawn_template_executor</next_action>"
 
 run_test_xml "Spawns Plan agent for plan mode" \
     "<prompt_optimizer_result><template>code-review</template><skill>meta-prompt:code-review</skill><execution_mode>plan</execution_mode><optimized_prompt>Test prompt</optimized_prompt></prompt_optimizer_result>" \
-    "spawn_plan_agent"
+    "<next_action>spawn_plan_agent</next_action>"
 
 run_test_xml "Includes skill in executor spawn" \
     "<prompt_optimizer_result><template>test-generation</template><skill>meta-prompt:test-generation</skill><execution_mode>direct</execution_mode><optimized_prompt>Test prompt</optimized_prompt></prompt_optimizer_result>" \
@@ -187,11 +191,11 @@ echo -e "${YELLOW}Phase 6: Post-Plan State${NC}"
 
 run_test_xml "Detects post_plan state from plan result" \
     "<plan_result><skill>meta-prompt:code-review</skill><optimized_prompt>Test prompt</optimized_prompt></plan_result>" \
-    "STATE: post_plan"
+    "<state>post_plan</state>"
 
 run_test_xml "Spawns template-executor after Plan agent" \
     "<plan_result><skill>meta-prompt:code-review</skill><optimized_prompt>Test prompt</optimized_prompt></plan_result>" \
-    "spawn_template_executor"
+    "<next_action>spawn_template_executor</next_action>"
 
 run_test_xml "Includes skill in executor spawn after plan" \
     "<plan_result><skill>meta-prompt:test-generation</skill><optimized_prompt>Test prompt</optimized_prompt></plan_result>" \
@@ -204,7 +208,11 @@ echo -e "${YELLOW}Phase 7: Final State${NC}"
 
 run_test_xml "Detects final state from executor result" \
     "<template_executor_result><status>completed</status><summary>Done</summary></template_executor_result>" \
-    "NEXT_ACTION: done"
+    "<next_action>done</next_action>"
+
+run_test_xml "Returns XML with todos in final state" \
+    "<template_executor_result><status>completed</status><summary>Done</summary></template_executor_result>" \
+    "<todos>"
 
 echo ""
 

@@ -201,31 +201,31 @@ handle_initial_state() {
     # If no template specified, spawn template-selector first
     if [ -z "$TEMPLATE" ]; then
         cat <<EOF
-STATE: initial
-NEXT_ACTION: spawn_template_selector
-
-TODO_LIST:
-1. [in_progress] Determine template
-2. [pending] Optimize prompt
-3. [pending] Execute task
-4. [pending] Present results
-
-Use the Task tool:
-- subagent_type: "meta-prompt:template-selector"
-- description: "Select template for task"
-- prompt: "Select the best template for this task:
+<handler_response>
+<state>initial</state>
+<next_action>spawn_template_selector</next_action>
+<todos>
+<todo status="in_progress" content="Determine template" activeForm="Determining template"/>
+<todo status="pending" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="pending" content="Execute task" activeForm="Executing task"/>
+<todo status="pending" content="Present results" activeForm="Presenting results"/>
+</todos>
+<task_tool>
+<subagent_type>meta-prompt:template-selector</subagent_type>
+<description>Select template for task</description>
+<prompt><![CDATA[Select the best template for this task:
 
 <template_selector_request>
 <user_task>$sanitized_task</user_task>
 </template_selector_request>
 
-Follow your instructions to classify the task and return the result in XML format."
-
-After receiving the result, pass it to the handler script along with the original flags:
-~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<template_selector_result>...(full XML output)...</template_selector_result>
+Follow your instructions to classify the task and return the result in XML format.]]></prompt>
+</task_tool>
+<next_handler_call><![CDATA[~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<template_selector_result>...(full XML output)...</template_selector_result>
 <original_task>$sanitized_task</original_task>
 <plan_flag>$PLAN</plan_flag>
-<return_only_flag>$RETURN_ONLY</return_only_flag>'
+<return_only_flag>$RETURN_ONLY</return_only_flag>']]></next_handler_call>
+</handler_response>
 EOF
         return
     fi
@@ -243,51 +243,52 @@ EOF
     # Check if return-only mode
     if [ "$RETURN_ONLY" = true ]; then
         cat <<EOF
-STATE: initial
-NEXT_ACTION: spawn_optimizer_return_only
-
-TODO_LIST:
-1. [in_progress] Optimize prompt
-2. [pending] Present optimized prompt
-
-Use the Task tool:
-- subagent_type: "meta-prompt:prompt-optimizer"
-- description: "Create optimized prompt"
-- prompt: "Process this request and return an optimized prompt:
+<handler_response>
+<state>initial</state>
+<next_action>spawn_optimizer_return_only</next_action>
+<todos>
+<todo status="in_progress" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="pending" content="Present optimized prompt" activeForm="Presenting optimized prompt"/>
+</todos>
+<task_tool>
+<subagent_type>meta-prompt:prompt-optimizer</subagent_type>
+<description>Create optimized prompt</description>
+<prompt><![CDATA[Process this request and return an optimized prompt:
 
 <prompt_optimizer_request>
 <user_task>$sanitized_task</user_task>$template_xml
 <execution_mode>$execution_mode</execution_mode>
 </prompt_optimizer_request>
 
-Follow your instructions to process the template and return the result in XML format."
-
-After receiving the result, present the optimized prompt to the user (do not execute).
+Follow your instructions to process the template and return the result in XML format.]]></prompt>
+</task_tool>
+<final_action>present_optimized_prompt</final_action>
+</handler_response>
 EOF
     else
         cat <<EOF
-STATE: initial
-NEXT_ACTION: spawn_optimizer
-
-TODO_LIST:
-1. [in_progress] Optimize prompt
-2. [pending] Execute task
-3. [pending] Present results
-
-Use the Task tool:
-- subagent_type: "meta-prompt:prompt-optimizer"
-- description: "Create optimized prompt"
-- prompt: "Process this request and return an optimized prompt:
+<handler_response>
+<state>initial</state>
+<next_action>spawn_optimizer</next_action>
+<todos>
+<todo status="in_progress" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="pending" content="Execute task" activeForm="Executing task"/>
+<todo status="pending" content="Present results" activeForm="Presenting results"/>
+</todos>
+<task_tool>
+<subagent_type>meta-prompt:prompt-optimizer</subagent_type>
+<description>Create optimized prompt</description>
+<prompt><![CDATA[Process this request and return an optimized prompt:
 
 <prompt_optimizer_request>
 <user_task>$sanitized_task</user_task>$template_xml
 <execution_mode>$execution_mode</execution_mode>
 </prompt_optimizer_request>
 
-Follow your instructions to process the template and return the result in XML format."
-
-After receiving the result, pass it to the handler script to get the next instruction:
-~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<prompt_optimizer_result>...(full XML output)...</prompt_optimizer_result>'
+Follow your instructions to process the template and return the result in XML format.]]></prompt>
+</task_tool>
+<next_handler_call><![CDATA[~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<prompt_optimizer_result>...(full XML output)...</prompt_optimizer_result>']]></next_handler_call>
+</handler_response>
 EOF
     fi
 }
@@ -317,53 +318,54 @@ handle_post_template_selector_state() {
     # Check if return-only mode
     if [ "$return_only_flag" = "true" ]; then
         cat <<EOF
-STATE: post_template_selector
-NEXT_ACTION: spawn_optimizer_return_only
-
-TODO_LIST:
-1. [completed] Determine template
-2. [in_progress] Optimize prompt
-3. [pending] Present optimized prompt
-
-Use the Task tool:
-- subagent_type: "meta-prompt:prompt-optimizer"
-- description: "Create optimized prompt"
-- prompt: "Process this request and return an optimized prompt:
+<handler_response>
+<state>post_template_selector</state>
+<next_action>spawn_optimizer_return_only</next_action>
+<todos>
+<todo status="completed" content="Determine template" activeForm="Determining template"/>
+<todo status="in_progress" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="pending" content="Present optimized prompt" activeForm="Presenting optimized prompt"/>
+</todos>
+<task_tool>
+<subagent_type>meta-prompt:prompt-optimizer</subagent_type>
+<description>Create optimized prompt</description>
+<prompt><![CDATA[Process this request and return an optimized prompt:
 
 <prompt_optimizer_request>
 <user_task>$sanitized_task</user_task>$template_xml
 <execution_mode>$execution_mode</execution_mode>
 </prompt_optimizer_request>
 
-Follow your instructions to process the template and return the result in XML format."
-
-After receiving the result, present the optimized prompt to the user (do not execute).
+Follow your instructions to process the template and return the result in XML format.]]></prompt>
+</task_tool>
+<final_action>present_optimized_prompt</final_action>
+</handler_response>
 EOF
     else
         cat <<EOF
-STATE: post_template_selector
-NEXT_ACTION: spawn_optimizer
-
-TODO_LIST:
-1. [completed] Determine template
-2. [in_progress] Optimize prompt
-3. [pending] Execute task
-4. [pending] Present results
-
-Use the Task tool:
-- subagent_type: "meta-prompt:prompt-optimizer"
-- description: "Create optimized prompt"
-- prompt: "Process this request and return an optimized prompt:
+<handler_response>
+<state>post_template_selector</state>
+<next_action>spawn_optimizer</next_action>
+<todos>
+<todo status="completed" content="Determine template" activeForm="Determining template"/>
+<todo status="in_progress" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="pending" content="Execute task" activeForm="Executing task"/>
+<todo status="pending" content="Present results" activeForm="Presenting results"/>
+</todos>
+<task_tool>
+<subagent_type>meta-prompt:prompt-optimizer</subagent_type>
+<description>Create optimized prompt</description>
+<prompt><![CDATA[Process this request and return an optimized prompt:
 
 <prompt_optimizer_request>
 <user_task>$sanitized_task</user_task>$template_xml
 <execution_mode>$execution_mode</execution_mode>
 </prompt_optimizer_request>
 
-Follow your instructions to process the template and return the result in XML format."
-
-After receiving the result, pass it to the handler script to get the next instruction:
-~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<prompt_optimizer_result>...(full XML output)...</prompt_optimizer_result>'
+Follow your instructions to process the template and return the result in XML format.]]></prompt>
+</task_tool>
+<next_handler_call><![CDATA[~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<prompt_optimizer_result>...(full XML output)...</prompt_optimizer_result>']]></next_handler_call>
+</handler_response>
 EOF
     fi
 }
@@ -382,44 +384,44 @@ handle_post_optimizer_state() {
 
     if [ "$execution_mode" = "plan" ]; then
         cat <<EOF
-STATE: post_optimizer
-NEXT_ACTION: spawn_plan_agent
+<handler_response>
+<state>post_optimizer</state>
+<next_action>spawn_plan_agent</next_action>
+<todos>
+<todo status="completed" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="in_progress" content="Create plan" activeForm="Creating plan"/>
+<todo status="pending" content="Execute task" activeForm="Executing task"/>
+<todo status="pending" content="Present results" activeForm="Presenting results"/>
+</todos>
+<task_tool>
+<subagent_type>Plan</subagent_type>
+<description>Create execution plan</description>
+<prompt><![CDATA[SKILL_TO_LOAD: $sanitized_skill
 
-TODO_LIST:
-1. [completed] Optimize prompt
-2. [in_progress] Create plan
-3. [pending] Execute task
-4. [pending] Present results
-
-Use the Task tool:
-- subagent_type: "Plan"
-- description: "Create execution plan"
-- prompt: "SKILL_TO_LOAD: $sanitized_skill
-
-$optimized_prompt"
-
-After the Plan agent completes and returns its plan, pass the result to the handler script:
-~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<plan_result>
+$optimized_prompt]]></prompt>
+</task_tool>
+<next_handler_call><![CDATA[~/.claude/plugins/marketplaces/claude-experiments/meta-prompt/commands/scripts/prompt-handler.sh '<plan_result>
 <skill>$sanitized_skill</skill>
 <optimized_prompt>
 $optimized_prompt
 </optimized_prompt>
-</plan_result>'
+</plan_result>']]></next_handler_call>
+</handler_response>
 EOF
     else
         cat <<EOF
-STATE: post_optimizer
-NEXT_ACTION: spawn_template_executor
-
-TODO_LIST:
-1. [completed] Optimize prompt
-2. [in_progress] Execute task
-3. [pending] Present results
-
-Use the Task tool:
-- subagent_type: "meta-prompt:template-executor"
-- description: "Execute task"
-- prompt: "SKILL_TO_LOAD: $sanitized_skill
+<handler_response>
+<state>post_optimizer</state>
+<next_action>spawn_template_executor</next_action>
+<todos>
+<todo status="completed" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="in_progress" content="Execute task" activeForm="Executing task"/>
+<todo status="pending" content="Present results" activeForm="Presenting results"/>
+</todos>
+<task_tool>
+<subagent_type>meta-prompt:template-executor</subagent_type>
+<description>Execute task</description>
+<prompt><![CDATA[SKILL_TO_LOAD: $sanitized_skill
 
 <template_executor_request>
 <skill>$sanitized_skill</skill>
@@ -428,9 +430,10 @@ $optimized_prompt
 </optimized_prompt>
 </template_executor_request>
 
-Follow your instructions to load the skill (if not 'none') and execute the task."
-
-After the template-executor completes, present the results to the user.
+Follow your instructions to load the skill (if not 'none') and execute the task.]]></prompt>
+</task_tool>
+<final_action>present_results</final_action>
+</handler_response>
 EOF
     fi
 }
@@ -449,19 +452,19 @@ handle_post_plan_state() {
     local sanitized_skill=$(sanitize_input "$skill")
 
     cat <<EOF
-STATE: post_plan
-NEXT_ACTION: spawn_template_executor
-
-TODO_LIST:
-1. [completed] Optimize prompt
-2. [completed] Create plan
-3. [in_progress] Execute task
-4. [pending] Present results
-
-Use the Task tool:
-- subagent_type: "meta-prompt:template-executor"
-- description: "Execute task"
-- prompt: "SKILL_TO_LOAD: $sanitized_skill
+<handler_response>
+<state>post_plan</state>
+<next_action>spawn_template_executor</next_action>
+<todos>
+<todo status="completed" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="completed" content="Create plan" activeForm="Creating plan"/>
+<todo status="in_progress" content="Execute task" activeForm="Executing task"/>
+<todo status="pending" content="Present results" activeForm="Presenting results"/>
+</todos>
+<task_tool>
+<subagent_type>meta-prompt:template-executor</subagent_type>
+<description>Execute task</description>
+<prompt><![CDATA[SKILL_TO_LOAD: $sanitized_skill
 
 <template_executor_request>
 <skill>$sanitized_skill</skill>
@@ -470,24 +473,26 @@ $optimized_prompt
 </optimized_prompt>
 </template_executor_request>
 
-Follow your instructions to load the skill (if not 'none') and execute the task."
-
-After the template-executor completes, present the results to the user.
+Follow your instructions to load the skill (if not 'none') and execute the task.]]></prompt>
+</task_tool>
+<final_action>present_results</final_action>
+</handler_response>
 EOF
 }
 
 # Handle final state - just present results
 handle_final_state() {
     cat <<EOF
-STATE: final
-NEXT_ACTION: done
-
-TODO_LIST:
-1. [completed] Optimize prompt
-2. [completed] Execute task
-3. [in_progress] Present results
-
-Present the execution results to the user.
+<handler_response>
+<state>final</state>
+<next_action>done</next_action>
+<todos>
+<todo status="completed" content="Optimize prompt" activeForm="Optimizing prompt"/>
+<todo status="completed" content="Execute task" activeForm="Executing task"/>
+<todo status="in_progress" content="Present results" activeForm="Presenting results"/>
+</todos>
+<final_action>present_results</final_action>
+</handler_response>
 EOF
 }
 

@@ -1311,7 +1311,7 @@ tests/validate-templates.sh code-comparison
 
 **Purpose:** Run comprehensive integration test suite
 
-**Location:** `commands/scripts/test-integration.sh`
+**Location:** `tests/test-integration.sh`
 
 **Synopsis:**
 ```bash
@@ -1352,10 +1352,10 @@ Failed:       0
 **Example Usage:**
 ```bash
 # Run full test suite
-commands/scripts/test-integration.sh
+tests/test-integration.sh
 
 # Run with verbose bash debugging
-bash -x commands/scripts/test-integration.sh
+bash -x tests/test-integration.sh
 ```
 
 **Test Phases:**

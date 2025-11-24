@@ -37,7 +37,7 @@ This project implements a **meta-prompt optimization infrastructure** for Claude
 
 The system follows a **layered architecture** with deterministic preprocessing layers that filter and route requests before reaching LLM-based processing.
 
-**Architecture Overview:** This diagram shows how user commands flow through the system. User commands enter through `/prompt` or `/create-prompt`, then pass through deterministic bash scripts (green - zero tokens) for classification and processing. Only when templates don't match (10% of cases) or for actual task execution does the system invoke LLM processing (pink - consumes tokens). This architecture achieves 40-60% token reduction by handling orchestration and template selection deterministically.
+**Architecture Overview:** This diagram shows how user commands flow through the system. User commands enter through `/prompt`, then pass through deterministic bash scripts (green - zero tokens) for classification and processing. Only when templates don't match (10% of cases) or for actual task execution does the system invoke LLM processing (pink - consumes tokens). This architecture achieves 40-60% token reduction by handling orchestration and template selection deterministically.
 
 ```mermaid
 graph TD
@@ -255,7 +255,7 @@ Functions shared across all handlers:
 
 **Location:** `templates/`
 
-Six task-specific templates optimized for software development:
+Six specialized templates plus one custom fallback optimized for software development:
 
 | Template | Category | Complexity | Variables | Use Cases |
 |----------|----------|------------|-----------|-----------|
@@ -297,12 +297,12 @@ Each agent uses a model optimized for its complexity level:
 - **Output:** Template name via XML
 
 #### prompt-optimizer
-- **Purpose:** Generate optimized prompts from templates
+- **Purpose:** Generate and validate optimized prompts from templates
 - **Type:** Claude Code agent
 - **Handler:** `agents/scripts/prompt-optimizer-handler.sh`
 - **Model:** sonnet (variable extraction may require nuanced reasoning)
 - **Tools:** Bash (handler script), Read (templates)
-- **Output:** Optimized prompt via XML
+- **Output:** Optimized prompt via XML (validated - no remaining placeholders)
 
 #### template-executor
 - **Purpose:** Execute tasks using domain-specific skills
@@ -666,7 +666,7 @@ meta-prompt/                         # Plugin root
 
 ### Template Expansion
 
-**Current:** 6 templates covering 5 categories + 1 fallback
+**Current:** 6 specialized templates + 1 custom fallback
 **Scalability:** New templates can be added by:
 1. Creating new `.md` file in `/templates/`
 2. Adding keywords to `template-selector-handler.sh`
